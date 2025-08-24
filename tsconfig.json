@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@soldecoder-monitor/features-sdk": ["packages/plugin-sdk/src"],
+      "@soldecoder-monitor/features-sdk/*": ["packages/plugin-sdk/src/*"],
+      "@soldecoder-monitor/features/*": ["packages/features/*/src"],
+      "@soldecoder-monitor/shared/*": ["packages/shared/*/src"]
+    }
+  },
+  "include": ["bot/**/*", "packages/**/*"],
+  "exclude": ["node_modules", "**/dist", "**/build"]
+}
