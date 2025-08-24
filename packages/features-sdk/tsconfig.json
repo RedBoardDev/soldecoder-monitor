@@ -1,3 +1,4 @@
 {
-  "extends": "@soldecoder-monitor/typescript-config/package-config.json"
+  "extends": "@soldecoder-monitor/typescript-config/package-config.json",
+  "exclude": ["dist", "node_modules"]
 }

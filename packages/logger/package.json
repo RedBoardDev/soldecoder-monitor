@@ -1,5 +1,5 @@
 {
-  "name": "@soldecoder-monitor/features-sdk",
+  "name": "@soldecoder-monitor/logger",
   "version": "1.0.0",
   "private": true,
   "main": "src/index.ts",
@@ -10,13 +10,9 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "@soldecoder-monitor/logger": "*",
-    "@soldecoder-monitor/shared": "*",
-    "@soldecoder-monitor/discord": "*"
-  },
   "devDependencies": {
     "@soldecoder-monitor/typescript-config": "*",
-    "@types/node": "^20.19.11"
+    "@types/node": "^20.19.11",
+    "typescript": "^5.6.3"
   }
 }
