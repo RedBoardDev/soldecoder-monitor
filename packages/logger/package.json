@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@soldecoder-monitor/typescript-config": "*",
+    "@soldecoder-monitor/config-env": "*",
     "@types/node": "^20.19.11",
     "typescript": "^5.6.3"
   }

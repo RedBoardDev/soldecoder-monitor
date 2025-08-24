@@ -43,6 +43,13 @@ export const DonationSchema = z.object({
 });
 
 /**
+ * Logging configuration schema
+ */
+export const LoggingSchema = z.object({
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+});
+
+/**
  * Complete environment schema
  */
 export const EnvironmentSchema = z.object({
@@ -51,6 +58,7 @@ export const EnvironmentSchema = z.object({
   ...SolanaSchema.shape,
   ...LpAgentSchema.shape,
   ...DonationSchema.shape,
+  ...LoggingSchema.shape,
 });
 
 export type EnvironmentVariables = z.infer<typeof EnvironmentSchema>;

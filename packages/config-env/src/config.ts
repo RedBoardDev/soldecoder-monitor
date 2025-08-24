@@ -72,6 +72,15 @@ export class Config {
   }
 
   /**
+   * Logging configuration
+   */
+  get logging() {
+    return {
+      level: this.env.LOG_LEVEL,
+    } as const;
+  }
+
+  /**
    * Get all configuration as a single object (for backward compatibility)
    */
   get all() {
@@ -81,6 +90,7 @@ export class Config {
       solana: this.solana,
       lpagent: this.lpagent,
       donate: this.donate,
+      logging: this.logging,
     } as const;
   }
 }

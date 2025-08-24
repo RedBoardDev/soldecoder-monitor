@@ -1,5 +1,5 @@
+import { config } from '@soldecoder-monitor/config-env';
 import type { ILogger } from '@soldecoder-monitor/features-sdk';
-import { config } from '../config/bot.config';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
