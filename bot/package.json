@@ -16,8 +16,7 @@
     "@soldecoder-monitor/shared": "*",
     "@soldecoder-monitor/discord": "*",
     "@soldecoder-monitor/features-sdk": "*",
-    "dotenv": "^16.4.7",
-    "zod": "^3.23.8"
+    "@soldecoder-monitor/config-env": "*"
   },
   "devDependencies": {
     "@types/node": "^20.19.11",

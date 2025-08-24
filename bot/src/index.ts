@@ -1,3 +1,4 @@
+import { validateEnvironment } from '@soldecoder-monitor/config-env';
 import { Bot } from './core/bot';
 import { logger } from './utils/logger';
 
@@ -38,6 +39,15 @@ function setupShutdownHandlers(bot: Bot): void {
 async function main(): Promise<void> {
   logger.info('🎯 Discord Bot Feature System v1.0.0');
   logger.info('📦 Initializing bot...');
+
+  // Validate environment variables first
+  try {
+    validateEnvironment();
+    logger.info('✅ Environment configuration loaded successfully');
+  } catch (error) {
+    logger.error('❌ Failed to validate environment configuration:', error);
+    process.exit(1);
+  }
 
   // Create bot instance
   const bot = new Bot();
