@@ -1,20 +1,18 @@
-import { config } from '@soldecoder-monitor/config-env';
-import type { ILogger } from '@soldecoder-monitor/features-sdk';
+import type { ILogger, LoggerConfig, LogLevel } from './types';
+import { LOG_LEVELS } from './types';
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-
-const LOG_LEVELS: Record<LogLevel, number> = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3,
-};
-
-class Logger implements ILogger {
+/**
+ * Simple, clean logger implementation
+ */
+export class Logger implements ILogger {
   private level: number;
+  private enableTimestamp: boolean;
+  private enableColors: boolean;
 
-  constructor(level: LogLevel = 'info') {
-    this.level = LOG_LEVELS[level];
+  constructor(config: LoggerConfig = { level: 'info' }) {
+    this.level = LOG_LEVELS[config.level];
+    this.enableTimestamp = config.enableTimestamp ?? true;
+    this.enableColors = config.enableColors ?? true;
   }
 
   private shouldLog(level: LogLevel): boolean {
@@ -22,37 +20,86 @@ class Logger implements ILogger {
   }
 
   private formatMessage(level: LogLevel, message: string): string {
-    const timestamp = new Date().toISOString();
+    const timestamp = this.enableTimestamp ? new Date().toISOString() : '';
     const levelStr = level.toUpperCase().padEnd(5);
-    return `[${timestamp}] ${levelStr} ${message}`;
+
+    if (this.enableTimestamp) {
+      return `[${timestamp}] ${levelStr} ${message}`;
+    }
+
+    return `${levelStr} ${message}`;
+  }
+
+  private getColorCode(level: LogLevel): string {
+    if (!this.enableColors) return '';
+
+    const colors = {
+      debug: '\x1b[36m', // Cyan
+      info: '\x1b[32m', // Green
+      warn: '\x1b[33m', // Yellow
+      error: '\x1b[31m', // Red
+    };
+
+    return colors[level] || '';
+  }
+
+  private resetColor(): string {
+    return this.enableColors ? '\x1b[0m' : '';
   }
 
   debug(message: string, ...args: unknown[]): void {
     if (this.shouldLog('debug')) {
-      console.debug(this.formatMessage('debug', message), ...args);
+      const formatted = this.formatMessage('debug', message);
+      const colorCode = this.getColorCode('debug');
+      console.debug(`${colorCode}${formatted}${this.resetColor()}`, ...args);
     }
   }
 
   info(message: string, ...args: unknown[]): void {
     if (this.shouldLog('info')) {
-      console.info(this.formatMessage('info', message), ...args);
+      const formatted = this.formatMessage('info', message);
+      const colorCode = this.getColorCode('info');
+      console.info(`${colorCode}${formatted}${this.resetColor()}`, ...args);
     }
   }
 
   warn(message: string, ...args: unknown[]): void {
     if (this.shouldLog('warn')) {
-      console.warn(this.formatMessage('warn', message), ...args);
+      const formatted = this.formatMessage('warn', message);
+      const colorCode = this.getColorCode('warn');
+      console.warn(`${colorCode}${formatted}${this.resetColor()}`, ...args);
     }
   }
 
-  error(message: string, error?: Error | unknown): void {
+  error(message: string, error?: Error | unknown, context?: Record<string, unknown>): void {
     if (this.shouldLog('error')) {
-      console.error(this.formatMessage('error', message));
+      const formatted = this.formatMessage('error', message);
+      const colorCode = this.getColorCode('error');
+      console.error(`${colorCode}${formatted}${this.resetColor()}`);
+
       if (error) {
         console.error(error);
       }
+
+      if (context && Object.keys(context).length > 0) {
+        console.error('Context:', context);
+      }
     }
   }
-}
 
-export const logger = new Logger(config.logging.level);
+  /**
+   * Sets the log level
+   */
+  setLevel(level: LogLevel): void {
+    this.level = LOG_LEVELS[level];
+  }
+
+  /**
+   * Gets the current log level
+   */
+  getLevel(): LogLevel {
+    const entries = Object.entries(LOG_LEVELS);
+    const levelEntry = entries.find(([, value]) => value === this.level);
+    return (levelEntry?.[0] as LogLevel) || 'info';
+  }
+}
