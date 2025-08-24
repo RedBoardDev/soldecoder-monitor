@@ -1,0 +1,16 @@
+{
+  "name": "@soldecoder-monitor/typescript-config",
+  "version": "1.0.0",
+  "description": "Shared TypeScript configuration for the soldecoder-monitor monorepo",
+  "main": "index.js",
+  "files": [
+    "*.json"
+  ],
+  "keywords": ["typescript", "config", "monorepo"],
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  }
+}

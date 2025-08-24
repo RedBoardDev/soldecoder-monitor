@@ -1,0 +1,3 @@
+{
+  "extends": "@soldecoder-monitor/typescript-config/package-config.json"
+}
