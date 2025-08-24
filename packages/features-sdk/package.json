@@ -1,5 +1,5 @@
 {
-  "name": "@discord-bot/plugin-sdk",
+  "name": "@soldecoder-monitor/features-sdk",
   "version": "1.0.0",
   "private": true,
   "main": "src/index.ts",

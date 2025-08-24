@@ -1,9 +1,9 @@
 import type { Client } from 'discord.js';
 
 /**
- * Plugin metadata interface
+ * Feature metadata interface
  */
-export interface IPluginMetadata {
+export interface IFeatureMetadata {
   name: string;
   version: string;
   description?: string;
@@ -12,49 +12,49 @@ export interface IPluginMetadata {
 }
 
 /**
- * Plugin lifecycle hooks
+ * Feature lifecycle hooks
  */
-export interface IPluginLifecycle {
+export interface IFeatureLifecycle {
   /**
-   * Called when plugin is loaded
+   * Called when feature is loaded
    */
-  onLoad?(context: IPluginContext): Promise<void> | void;
+  onLoad?(context: IFeatureContext): Promise<void> | void;
 
   /**
-   * Called when plugin is enabled
+   * Called when feature is enabled
    */
-  onEnable?(context: IPluginContext): Promise<void> | void;
+  onEnable?(context: IFeatureContext): Promise<void> | void;
 
   /**
-   * Called when plugin is disabled
+   * Called when feature is disabled
    */
   onDisable?(): Promise<void> | void;
 
   /**
-   * Called when plugin is unloaded
+   * Called when feature is unloaded
    */
   onUnload?(): Promise<void> | void;
 }
 
 /**
- * Plugin context provided to plugins
+ * Feature context provided to features
  */
-export interface IPluginContext {
+export interface IFeatureContext {
   client: Client;
   logger: ILogger;
-  config: IPluginConfig;
+  config: IFeatureConfig;
 }
 
 /**
- * Plugin configuration interface
+ * Feature configuration interface
  */
-export interface IPluginConfig {
+export interface IFeatureConfig {
   enabled: boolean;
   [key: string]: unknown;
 }
 
 /**
- * Logger interface for plugins
+ * Logger interface for features
  */
 export interface ILogger {
   debug(message: string, ...args: unknown[]): void;
@@ -64,10 +64,10 @@ export interface ILogger {
 }
 
 /**
- * Base plugin interface
+ * Base feature interface
  */
-export interface IPlugin extends IPluginLifecycle {
-  metadata: IPluginMetadata;
+export interface IFeature extends IFeatureLifecycle {
+  metadata: IFeatureMetadata;
 }
 
 /**

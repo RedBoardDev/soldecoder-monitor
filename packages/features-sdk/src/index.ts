@@ -24,4 +24,16 @@ export {
   PermissionFlagsBits,
   TextInputStyle,
 } from 'discord.js';
-export type { ISchedulerManager, ISchedulerMetadata } from './interfaces/plugin.interface';
+// Export the base feature class
+export { Feature } from './feature.base';
+// Export all feature interfaces and types
+export type {
+  IFeature,
+  IFeatureConfig,
+  IFeatureContext,
+  IFeatureLifecycle,
+  IFeatureMetadata,
+  ILogger,
+  ISchedulerManager,
+  ISchedulerMetadata,
+} from './interfaces/feature.interface';

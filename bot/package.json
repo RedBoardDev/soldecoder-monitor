@@ -1,0 +1,25 @@
+{
+  "name": "@soldecoder-monitor/bot",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@soldecoder-monitor/typescript-config": "*",
+    "@soldecoder-monitor/features-sdk": "*",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

@@ -51,7 +51,7 @@
       }
     },
     {
-      "includes": ["packages/plugin-sdk/**"],
+      "includes": ["packages/features-sdk/**"],
       "linter": {
         "rules": {
           "suspicious": {
