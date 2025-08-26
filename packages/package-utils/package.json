@@ -1,5 +1,5 @@
 {
-  "name": "@soldecoder-monitor/shared",
+  "name": "@soldecoder-monitor/package-utils",
   "version": "1.0.0",
   "private": true,
   "main": "src/index.ts",
