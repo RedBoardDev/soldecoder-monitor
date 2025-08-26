@@ -1,4 +1,4 @@
-import type { EnqueueOptions, RateLimiterStats } from '../types/rate-limiter.types';
+import type { EnqueueOptions, RateLimiterStats } from '@package-utils/domain/types/rate-limiter.types';
 
 /**
  * Rate Limiter service interface

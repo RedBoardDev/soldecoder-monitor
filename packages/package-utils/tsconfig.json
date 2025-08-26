@@ -2,7 +2,13 @@
   "extends": "@soldecoder-monitor/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@package-utils/domain/*": ["src/domain/*"],
+      "@package-utils/infrastructure/*": ["src/infrastructure/*"],
+      "@package-utils/domain/interfaces/*": ["src/domain/interfaces/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]

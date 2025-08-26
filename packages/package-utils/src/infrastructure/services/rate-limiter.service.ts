@@ -1,17 +1,17 @@
-import type { ILogger } from '@soldecoder-monitor/logger/src/types';
 import {
   QueueFullError,
   RateLimiterStoppedError,
   TaskCancelledError,
   TaskTimeoutError,
-} from '../../domain/errors/rate-limiter.errors';
-import type { IRateLimiter } from '../../domain/interfaces/rate-limiter.interface';
+} from '@package-utils/domain/errors/rate-limiter.errors';
+import type { IRateLimiter } from '@package-utils/domain/interfaces/rate-limiter.interface';
 import type {
   EnqueueOptions,
   QueuedTask,
   RateLimiterConfig,
   RateLimiterStats,
-} from '../../domain/types/rate-limiter.types';
+} from '@package-utils/domain/types/rate-limiter.types';
+import type { ILogger } from '@soldecoder-monitor/logger/src/types';
 
 /**
  * Generic Rate Limiting Service

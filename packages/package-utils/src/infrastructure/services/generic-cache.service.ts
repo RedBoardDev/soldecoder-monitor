@@ -1,7 +1,7 @@
+import { CacheSerializationError } from '@package-utils/domain/errors/cache.errors';
+import type { IGenericCacheService } from '@package-utils/domain/interfaces/generic-cache.service.interface';
+import type { CacheEntry, CacheStats } from '@package-utils/domain/types/cache.types';
 import { logger } from '@soldecoder-monitor/logger';
-import { CacheSerializationError } from '../../domain/errors/cache.errors';
-import type { IGenericCacheService } from '../../domain/interfaces/generic-cache.service.interface';
-import type { CacheEntry, CacheStats } from '../../domain/types/cache.types';
 
 /**
  * Generic cache service implementation.

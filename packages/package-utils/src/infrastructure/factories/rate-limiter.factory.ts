@@ -1,7 +1,7 @@
+import type { IRateLimiter } from '@package-utils/domain/interfaces/rate-limiter.interface';
+import type { RateLimiterConfig } from '@package-utils/domain/types/rate-limiter.types';
+import { RateLimiterService } from '@package-utils/infrastructure/services/rate-limiter.service';
 import type { ILogger } from '@soldecoder-monitor/logger/src/types';
-import type { IRateLimiter } from '../../domain/interfaces/rate-limiter.interface';
-import type { RateLimiterConfig } from '../../domain/types/rate-limiter.types';
-import { RateLimiterService } from '../services/rate-limiter.service';
 
 /**
  * Factory for creating preconfigured RateLimiter instances

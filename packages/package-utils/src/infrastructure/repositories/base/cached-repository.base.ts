@@ -1,7 +1,7 @@
+import type { ICachedRepositoryBase } from '@package-utils/domain/interfaces/cached-repository.interface';
+import type { IGenericCacheService } from '@package-utils/domain/interfaces/generic-cache.service.interface';
+import { GenericCacheService } from '@package-utils/infrastructure/services/generic-cache.service';
 import { logger } from '@soldecoder-monitor/logger';
-import type { ICachedRepositoryBase } from '../../../domain/interfaces/cached-repository.interface';
-import type { IGenericCacheService } from '../../../domain/interfaces/generic-cache.service.interface';
-import { GenericCacheService } from '../../services/generic-cache.service';
 
 /**
  * Base class for repositories that automatically handles cache/database operations.

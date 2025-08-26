@@ -1,4 +1,4 @@
-import type { CacheStats } from '../types/cache.types';
+import type { CacheStats } from '@package-utils/domain/types/cache.types';
 
 /**
  * Generic cache service interface for key-value storage with TTL support.

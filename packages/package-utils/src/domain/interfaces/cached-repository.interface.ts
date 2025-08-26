@@ -1,5 +1,5 @@
-import type { CacheStats } from '../types/cache.types';
-import type { IGenericCacheService } from './generic-cache.service.interface';
+import type { IGenericCacheService } from '@package-utils/domain/interfaces/generic-cache.service.interface';
+import type { CacheStats } from '@package-utils/domain/types/cache.types';
 
 /**
  * Base interface for cached repositories.
