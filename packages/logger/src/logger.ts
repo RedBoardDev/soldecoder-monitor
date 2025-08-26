@@ -2,9 +2,10 @@ import type { ILogger, LoggerConfig, LogLevel } from './types';
 import { LOG_LEVELS } from './types';
 
 /**
- * Simple, clean logger implementation
+ * Simple, clean logger implementation with Singleton pattern
  */
 export class Logger implements ILogger {
+  private static instance: Logger | null = null;
   private level: number;
   private enableTimestamp: boolean;
   private enableColors: boolean;
@@ -13,6 +14,30 @@ export class Logger implements ILogger {
     this.level = LOG_LEVELS[config.level];
     this.enableTimestamp = config.enableTimestamp ?? true;
     this.enableColors = config.enableColors ?? true;
+  }
+
+  /**
+   * Get singleton instance with default config
+   */
+  public static getInstance(): Logger {
+    if (!Logger.instance) {
+      Logger.instance = new Logger();
+    }
+    return Logger.instance;
+  }
+
+  /**
+   * Create a new custom instance (bypasses singleton)
+   */
+  public static createInstance(config: LoggerConfig): Logger {
+    return new Logger(config);
+  }
+
+  /**
+   * Reset singleton instance (useful for testing)
+   */
+  public static resetInstance(): void {
+    Logger.instance = null;
   }
 
   private shouldLog(level: LogLevel): boolean {

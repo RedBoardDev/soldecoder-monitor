@@ -1,6 +1,6 @@
-import { validateEnvironment } from '@soldecoder-monitor/config-env';
+import { config, validateEnvironment } from '@soldecoder-monitor/config-env';
+import { type LogLevel, logger, setLogLevel } from '@soldecoder-monitor/logger';
 import { Bot } from './core/bot';
-import { logger } from './utils/logger';
 
 /**
  * Setup shutdown handlers
@@ -43,6 +43,7 @@ async function main(): Promise<void> {
   // Validate environment variables first
   try {
     validateEnvironment();
+    setLogLevel(config.logging.level as LogLevel);
     logger.info('✅ Environment configuration loaded successfully');
   } catch (error) {
     logger.error('❌ Failed to validate environment configuration:', error);
@@ -59,20 +60,17 @@ async function main(): Promise<void> {
   logger.info('📦 Loading features...');
 
   try {
-    // Import and register Ping Feature
-    const { PingFeature } = await import('@discord-bot/ping-feature');
-    const pingFeature = new PingFeature();
-    await bot.registerFeature(pingFeature);
+    // // Import and register Ping Feature
+    // const pingFeature = new PingFeature();
+    // await bot.registerFeature(pingFeature);
 
-    // Import and register Test Reaction Feature
-    const { TestReactionFeature } = await import('@discord-bot/test-reaction-feature');
-    const testReactionFeature = new TestReactionFeature();
-    await bot.registerFeature(testReactionFeature);
+    // // Import and register Test Reaction Feature
+    // const testReactionFeature = new TestReactionFeature();
+    // await bot.registerFeature(testReactionFeature);
 
-    // Import and register Scheduler Test Feature
-    const { SchedulerTestFeature } = await import('@discord-bot/scheduler-test-feature');
-    const schedulerTestFeature = new SchedulerTestFeature();
-    await bot.registerFeature(schedulerTestFeature);
+    // // Import and register Scheduler Test Feature
+    // const schedulerTestFeature = new SchedulerTestFeature();
+    // await bot.registerFeature(schedulerTestFeature);
 
     logger.info('✅ All features loaded successfully');
   } catch (error) {

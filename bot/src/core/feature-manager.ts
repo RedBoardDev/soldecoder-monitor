@@ -1,7 +1,7 @@
 import type { IFeature, IFeatureConfig, IFeatureContext } from '@soldecoder-monitor/features-sdk';
+import { createFeatureLogger, logger } from '@soldecoder-monitor/logger';
 import type { Client } from 'discord.js';
 import { SlashCommandBuilder } from 'discord.js';
-import { createFeatureLogger, logger } from '../utils/logger';
 import { SchedulerManager } from './scheduler-manager';
 
 /**

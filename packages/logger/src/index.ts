@@ -14,10 +14,9 @@
  * ```
  */
 
-import { config } from '@soldecoder-monitor/config-env';
 import { createFeatureLogger as createFeatureLoggerWithBase } from './create-feature';
 import { Logger } from './logger';
-import type { ILogger, LogLevel } from './types';
+import { type ILogger, type LogLevel, logLevel } from './types';
 
 // Export the base feature creation function
 export { createFeature } from './create-feature';
@@ -25,14 +24,11 @@ export { createFeature } from './create-feature';
 // Export Logger class
 export { Logger } from './logger';
 // Export types
-export type { ILogger, LoggerConfig, LogLevel } from './types';
+export type { LoggerConfig, LogLevel } from './types';
 
-// Create and export global logger instance
-export const logger = new Logger({
-  level: config.logging.level as LogLevel,
-  enableTimestamp: true,
-  enableColors: true,
-});
+// Create and export global logger instance (singleton with config-env)
+export const logger = Logger.getInstance();
+logger.setLevel(logLevel.DEBUG);
 
 /**
  * Creates a feature logger using the global logger instance
@@ -41,4 +37,19 @@ export const logger = new Logger({
 export function createFeatureLogger(pluginName: string): ILogger {
   return createFeatureLoggerWithBase(pluginName, logger);
 }
- 
+
+/**
+ * Set the log level for the global logger instance
+ * @param level - The log level to set
+ */
+export function setLogLevel(level: LogLevel): void {
+  logger.setLevel(level);
+}
+
+/**
+ * Get the current log level of the global logger instance
+ * @returns The current log level
+ */
+export function getLogLevel(): LogLevel {
+  return logger.getLevel();
+}

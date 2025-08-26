@@ -1,7 +1,7 @@
 import type { IFeature } from '@soldecoder-monitor/features-sdk';
+import { logger } from '@soldecoder-monitor/logger';
 import { Client, GatewayIntentBits } from 'discord.js';
 import { config } from '../config/bot.config';
-import { logger } from '../utils/logger';
 import { FeatureManager } from './feature-manager';
 
 /**

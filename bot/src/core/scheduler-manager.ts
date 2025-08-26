@@ -1,5 +1,5 @@
 import type { ISchedulerManager, ISchedulerMetadata } from '@soldecoder-monitor/features-sdk';
-import { logger } from '../utils/logger';
+import { logger } from '@soldecoder-monitor/logger';
 
 /**
  * Active scheduler instance

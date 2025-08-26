@@ -2,7 +2,14 @@
  * Logger types and interfaces
  */
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export enum logLevel {
+  DEBUG = 'debug',
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
+}
+
+export type LogLevel = `${logLevel}`;
 
 export interface ILogger {
   debug(message: string, ...args: unknown[]): void;
