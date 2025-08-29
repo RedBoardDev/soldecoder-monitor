@@ -1,45 +1,44 @@
-import { z } from 'zod';
-import dotenv from 'dotenv';
-import path from 'node:path';
+import { EchoFeature } from '@soldecoder-monitor/features/src/echo/echo.feature';
+import { PingFeature } from '@soldecoder-monitor/features/src/ping/ping.feature';
+import { SchedulerFeature } from '@soldecoder-monitor/features/src/scheduler/scheduler.feature';
+import type { Feature } from '@soldecoder-monitor/features-sdk';
+import { GatewayIntentBits, Partials } from 'discord.js';
 
-// Load environment variables
-dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
+/**
+ * Discord Bot Configuration
+ */
+export const botConfig = {
+  /**
+   * Discord client intents
+   */
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.DirectMessages,
+  ] as const,
 
-const BotConfigSchema = z.object({
-  // Discord
-  DISCORD_TOKEN: z.string().min(1, 'Discord token is required'),
+  /**
+   * Discord client partials
+   */
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.User, Partials.GuildMember] as const,
 
-  // Environment
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  /**
+   * Features to load
+   */
+  features: [
+    { name: 'PingFeature', class: PingFeature },
+    { name: 'EchoFeature', class: EchoFeature },
+    { name: 'SchedulerFeature', class: SchedulerFeature },
+  ] as Array<{ name: string; class: new () => Feature }>,
 
-  // Plugins
-  PLUGINS_DIR: z.string().default('./plugins'),
-  AUTO_LOAD_PLUGINS: z
-    .string()
-    .transform((val) => val === 'true')
-    .default('true'),
-});
-
-const configParse = BotConfigSchema.safeParse(process.env);
-
-if (!configParse.success) {
-  console.error('❌ Invalid configuration:', configParse.error.format());
-  process.exit(1);
-}
-
-export const config = {
-  discord: {
-    token: configParse.data.DISCORD_TOKEN,
-  },
-  environment: configParse.data.NODE_ENV,
-  logging: {
-    level: configParse.data.LOG_LEVEL,
-  },
-  plugins: {
-    directory: configParse.data.PLUGINS_DIR,
-    autoLoad: configParse.data.AUTO_LOAD_PLUGINS,
+  /**
+   * Global bot configuration
+   */
+  global: {
+    logLevel: 'debug' as const,
   },
 } as const;
 
-export type BotConfig = typeof config;
+export type BotConfig = typeof botConfig;

@@ -1,92 +1,42 @@
-import { config, validateEnvironment } from '@soldecoder-monitor/config-env';
-import { type LogLevel, logger, setLogLevel } from '@soldecoder-monitor/logger';
-import { Bot } from './core/bot';
+import 'reflect-metadata'; // IMPORTANT: Must be first import
+
+import { logger } from '@soldecoder-monitor/logger';
+import { BotService } from './bot.service';
 
 /**
- * Setup shutdown handlers
- */
-function setupShutdownHandlers(bot: Bot): void {
-  const shutdown = async (signal: string) => {
-    logger.info(`Received ${signal}, initiating graceful shutdown...`);
-
-    try {
-      await bot.stop();
-      process.exit(0);
-    } catch (error) {
-      logger.error('Error during shutdown:', error);
-      process.exit(1);
-    }
-  };
-
-  process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-
-  // Handle uncaught errors
-  process.on('uncaughtException', (error) => {
-    logger.error('Uncaught exception:', error);
-    process.exit(1);
-  });
-
-  process.on('unhandledRejection', (reason) => {
-    logger.error('Unhandled promise rejection:', reason);
-    process.exit(1);
-  });
-}
-
-/**
- * Main entry point
+ * Main entry point for the Discord Bot
  */
 async function main(): Promise<void> {
-  logger.info('🎯 Discord Bot Feature System v1.0.0');
-  logger.info('📦 Initializing bot...');
+  logger.info('🎯 Discord Bot Starting...');
 
-  // Validate environment variables first
-  try {
-    validateEnvironment();
-    setLogLevel(config.logging.level as LogLevel);
-    logger.info('✅ Environment configuration loaded successfully');
-  } catch (error) {
-    logger.error('❌ Failed to validate environment configuration:', error);
+  const botService = new BotService();
+
+  // Setup signal handlers for graceful shutdown
+  botService.setupSignalHandlers();
+
+  // Initialize and start the bot
+  const result = await botService.initialize();
+
+  if (!result.success) {
+    logger.error('❌ Bot initialization failed');
+    if (result.errors) {
+      result.errors.forEach((error) => {
+        logger.error(error);
+      });
+    }
     process.exit(1);
   }
 
-  // Create bot instance
-  const bot = new Bot();
-
-  // Setup shutdown handlers
-  setupShutdownHandlers(bot);
-
-  // Load example features
-  logger.info('📦 Loading features...');
-
-  try {
-    // // Import and register Ping Feature
-    // const pingFeature = new PingFeature();
-    // await bot.registerFeature(pingFeature);
-
-    // // Import and register Test Reaction Feature
-    // const testReactionFeature = new TestReactionFeature();
-    // await bot.registerFeature(testReactionFeature);
-
-    // // Import and register Scheduler Test Feature
-    // const schedulerTestFeature = new SchedulerTestFeature();
-    // await bot.registerFeature(schedulerTestFeature);
-
-    logger.info('✅ All features loaded successfully');
-  } catch (error) {
-    logger.error('❌ Failed to load features:', error);
-    throw error;
+  if (result.errors && result.errors.length > 0) {
+    logger.warn('⚠️ Bot started with some warnings:');
+    result.errors.forEach((error) => {
+      logger.warn(error);
+    });
   }
-
-  // Start the bot
-  await bot.start();
-
-  logger.info('🚀 Bot is now running!');
-  logger.info('💡 Add features to extend functionality');
 }
 
-// Start the bot
+// Start the application
 main().catch((error) => {
-  logger.error('❌ Bot startup failed:', error);
+  logger.error('💥 Unhandled error:', error);
   process.exit(1);
 });
