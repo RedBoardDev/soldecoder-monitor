@@ -5,7 +5,7 @@ import { z } from 'zod';
  */
 export const DiscordSchema = z.object({
   DISCORD_TOKEN: z.string().min(1, 'Discord token is required'),
-  DISCORD_ADMIN_USER_ID: z.string().default(''),
+  // DISCORD_ADMIN_USER_ID: z.string().default(''),
 });
 
 /**
@@ -54,9 +54,9 @@ export const LoggingSchema = z.object({
  */
 export const EnvironmentSchema = z.object({
   ...DiscordSchema.shape,
-  ...AWSSchema.shape,
-  ...SolanaSchema.shape,
-  ...LpAgentSchema.shape,
+  // ...AWSSchema.shape,
+  // ...SolanaSchema.shape,
+  // ...LpAgentSchema.shape,
   ...DonationSchema.shape,
   ...LoggingSchema.shape,
 });
