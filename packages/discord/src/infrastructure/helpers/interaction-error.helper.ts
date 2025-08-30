@@ -1,4 +1,3 @@
-import { DiscordError } from '@discord/domain/errors/base.error';
 import { logger } from '@soldecoder-monitor/logger';
 import type {
   ButtonInteraction,
@@ -9,6 +8,7 @@ import type {
   UserSelectMenuInteraction,
 } from 'discord.js';
 import { MessageFlags } from 'discord.js';
+import { DiscordError } from '../../domain/errors/base.error';
 
 type InteractionType =
   | ButtonInteraction
