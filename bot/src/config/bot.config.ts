@@ -1,3 +1,4 @@
+import { DonateFeature } from '@soldecoder-monitor/features/src/donate/donate.feature';
 import { EchoFeature } from '@soldecoder-monitor/features/src/echo/echo.feature';
 import { PingFeature } from '@soldecoder-monitor/features/src/ping/ping.feature';
 import { SchedulerFeature } from '@soldecoder-monitor/features/src/scheduler/scheduler.feature';
@@ -31,6 +32,7 @@ export const botConfig = {
     { name: 'PingFeature', class: PingFeature },
     { name: 'EchoFeature', class: EchoFeature },
     { name: 'SchedulerFeature', class: SchedulerFeature },
+    { name: 'DonateFeature', class: DonateFeature },
   ] as Array<{ name: string; class: new () => Feature }>,
 
   /**

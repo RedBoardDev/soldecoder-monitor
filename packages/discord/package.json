@@ -11,9 +11,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "discord.js": "^14.16.3",
     "@soldecoder-monitor/logger": "*",
-    "@soldecoder-monitor/shared": "*",
-    "discord.js": "^14.16.3"
+    "@soldecoder-monitor/config-env": "*",
+    "@soldecoder-monitor/package-utils": "*"
   },
   "devDependencies": {
     "@soldecoder-monitor/typescript-config": "*",

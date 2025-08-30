@@ -1,8 +1,6 @@
 {
-  "extends": "@soldecoder-monitor/typescript-config/base.json",
+  "extends": "@soldecoder-monitor/typescript-config/package-config.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@package-utils/domain/*": ["src/domain/*"],
