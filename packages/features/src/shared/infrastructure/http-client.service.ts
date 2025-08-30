@@ -1,3 +1,4 @@
+import { time } from '@shared';
 import { ExternalServiceError } from '@soldecoder-monitor/discord/src/domain/errors/command.errors';
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
 import type { z } from 'zod';
@@ -41,13 +42,13 @@ export class HttpClientService implements IHttpClient {
 
   constructor(config?: Partial<HttpClientConfig>) {
     this.config = {
-      defaultTimeout: 30_000,
+      defaultTimeout: time.seconds(30),
       defaultHeaders: {
         accept: 'application/json',
       },
       userAgent: 'SolDecoder-Bot/1.0',
       cacheKeyPrefix: 'http-client',
-      defaultCacheTtlMs: 60_000, // 1 minute
+      defaultCacheTtlMs: time.minutes(1),
       ...config,
     };
   }

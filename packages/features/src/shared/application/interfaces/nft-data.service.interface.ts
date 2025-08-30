@@ -41,10 +41,4 @@ export interface INftDataService {
    * @param collectionId - Optional collection ID to clear specific cache
    */
   clearCache(collectionId?: string): void;
-
-  /**
-   * Checks if service is healthy and can make requests
-   * @returns Promise resolving to true if service is healthy
-   */
-  isHealthy(): Promise<boolean>;
 }

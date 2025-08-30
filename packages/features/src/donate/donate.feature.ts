@@ -1,3 +1,4 @@
+import { time } from '@shared';
 import {
   Feature,
   type FeatureContext,
@@ -47,9 +48,9 @@ export class DonateFeature extends Feature {
   })
   @RateLimit({
     max: 1,
-    window: 5000, // 5 seconds
+    window: time.seconds(5),
     scope: 'user',
-    message: '⏱️ Please wait 5 seconds before using this command again.',
+    message: '⏱️ Please wait {timeRemaining} before using this command again.',
   })
   async handleDonate(interaction: ChatInputCommandInteraction): Promise<void> {
     return this.donateHandler.execute(interaction);

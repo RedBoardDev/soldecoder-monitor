@@ -59,8 +59,10 @@ export class RateLimitGuard implements Guard {
       }
     }
 
-    const message =
-      this.options.message || `⏱️ You're being rate limited. Please wait ${timeRemaining} before trying again.`;
+    // Support for {timeRemaining} placeholder in custom messages
+    const message = this.options.message
+      ? this.options.message.replace('{timeRemaining}', timeRemaining)
+      : `⏱️ You're being rate limited. Please wait ${timeRemaining} before trying again.`;
 
     if ('reply' in context.interaction) {
       if (context.interaction.replied || context.interaction.deferred) {

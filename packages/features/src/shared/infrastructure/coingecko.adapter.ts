@@ -1,3 +1,4 @@
+import { time } from '@shared';
 import { z } from 'zod';
 import type { IHttpClient } from '../application/interfaces/http-client.interface';
 import type { INftDataService, NftCacheInfo } from '../application/interfaces/nft-data.service.interface';
@@ -8,7 +9,7 @@ import { HttpClientService } from './http-client.service';
 /**
  * CoinGecko ping response schema
  */
-const CoinGeckoPingSchema = z.object({
+const _CoinGeckoPingSchema = z.object({
   gecko_says: z.string(),
 });
 
@@ -22,11 +23,11 @@ export class CoinGeckoAdapter implements INftDataService {
   private constructor() {
     this.httpClient = new HttpClientService({
       baseUrl: 'https://api.coingecko.com/api/v3',
-      defaultTimeout: 30_000, // 30 seconds
+      defaultTimeout: time.seconds(30),
       userAgent: 'SolDecoder-Bot/1.0 (CoinGecko)',
       cacheKeyPrefix: 'coingecko',
-      defaultCacheTtlMs: 60_000, // 1 minute
-    });
+      defaultCacheTtlMs: time.minutes(5),
+    }); 
   }
 
   /**
@@ -53,7 +54,6 @@ export class CoinGeckoAdapter implements INftDataService {
           enabled: true,
           key: `nft-data:${collectionId}`,
         },
-        timeout: this.config.timeoutMs,
       });
 
       return nftData;
@@ -95,21 +95,6 @@ export class CoinGeckoAdapter implements INftDataService {
       this.httpClient.clearCache(cacheKey);
     } else {
       this.httpClient.clearCache();
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async isHealthy(): Promise<boolean> {
-    try {
-      const response = await this.httpClient.get('/ping', CoinGeckoPingSchema, {
-        timeout: 15_000, // 15 seconds
-      });
-
-      return response.gecko_says.includes('V3');
-    } catch {
-      return false;
     }
   }
 

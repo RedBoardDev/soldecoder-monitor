@@ -14,7 +14,8 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@soldecoder-monitor/*": ["../packages/*/src"]
+      "@soldecoder-monitor/*": ["../packages/*/src"],
+      "@shared": ["../packages/features/src/shared/index"]
     },
     "noEmit": true
   },

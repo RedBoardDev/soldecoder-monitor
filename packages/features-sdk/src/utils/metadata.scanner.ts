@@ -1,4 +1,3 @@
-import type { Feature } from '../core/feature-base';
 import { metadataRegistry } from '../decorators/metadata-registry';
 import type { CommandRegistration, EventRegistration, InteractionRegistration, SchedulerRegistration } from '../types';
 
@@ -17,8 +16,9 @@ export class MetadataScanner {
    * Scan a feature instance for decorators
    * Now simply gets metadata from the registry
    */
-  scanFeature(feature: Feature, featureName: string): void {
-    const metadata = metadataRegistry.getFeatureMetadata(feature);
+  scanFeature(feature: unknown, featureName: string): void {
+    // Ensure feature is cast to the expected FeatureInstance type
+    const metadata = metadataRegistry.getFeatureMetadata(feature as Record<string, unknown>);
 
     // Store with proper feature name
     const store: FeatureMetadataStore = {
