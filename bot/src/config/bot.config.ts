@@ -1,5 +1,6 @@
 import { DonateFeature } from '@soldecoder-monitor/features/src/donate/donate.feature';
 import { EchoFeature } from '@soldecoder-monitor/features/src/echo/echo.feature';
+import { NftPriceFeature } from '@soldecoder-monitor/features/src/nft-price/nft-price.feature';
 import { PingFeature } from '@soldecoder-monitor/features/src/ping/ping.feature';
 import { SchedulerFeature } from '@soldecoder-monitor/features/src/scheduler/scheduler.feature';
 import type { Feature } from '@soldecoder-monitor/features-sdk';
@@ -33,6 +34,7 @@ export const botConfig = {
     { name: 'EchoFeature', class: EchoFeature },
     { name: 'SchedulerFeature', class: SchedulerFeature },
     { name: 'DonateFeature', class: DonateFeature },
+    { name: 'NftPriceFeature', class: NftPriceFeature },
   ] as Array<{ name: string; class: new () => Feature }>,
 
   /**
