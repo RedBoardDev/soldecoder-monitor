@@ -1,12 +1,15 @@
 import { DiscordZodTypes, getOptions } from '@soldecoder-monitor/discord';
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { DomainError } from 'shared/domain/errors/domain-error.errors';
-import { GuildRequiredError } from 'shared/domain/errors/guild-required.errors';
+import { EmbedBuilder } from 'discord.js';
 import { z } from 'zod';
-import { GetPositionSettingsCommand } from '../../core/application/commands/get-position-settings.command';
-import type { GetPositionSettingsUseCase } from '../../core/application/use-cases/get-position-settings.use-case';
-import { buildPositionSettingsEmbed } from '../ui';
+import { DomainError, GuildRequiredError } from '../../../shared/domain';
+import { 
+  type CalculatePositionRecommendationsUseCase, 
+  GetPositionSettingsCommand,
+  PositionRecommendationsResult,
+} from '../../core/application';
+import { buildPositionSizeRecommendationsEmbed } from '../ui';
 
 const logger = createFeatureLogger('positions-size-command');
 
@@ -19,7 +22,7 @@ const positionSizeOptionsSchema = z.object({
 export type PositionSizeOptions = z.infer<typeof positionSizeOptionsSchema>;
 
 export class PositionsSizeCommandHandler {
-  constructor(private readonly getPositionSettingsUseCase: GetPositionSettingsUseCase) {}
+  constructor(private readonly calculatePositionRecommendationsUseCase: CalculatePositionRecommendationsUseCase) {}
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply();
@@ -31,28 +34,60 @@ export class PositionsSizeCommandHandler {
       const options = getOptions(interaction, positionSizeOptionsSchema);
       const command = GetPositionSettingsCommand.fromOptions(guildId, options);
 
-      logger.debug('Processing position size request', {
-        guildId: command.guildId,
-        hasWallet: command.hasWalletOverride(),
-        hasStoploss: command.hasStoplossOverride(),
-        hasCurrentSize: command.hasCurrentSize(),
-      });
+      const result = await this.calculatePositionRecommendationsUseCase.execute(command);
 
-      const result = await this.getPositionSettingsUseCase.execute(command);
+      let embed: EmbedBuilder;
 
-      logger.info('Position settings retrieved successfully', {
-        guildId: result.guildId,
-        shortWallet: result.getShortWalletAddress(),
-        stoploss: result.stopLossPercent,
-        defaultsUsed: result.getDefaultsUsageSummary(),
-      });
+      if (result instanceof PositionRecommendationsResult) {
+        // Success case: show position size recommendations
+        embed = buildPositionSizeRecommendationsEmbed({
+          shortWallet: result.getShortWalletAddress(),
+          netWorth: result.totalNetWorth,
+          stoploss: result.stopLossPercent,
+          currentSize: result.currentSize,
+          items: result.positionItems,
+        });
 
-      const embed = buildPositionSettingsEmbed({
-        shortWallet: result.getShortWalletAddress(),
-        stopLossPercent: result.stopLossPercent,
-        currentSize: result.currentSize,
-        defaultsUsageSummary: result.getDefaultsUsageSummary(),
-      });
+        logger.info('Position recommendations displayed successfully', {
+          guildId: result.guildId,
+          shortWallet: result.getShortWalletAddress(),
+          totalNetWorth: result.totalNetWorth,
+          itemsCount: result.positionItems.length,
+        });
+      } else {
+        // Fallback case: show settings only when wallet service fails
+        embed = new EmbedBuilder()
+          .setTitle('⚠️ Position Settings Retrieved')
+          .setColor(0xffa500)
+          .setDescription(
+            [
+              `📍 **Wallet:** \`${result.getShortWalletAddress()}\``,
+              `📉 **Stop Loss:** \`${result.stopLossPercent}%\``,
+              result.currentSize ? `📊 **Current Size:** \`${result.currentSize} SOL\`` : null,
+            ]
+              .filter(Boolean)
+              .join(' • '),
+          )
+          .addFields(
+            {
+              name: 'ℹ️ Configuration Info',
+              value: result.getDefaultsUsageSummary(),
+              inline: false,
+            },
+            {
+              name: '⚠️ Position Calculations Unavailable',
+              value: 'Could not fetch wallet data for position size recommendations. Settings shown instead.',
+              inline: false,
+            },
+          )
+          .setTimestamp();
+
+        logger.info('Position settings displayed (calculations unavailable)', {
+          guildId: result.guildId,
+          shortWallet: result.getShortWalletAddress(),
+          defaultsUsed: result.getDefaultsUsageSummary(),
+        });
+      }
 
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
