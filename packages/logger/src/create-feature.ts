@@ -9,19 +9,19 @@ export function createFeatureLogger(featureName: string, baseLogger: ILogger): I
 
   return {
     debug: (message: string, ...args: unknown[]) => {
-      baseLogger.debug(`${prefix} ${message}`, ...args);
+      baseLogger.debug(`[${prefix}] ${message}`, ...args);
     },
 
     info: (message: string, ...args: unknown[]) => {
-      baseLogger.info(`${prefix} ${message}`, ...args);
+      baseLogger.info(`[${prefix}] ${message}`, ...args);
     },
 
     warn: (message: string, ...args: unknown[]) => {
-      baseLogger.warn(`${prefix} ${message}`, ...args);
+      baseLogger.warn(`[${prefix}] ${message}`, ...args);
     },
 
     error: (message: string, error?: Error | unknown, context?: Record<string, unknown>) => {
-      baseLogger.error(`${prefix} ${message}`, error, context);
+      baseLogger.error(`[${prefix}] ${message}`, error, context);
     },
   };
 }

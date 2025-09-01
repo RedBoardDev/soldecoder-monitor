@@ -19,7 +19,7 @@ import type { ILogger } from '@soldecoder-monitor/logger/src/types';
  */
 export class RateLimiterService implements IRateLimiter {
   private readonly config: Required<RateLimiterConfig>;
-  private queue: QueuedTask[] = [];
+  private queue: QueuedTask<any>[] = [];
   private processing = 0;
   private running = true;
   private taskCounter = 0;
@@ -31,7 +31,7 @@ export class RateLimiterService implements IRateLimiter {
     totalTimeout: 0,
     totalCancelled: 0,
   };
-  private readonly tasksMap = new Map<string, QueuedTask>();
+  private readonly tasksMap = new Map<string, QueuedTask<any>>();
   private lastExecutionTime = 0;
   private readonly logger?: ILogger;
 
@@ -132,7 +132,7 @@ export class RateLimiterService implements IRateLimiter {
    * Adds a task to the queue, respecting FIFO or priority order.
    * @param task - The queued task to add.
    */
-  private addToQueue(task: QueuedTask): void {
+  private addToQueue<T>(task: QueuedTask<T>): void {
     this.tasksMap.set(task.id, task);
 
     if (this.config.fifo || task.priority === 0) {
@@ -264,7 +264,7 @@ export class RateLimiterService implements IRateLimiter {
    * @param queuedTask - The task that failed.
    * @param error - The error that occurred.
    */
-  private handleTaskError(queuedTask: QueuedTask, error: unknown): void {
+  private handleTaskError(queuedTask: QueuedTask<any>, error: unknown): void {
     if (error instanceof TaskTimeoutError) {
       this.stats.totalTimeout++;
       this.logger?.warn(`[${this.config.name}] Task timeout`, {

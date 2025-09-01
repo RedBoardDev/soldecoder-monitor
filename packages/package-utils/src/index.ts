@@ -30,8 +30,3 @@ export type { ICachedRepositoryBase } from '@package-utils/domain/interfaces/cac
  */
 export { GenericCacheService } from '@package-utils/infrastructure/services/generic-cache.service';
 export type { IGenericCacheService } from '@package-utils/domain/interfaces/generic-cache.service.interface';
-
-/**
- * DynamoDB
- */
-export { default as DynamoService } from './infrastructure/services/dynamodb.service';

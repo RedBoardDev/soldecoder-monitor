@@ -3,9 +3,9 @@ import {
   ChannelNotFoundError,
   InvalidChannelTypeError,
   MentionPermissionError,
-} from '@discord/domain/errors/channel.errors';
-import { BotPermissionError, ChannelAccessError } from '@discord/domain/errors/permission.errors';
-import type { IPermissionValidator } from '@discord/domain/interfaces/permission-validator.interface';
+} from '../../domain/errors/channel.errors';
+import { BotPermissionError, ChannelAccessError } from '../../domain/errors/permission.errors';
+import type { IPermissionValidator } from '../../domain/interfaces/permission-validator.interface';
 import type { Guild } from 'discord.js';
 import { ChannelType, PermissionFlagsBits } from 'discord.js';
 

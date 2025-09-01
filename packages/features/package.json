@@ -11,7 +11,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@soldecoder-monitor/discord": "*",
     "@soldecoder-monitor/features-sdk": "*",
+    "@soldecoder-monitor/data": "*",
     "axios": "^1.6.7"
   },
   "devDependencies": {
