@@ -12,13 +12,22 @@ export class ChannelConfigMapper {
    * Map DynamoDB item to domain entity
    */
   static toDomain(item: Record<string, unknown>, channelId: string, guildId: string): ChannelConfigEntity {
+    // Transform tagType to handle legacy uppercase values
+    let tagType: 'user' | 'role' | null = null;
+    if (item.tagType) {
+      const tagTypeStr = (item.tagType as string).toLowerCase();
+      if (tagTypeStr === 'user' || tagTypeStr === 'role') {
+        tagType = tagTypeStr;
+      }
+    }
+
     const data: ChannelConfigData = {
       channelId,
       guildId,
       image: item.image as boolean,
       notifyOnClose: item.notifyOnClose as boolean,
       pin: item.pin as boolean,
-      tagType: item.tagType as 'user' | 'role' | null,
+      tagType,
       tagId: item.tagId as string | null,
       threshold: item.threshold as number | null,
       createdAt: (item.createdAt as number) || Date.now(),

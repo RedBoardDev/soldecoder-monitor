@@ -1,5 +1,6 @@
 import { time } from '@shared';
 import {
+  Ephemeral,
   Feature,
   type FeatureContext,
   FeatureDecorator,
@@ -46,6 +47,7 @@ export class DonateFeature extends Feature {
       guildOnly: false,
     },
   })
+  @Ephemeral()
   @RateLimit({
     max: 1,
     window: time.seconds(5),

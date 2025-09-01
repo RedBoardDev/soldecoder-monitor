@@ -1,5 +1,6 @@
 import { CoinGeckoAdapter, time } from '@shared';
 import {
+  Ephemeral,
   Feature,
   type FeatureContext,
   FeatureDecorator,
@@ -47,6 +48,7 @@ export class NftPriceFeature extends Feature {
       guildOnly: false,
     },
   })
+  @Ephemeral()
   @RateLimit({
     max: 2,
     window: time.minutes(1),
