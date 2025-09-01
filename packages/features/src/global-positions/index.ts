@@ -2,9 +2,13 @@
 
 // Core - Application Layer
 export { GetGlobalPositionsCommand } from './core/application/commands/get-global-positions.command';
+export { delay, processGuildPositions } from './core/application/helpers/guild-processor.helper';
+export { fetchPositionStatuses } from './core/application/helpers/position-fetcher.helper';
+export { createChannelCreatedAtMap, groupPositionsByWallet } from './core/application/helpers/position-grouper.helper';
 export { parsePositionStatusMessage } from './core/application/helpers/position-parser.helper';
 export { GlobalPositionsResult } from './core/application/results/global-positions.result';
 export { GetGlobalPositionsUseCase } from './core/application/use-cases/get-global-positions.use-case';
+export { UpdateGlobalPositionsSchedulerUseCase } from './core/application/use-cases/update-global-positions-scheduler.use-case';
 
 // Core - Domain Layer
 export {
@@ -23,6 +27,16 @@ export {
 } from './core/domain/types/global-positions.types';
 export { PositionStatus } from './core/domain/value-objects/position-status.vo';
 export { PositionSummary } from './core/domain/value-objects/position-summary.vo';
+export {
+  createMessage,
+  deleteMessageSafely,
+  getTextChannel,
+  isLatestMessage,
+  isMessageTooOld,
+  tryUpdateMessage,
+} from './core/infrastructure/helpers/discord-message.helper';
+// Core - Infrastructure Layer
+export { GlobalMessageUpdateService } from './core/infrastructure/services/global-message-update.service';
 
 // Discord handlers
 export { GlobalPositionsCommandHandler } from './discord/commands/global-positions.command';

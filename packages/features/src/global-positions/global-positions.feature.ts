@@ -1,15 +1,18 @@
 import { time } from '@shared';
-import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
+import { DynamoChannelConfigRepository, DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import {
   Ephemeral,
   Feature,
   type FeatureContext,
   FeatureDecorator,
+  Interval,
   RateLimit,
   SlashCommand,
 } from '@soldecoder-monitor/features-sdk';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { GetGlobalPositionsUseCase } from './core/application/use-cases/get-global-positions.use-case';
+import { UpdateGlobalPositionsSchedulerUseCase } from './core/application/use-cases/update-global-positions-scheduler.use-case';
+import { GlobalMessageUpdateService } from './core/infrastructure/services/global-message-update.service';
 import { GlobalPositionsCommandHandler } from './discord/commands/global-positions.command';
 
 @FeatureDecorator({
@@ -21,6 +24,7 @@ import { GlobalPositionsCommandHandler } from './discord/commands/global-positio
 export class GlobalPositionsFeature extends Feature {
   private globalPositionsHandler!: GlobalPositionsCommandHandler;
   private getGlobalPositionsUseCase!: GetGlobalPositionsUseCase;
+  private updateSchedulerUseCase!: UpdateGlobalPositionsSchedulerUseCase;
 
   get metadata() {
     return {
@@ -35,10 +39,19 @@ export class GlobalPositionsFeature extends Feature {
     this.setContext(context);
 
     const guildSettingsRepository = DynamoGuildSettingsRepository.create();
+    const channelConfigRepository = DynamoChannelConfigRepository.create();
+    const globalMessageService = GlobalMessageUpdateService.create();
 
     this.getGlobalPositionsUseCase = new GetGlobalPositionsUseCase(guildSettingsRepository);
+    this.updateSchedulerUseCase = new UpdateGlobalPositionsSchedulerUseCase(
+      guildSettingsRepository,
+      channelConfigRepository,
+      globalMessageService,
+    );
 
     this.globalPositionsHandler = new GlobalPositionsCommandHandler(this.getGlobalPositionsUseCase);
+
+    context.logger.info('Global positions feature loaded with scheduler');
   }
 
   @SlashCommand({
@@ -70,5 +83,23 @@ export class GlobalPositionsFeature extends Feature {
   })
   async handleGlobalPositions(interaction: ChatInputCommandInteraction): Promise<void> {
     return this.globalPositionsHandler.execute(interaction);
+  }
+
+  @Interval({
+    name: 'global-positions-auto-update',
+    milliseconds: 30000, // Every 30 seconds
+    runOnInit: false, // Start 30s after initialization
+  })
+  async updateGlobalPositions(): Promise<void> {
+    if (!this.context?.client) {
+      this.context?.logger.warn('Client not available for global positions update');
+      return;
+    }
+
+    try {
+      await this.updateSchedulerUseCase.execute(this.context.client);
+    } catch (error) {
+      this.context?.logger.error('Global positions scheduler failed', error as Error);
+    }
   }
 }
