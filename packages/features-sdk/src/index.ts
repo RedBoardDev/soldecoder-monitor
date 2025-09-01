@@ -14,6 +14,7 @@ export {
 export { On, Once } from './decorators/events.decorator';
 export { Feature as FeatureDecorator } from './decorators/feature.decorator';
 export {
+  Ephemeral,
   GuildOnly,
   RateLimit,
   RequirePermissions,

@@ -61,6 +61,7 @@ class MetadataRegistry {
   private readonly schedulers: SchedulerEntry[] = [];
   private readonly autocompletes: AutocompleteEntry[] = [];
   private readonly guards = new Map<string, Guard[]>();
+  private readonly ephemeralMethods = new Set<string>();
 
   addCommand(
     methodName: string,
@@ -95,6 +96,10 @@ class MetadataRegistry {
     this.guards.set(methodName, [...existing, ...guards]);
   }
 
+  addEphemeral(methodName: string): void {
+    this.ephemeralMethods.add(methodName);
+  }
+
   /**
    * Get metadata for a feature instance
    * Filters metadata to only include methods that exist on the feature
@@ -109,7 +114,10 @@ class MetadataRegistry {
         .map((cmd) => ({
           feature: className,
           method: cmd.methodName,
-          metadata: cmd.metadata,
+          metadata: {
+            ...cmd.metadata,
+            ephemeral: cmd.metadata.ephemeral || this.ephemeralMethods.has(cmd.methodName),
+          },
           guards: this.guards.get(cmd.methodName) || [],
           handler: (feature[cmd.methodName] as (...args: unknown[]) => unknown).bind(feature),
         })),
@@ -188,6 +196,7 @@ class MetadataRegistry {
     this.schedulers.length = 0;
     this.autocompletes.length = 0;
     this.guards.clear();
+    this.ephemeralMethods.clear();
   }
 }
 

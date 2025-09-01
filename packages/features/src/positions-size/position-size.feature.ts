@@ -2,6 +2,7 @@ import { time } from '@shared';
 import { PortfolioService } from '@shared/infrastructure/portfolio.service';
 import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import {
+  Ephemeral,
   Feature,
   type FeatureContext,
   FeatureDecorator,
@@ -83,6 +84,7 @@ export class PositionSizeFeature extends Feature {
       return builder;
     },
   })
+  @Ephemeral()
   @RateLimit({
     max: 200,
     window: time.minutes(5),

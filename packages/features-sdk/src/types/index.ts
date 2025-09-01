@@ -61,16 +61,19 @@ export interface SlashCommandMetadata {
   description: string;
   docs?: CommandDocumentation;
   builder?: (builder: SlashCommandBuilder) => SlashCommandBuilder;
+  ephemeral?: boolean;
 }
 
 export interface UserCommandMetadata {
   name: string;
   docs?: CommandDocumentation;
+  ephemeral?: boolean;
 }
 
 export interface MessageCommandMetadata {
   name: string;
   docs?: CommandDocumentation;
+  ephemeral?: boolean;
 }
 
 // ============= Interaction Types =============

@@ -62,3 +62,15 @@ export function GuildOnly(): MethodDecorator {
     return descriptor;
   };
 }
+
+/**
+ * Ephemeral decorator
+ * Makes all interaction responses ephemeral (only visible to the user who triggered the command)
+ */
+export function Ephemeral(): MethodDecorator {
+  return (_target: object, propertyKey: string | symbol | { name: string }, descriptor: PropertyDescriptor) => {
+    const methodName = getMethodName(propertyKey);
+    metadataRegistry.addEphemeral(methodName);
+    return descriptor;
+  };
+}

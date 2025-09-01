@@ -85,6 +85,12 @@ export class CommandHandler {
         return; // Guard failed and handled the response
       }
 
+      // Apply ephemeral behavior if needed
+      const isEphemeral = registration.metadata.ephemeral || false;
+      if (isEphemeral) {
+        this.makeInteractionEphemeral(interaction);
+      }
+
       // Execute handler
       await registration.handler(interaction);
     } catch (error) {
@@ -162,5 +168,36 @@ export class CommandHandler {
    */
   private getAutocompleteKey(commandName: string, optionName?: string): string {
     return `${commandName}:${optionName || 'default'}`;
+  }
+
+  /**
+   * Make an interaction respond ephemeral by wrapping its methods
+   */
+  private makeInteractionEphemeral(interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction): void {
+    // Store original methods
+    const originalDeferReply = interaction.deferReply.bind(interaction);
+    const originalReply = interaction.reply.bind(interaction);
+    const originalFollowUp = interaction.followUp.bind(interaction);
+
+    // Override deferReply to always be ephemeral
+    interaction.deferReply = (async (options = {}) => {
+      return originalDeferReply({ ...options, ephemeral: true });
+    }) as typeof interaction.deferReply;
+
+    // Override reply to always be ephemeral
+    interaction.reply = (async (options) => {
+      if (typeof options === 'string') {
+        return originalReply({ content: options, ephemeral: true });
+      }
+      return originalReply({ ...options, ephemeral: true } as unknown as Parameters<typeof originalReply>[0]);
+    }) as typeof interaction.reply;
+
+    // Override followUp to always be ephemeral
+    interaction.followUp = (async (options) => {
+      if (typeof options === 'string') {
+        return originalFollowUp({ content: options, ephemeral: true });
+      }
+      return originalFollowUp({ ...options, ephemeral: true } as unknown as Parameters<typeof originalFollowUp>[0]);
+    }) as typeof interaction.followUp;
   }
 }
