@@ -9,6 +9,7 @@ export interface HttpRequestConfig {
   headers?: Record<string, string>;
   timeout?: number;
   params?: Record<string, string | number>;
+  data?: unknown; // Request body for POST/PUT/PATCH
 }
 
 /**
@@ -60,6 +61,24 @@ export interface IHttpClient {
    */
   get<T>(
     url: string,
+    schema: z.ZodSchema<T>,
+    options?: {
+      headers?: Record<string, string>;
+      timeout?: number;
+      cache?: CacheConfig;
+    },
+  ): Promise<T>;
+
+  /**
+   * Makes a POST request with optional caching
+   * @param url - Request URL
+   * @param data - Request body data
+   * @param schema - Zod schema for response validation
+   * @param options - Optional request and cache options
+   */
+  post<T>(
+    url: string,
+    data: unknown,
     schema: z.ZodSchema<T>,
     options?: {
       headers?: Record<string, string>;

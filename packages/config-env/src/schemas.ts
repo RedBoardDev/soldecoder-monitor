@@ -23,9 +23,7 @@ export const AWSSchema = z.object({
  */
 export const SolanaSchema = z.object({
   SOLANA_RPC_ENDPOINT: z.string().url().default('https://api.mainnet-beta.solana.com'),
-  METEORA_PROGRAM_ID: z.string().min(1, 'Meteora program ID is required'),
-  SOLANA_TRACKER_API_KEY_PRIMARY: z.string().min(1, 'Primary Solana tracker API key is required'),
-  SOLANA_TRACKER_API_KEY_SECONDARY: z.string().min(1, 'Secondary Solana tracker API key is required'),
+  // METEORA_PROGRAM_ID: z.string().min(1, 'Meteora program ID is required'),
 });
 
 /**
@@ -55,8 +53,8 @@ export const LoggingSchema = z.object({
 export const EnvironmentSchema = z.object({
   ...DiscordSchema.shape,
   ...AWSSchema.shape,
-  // ...SolanaSchema.shape,
-  // ...LpAgentSchema.shape,
+  ...SolanaSchema.shape,
+  ...LpAgentSchema.shape,
   ...DonationSchema.shape,
   ...LoggingSchema.shape,
 });

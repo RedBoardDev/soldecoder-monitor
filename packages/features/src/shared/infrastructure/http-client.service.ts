@@ -1,5 +1,6 @@
 import { time } from '@shared';
 import { ExternalServiceError } from '@soldecoder-monitor/discord/src/domain/errors/command.errors';
+import { logger } from '@soldecoder-monitor/logger';
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
 import type { z } from 'zod';
 import type {
@@ -8,6 +9,8 @@ import type {
   HttpRequestConfig,
   IHttpClient,
 } from '../application/interfaces/http-client.interface';
+import type { IRateLimiter } from '../application/interfaces/rate-limiter.interface';
+import { RateLimiterService } from './rate-limiter.service';
 
 /**
  * Cached HTTP response data
@@ -20,6 +23,17 @@ interface CachedResponse<T = unknown> {
 }
 
 /**
+ * Rate limiter configuration for HTTP client
+ */
+interface HttpClientRateLimiterConfig {
+  maxRequests: number;
+  windowMs: number;
+  maxQueueSize?: number;
+  taskTimeout?: number;
+  name?: string;
+}
+
+/**
  * HTTP client configuration
  */
 interface HttpClientConfig {
@@ -29,16 +43,18 @@ interface HttpClientConfig {
   userAgent: string;
   cacheKeyPrefix?: string;
   defaultCacheTtlMs?: number;
+  rateLimiter?: HttpClientRateLimiterConfig;
 }
 
 /**
- * Generic HTTP client with caching capabilities
+ * Generic HTTP client with caching capabilities and optional rate limiting
  * Encapsulates Axios usage and provides type-safe, cached HTTP requests
  * Each service should create its own instance with specific configuration
  */
 export class HttpClientService implements IHttpClient {
   private readonly config: HttpClientConfig;
   private readonly cache = new Map<string, CachedResponse>();
+  private readonly rateLimiter?: IRateLimiter;
 
   constructor(config?: Partial<HttpClientConfig>) {
     this.config = {
@@ -51,6 +67,26 @@ export class HttpClientService implements IHttpClient {
       defaultCacheTtlMs: time.minutes(1),
       ...config,
     };
+
+    // Initialize rate limiter if configured
+    if (this.config.rateLimiter) {
+      this.rateLimiter = new RateLimiterService(
+        {
+          maxRequests: this.config.rateLimiter.maxRequests,
+          windowMs: this.config.rateLimiter.windowMs,
+          maxQueueSize: this.config.rateLimiter.maxQueueSize ?? 10,
+          taskTimeout: this.config.rateLimiter.taskTimeout ?? time.seconds(45),
+          name: this.config.rateLimiter.name ?? `HttpClient-${this.config.cacheKeyPrefix}`,
+          fifo: true,
+        },
+        logger,
+      );
+
+      logger.debug(`🚦 Rate limiter initialized for ${this.config.cacheKeyPrefix}`, {
+        maxRequests: this.config.rateLimiter.maxRequests,
+        windowMs: this.config.rateLimiter.windowMs,
+      });
+    }
   }
 
   /**
@@ -65,7 +101,7 @@ export class HttpClientService implements IHttpClient {
         }
       : null;
 
-    // Check cache if enabled
+    // Check cache if enabled (before rate limiting)
     if (resolvedCacheConfig) {
       const cacheKey = this.generateCacheKey(config, resolvedCacheConfig.key);
       const cachedResponse = this.getCachedResponse<T>(cacheKey, resolvedCacheConfig.ttlMs);
@@ -74,23 +110,34 @@ export class HttpClientService implements IHttpClient {
       }
     }
 
-    try {
-      // Make HTTP request
-      const response = await this.makeRequest(config);
+    // Execute request with or without rate limiting
+    const executeRequest = async (): Promise<T> => {
+      try {
+        // Make HTTP request
+        const response = await this.makeRequest(config);
 
-      // Validate response with schema
-      const validatedData = this.validateResponse(response.data, schema);
+        // Validate response with schema
+        const validatedData = this.validateResponse(response.data, schema);
 
-      // Cache response if enabled
-      if (resolvedCacheConfig) {
-        const cacheKey = this.generateCacheKey(config, resolvedCacheConfig.key);
-        this.cacheResponse(cacheKey, validatedData, resolvedCacheConfig.ttlMs);
+        // Cache response if enabled
+        if (resolvedCacheConfig) {
+          const cacheKey = this.generateCacheKey(config, resolvedCacheConfig.key);
+          this.cacheResponse(cacheKey, validatedData, resolvedCacheConfig.ttlMs);
+        }
+
+        return validatedData;
+      } catch (error) {
+        this.handleRequestError(error, config.url);
+        throw error;
       }
+    };
 
-      return validatedData;
-    } catch (error) {
-      this.handleRequestError(error, config.url);
-      throw error;
+    // Use rate limiter if configured, otherwise execute directly
+    if (this.rateLimiter) {
+      const taskId = resolvedCacheConfig?.key || `request:${config.url}:${Date.now()}`;
+      return this.rateLimiter.enqueue(executeRequest, { taskId });
+    } else {
+      return executeRequest();
     }
   }
 
@@ -111,6 +158,30 @@ export class HttpClientService implements IHttpClient {
       method: 'GET',
       headers: options?.headers,
       timeout: options?.timeout,
+    };
+
+    return this.request(config, schema, options?.cache);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async post<T>(
+    url: string,
+    data: unknown,
+    schema: z.ZodSchema<T>,
+    options?: {
+      headers?: Record<string, string>;
+      timeout?: number;
+      cache?: CacheConfig;
+    },
+  ): Promise<T> {
+    const config: HttpRequestConfig = {
+      url,
+      method: 'POST',
+      headers: options?.headers,
+      timeout: options?.timeout,
+      data,
     };
 
     return this.request(config, schema, options?.cache);
@@ -170,6 +241,7 @@ export class HttpClientService implements IHttpClient {
       headers: this.getRequestHeaders(config.headers),
       timeout: config.timeout || this.config.defaultTimeout,
       params: config.params,
+      data: config.data, // Support request body
     };
 
     if (this.config.baseUrl && !config.url.startsWith('http')) {

@@ -42,25 +42,21 @@ export class Config {
   /**
    * Solana configuration
    */
-  // get solana() {
-  //   return {
-  //     rpcEndpoint: this.env.SOLANA_RPC_ENDPOINT,
-  //     programId: this.env.METEORA_PROGRAM_ID,
-  //     trackerApiKeys: {
-  //       primary: this.env.SOLANA_TRACKER_API_KEY_PRIMARY,
-  //       secondary: this.env.SOLANA_TRACKER_API_KEY_SECONDARY,
-  //     },
-  //   } as const;
-  // }
+  get solana() {
+    return {
+      rpcEndpoint: this.env.SOLANA_RPC_ENDPOINT,
+      // programId: this.env.METEORA_PROGRAM_ID,
+    } as const;
+  }
 
   /**
    * LpAgent configuration
    */
-  // get lpagent() {
-  //   return {
-  //     xAuth: this.env.LPAGENT_X_AUTH,
-  //   } as const;
-  // }
+  get lpagent() {
+    return {
+      xAuth: this.env.LPAGENT_X_AUTH,
+    } as const;
+  }
 
   /**
    * Donation configuration
@@ -87,8 +83,8 @@ export class Config {
     return {
       discord: this.discord,
       // aws: this.aws,
-      // solana: this.solana,
-      // lpagent: this.lpagent,
+      solana: this.solana,
+      lpagent: this.lpagent,
       donate: this.donate,
       logging: this.logging,
     } as const;
