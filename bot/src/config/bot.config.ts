@@ -1,4 +1,5 @@
 import { DonateFeature } from '@soldecoder-monitor/features/src/donate/donate.feature';
+import { GlobalPositionsFeature } from '@soldecoder-monitor/features/src/global-positions/global-positions.feature';
 import { NftPriceFeature } from '@soldecoder-monitor/features/src/nft-price/nft-price.feature';
 import { PositionSizeFeature } from '@soldecoder-monitor/features/src/positions-size/position-size.feature';
 import type { Feature } from '@soldecoder-monitor/features-sdk';
@@ -31,6 +32,7 @@ export const botConfig = {
     { name: 'DonateFeature', class: DonateFeature },
     { name: 'NftPriceFeature', class: NftPriceFeature },
     { name: 'PositionSizeFeature', class: PositionSizeFeature },
+    { name: 'GlobalPositionsFeature', class: GlobalPositionsFeature },
   ] as Array<{ name: string; class: new () => Feature }>,
 
   /**
