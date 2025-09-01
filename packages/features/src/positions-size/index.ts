@@ -7,9 +7,9 @@ export { CalculatePositionSizesUseCase } from './core/application/use-cases/calc
 
 // Core - Domain Layer
 export {
-  MissingPositionConfigurationError,
-  InvalidStoplossPercentError,
   InvalidCurrentSizeError,
+  InvalidStoplossPercentError,
+  MissingPositionConfigurationError,
   PositionCalculationError,
   WalletInfoServiceError,
 } from './core/domain/position-size.errors';
@@ -22,19 +22,14 @@ export { PositionCount } from './core/domain/value-objects/position-count.vo';
 export { PositionSizeItem } from './core/domain/value-objects/position-size-item.vo';
 export { StopLossPercent } from './core/domain/value-objects/stop-loss-percent.vo';
 
-// Core - Infrastructure
-export { WalletInfoMockService } from './core/infrastructure/wallet-info-mock.service';
-
 // Discord handlers
 export { PositionSizeCommandHandler, type PositionSizeOptions } from './discord/commands/position-size.command';
-
-// Feature
-export { PositionSizeFeature } from './position-size.feature';
-
 // UI components
 export {
   buildPositionSizeRecommendationsEmbed,
   buildPositionSizeSettingsFallbackEmbed,
   type PositionSizeRecommendationsEmbedParams,
   type PositionSizeSettingsFallbackEmbedParams,
-} from './ui/position-size-recommendations.embed';
+} from './discord/ui/position-size-recommendations.embed';
+// Feature
+export { PositionSizeFeature } from './position-size.feature';

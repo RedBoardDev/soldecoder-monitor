@@ -40,7 +40,7 @@ interface HttpClientConfig {
   baseUrl?: string;
   defaultTimeout: number;
   defaultHeaders: Record<string, string>;
-  userAgent: string;
+  userAgent: string | false;
   cacheKeyPrefix?: string;
   defaultCacheTtlMs?: number;
   rateLimiter?: HttpClientRateLimiterConfig;
@@ -216,22 +216,6 @@ export class HttpClientService implements IHttpClient {
   }
 
   /**
-   * {@inheritDoc}
-   */
-  public async isHealthy(): Promise<boolean> {
-    try {
-      // Simple ping test
-      await axios.get('https://httpbin.org/status/200', {
-        timeout: 5000,
-        headers: this.getRequestHeaders(),
-      });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
    * Makes the actual HTTP request using Axios
    */
   private async makeRequest(config: HttpRequestConfig): Promise<AxiosResponse> {
@@ -245,9 +229,11 @@ export class HttpClientService implements IHttpClient {
     };
 
     if (this.config.baseUrl && !config.url.startsWith('http')) {
-      axiosConfig.url = `${this.config.baseUrl}${config.url.startsWith('/') ? '' : '/'}${config.url}`;
+      // Ensure no double slashes between baseUrl and url
+      const baseUrl = this.config.baseUrl.replace(/\/+$/, '');
+      const urlPath = config.url.replace(/^\/+/, '');
+      axiosConfig.url = `${baseUrl}/${urlPath}`;
     }
-
     return axios.request(axiosConfig);
   }
 
@@ -320,11 +306,16 @@ export class HttpClientService implements IHttpClient {
    * Gets request headers combining defaults with custom headers
    */
   private getRequestHeaders(customHeaders?: Record<string, string>): Record<string, string> {
-    return {
+    const headers = {
       ...this.config.defaultHeaders,
-      'User-Agent': this.config.userAgent,
       ...customHeaders,
     };
+
+    if (this.config.userAgent !== false) {
+      headers['User-Agent'] = this.config.userAgent;
+    }
+
+    return headers;
   }
 
   /**

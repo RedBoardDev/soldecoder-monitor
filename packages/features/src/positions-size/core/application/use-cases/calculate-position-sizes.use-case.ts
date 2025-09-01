@@ -1,7 +1,7 @@
+import type { IPortfolioService } from '@shared/application/interfaces/portfolio.service.interface';
 import type { GuildSettingsRepository } from '@soldecoder-monitor/data';
 import { GuildSettingsNotFoundError } from '@soldecoder-monitor/data';
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
-import type { IWalletInfoService } from '../../../../shared/application';
 import { InvalidWalletAddressError, WalletAddress } from '../../../../shared/domain';
 import { MissingPositionConfigurationError } from '../../domain/position-size.errors';
 import { calculateAllPositionRecommendations } from '../../domain/services/position-size-calculator.service';
@@ -19,7 +19,7 @@ const logger = createFeatureLogger('calculate-position-sizes-use-case');
 export class CalculatePositionSizesUseCase {
   constructor(
     private readonly guildSettingsRepository: GuildSettingsRepository,
-    private readonly walletInfoService: IWalletInfoService,
+    readonly portfolioService: IPortfolioService,
   ) {}
 
   /**
@@ -76,20 +76,13 @@ export class CalculatePositionSizesUseCase {
 
     // 6. Attempt to get wallet info and calculate recommendations
     try {
-      const totalNetWorth = await this.walletInfoService.getTotalNetWorth(walletVO.getValue());
+      const totalNetWorth = await this.portfolioService.getTotalNetWorth(walletVO);
       const netWorthVO = NetWorth.create(totalNetWorth);
 
       const positionItems = calculateAllPositionRecommendations(netWorthVO, stopLossVO, command.currentSize);
 
-      logger.debug('Position calculations completed successfully', {
-        guildId: command.guildId,
-        totalNetWorth,
-        itemsCalculated: positionItems.length,
-        hasCurrentSize: command.hasCurrentSize(),
-      });
-
       return new PositionSizeCalculationsResult(
-        walletVO.getValue(),
+        walletVO.address,
         stopLossVO.getValue(),
         command.currentSize ?? null,
         command.guildId,
@@ -100,13 +93,13 @@ export class CalculatePositionSizesUseCase {
     } catch (walletError) {
       logger.warn('Failed to fetch wallet info, returning settings without calculations', {
         guildId: command.guildId,
-        walletAddress: walletVO.getShortAddress(),
+        walletAddress: walletVO.shortAddress,
         error: walletError instanceof Error ? walletError.message : 'Unknown error',
       });
 
       // Return result without calculations (fallback mode)
       return new PositionSizeCalculationsResult(
-        walletVO.getValue(),
+        walletVO.address,
         stopLossVO.getValue(),
         command.currentSize ?? null,
         command.guildId,

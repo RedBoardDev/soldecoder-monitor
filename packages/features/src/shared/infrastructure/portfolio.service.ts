@@ -1,11 +1,10 @@
-import { time } from '@shared';
+import { type IPortfolioService, time } from '@shared';
+import { type WalletPosition, WalletPositionSchema } from '@shared/discord/types/lpagent.types';
 import { config } from '@soldecoder-monitor/config-env';
 import { ExternalServiceError } from '@soldecoder-monitor/discord/src/domain/errors/command.errors';
 import { logger } from '@soldecoder-monitor/logger';
-import { type WalletPosition, WalletPositionSchema } from 'shared/discord/types/lpagent.types';
 import z from 'zod';
 import type { IHttpClient } from '../application/interfaces/http-client.interface';
-import type { IPortfolioService } from '../application/interfaces/portfolio.service.interface';
 import type { WalletAddress } from '../domain/value-objects/wallet-address.vo';
 import { HttpClientService } from './http-client.service';
 import { LpAgentAdapter } from './lpagent.adapter';
@@ -44,8 +43,9 @@ export class PortfolioService implements IPortfolioService {
     this.httpClient = new HttpClientService({
       baseUrl: config.solana.rpcEndpoint,
       defaultTimeout: time.seconds(10),
-      userAgent: 'SolDecoder-Bot/1.0 (Portfolio)',
+      userAgent: false,
       cacheKeyPrefix: 'portfolio',
+      defaultHeaders: { 'Content-Type': 'application/json' },
     });
     this.lpAgentAdapter = LpAgentAdapter.getInstance();
   }
@@ -66,7 +66,7 @@ export class PortfolioService implements IPortfolioService {
       }, 0);
 
       const rentFees = positions.length * RENT_FEE_PER_POSITION;
-      const totalNetWorth = solBalance + positionsValue - rentFees;
+      const totalNetWorth = solBalance + positionsValue + rentFees;
 
       return Math.max(0, totalNetWorth);
     } catch (error) {
@@ -100,7 +100,7 @@ export class PortfolioService implements IPortfolioService {
         '',
         {
           jsonrpc: '2.0',
-          id: Date.now(),
+          id: 1,
           method: 'getBalance',
           params: [wallet.address],
         },

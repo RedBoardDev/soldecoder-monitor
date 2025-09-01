@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import type { PositionSizeItem } from '../core/domain/value-objects/position-size-item.vo';
+import type { PositionSizeItem } from '../../core/domain/value-objects/position-size-item.vo';
 
 export interface PositionSizeRecommendationsEmbedParams {
   shortWallet: string;
@@ -13,7 +13,6 @@ export interface PositionSizeSettingsFallbackEmbedParams {
   shortWallet: string;
   stopLossPercent: number;
   currentSize?: number | null;
-  defaultsUsageSummary: string;
 }
 
 /**
@@ -57,7 +56,7 @@ export function buildPositionSizeRecommendationsEmbed(params: PositionSizeRecomm
 
 // TODO fallback vrm utilise et logique ??
 export function buildPositionSizeSettingsFallbackEmbed(params: PositionSizeSettingsFallbackEmbedParams): EmbedBuilder {
-  const { shortWallet, stopLossPercent, currentSize, defaultsUsageSummary } = params;
+  const { shortWallet, stopLossPercent, currentSize } = params;
 
   return new EmbedBuilder()
     .setTitle('⚠️ Position Settings Retrieved')
@@ -71,17 +70,10 @@ export function buildPositionSizeSettingsFallbackEmbed(params: PositionSizeSetti
         .filter(Boolean)
         .join(' • '),
     )
-    .addFields(
-      {
-        name: 'ℹ️ Configuration Info',
-        value: defaultsUsageSummary,
-        inline: false,
-      },
-      {
-        name: '⚠️ Position Calculations Unavailable',
-        value: 'Could not fetch wallet data for position size recommendations. Settings shown instead.',
-        inline: false,
-      },
-    )
+    .addFields({
+      name: '⚠️ Position Calculations Unavailable',
+      value: 'Could not fetch wallet data for position size recommendations. Settings shown instead.',
+      inline: false,
+    })
     .setTimestamp();
 }

@@ -17,6 +17,7 @@
     "sourceMap": true,
     "baseUrl": "./src",
     "paths": {
+      "@shared/*": ["shared/*"],
       "@shared": ["shared/index"]
     }
   },

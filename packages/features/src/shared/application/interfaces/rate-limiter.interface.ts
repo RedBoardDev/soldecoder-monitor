@@ -1,4 +1,4 @@
-import type { EnqueueOptions, RateLimiterStats } from 'shared/discord/types/rate-limiter.types';
+import type { EnqueueOptions, RateLimiterStats } from '@shared/discord/types/rate-limiter.types';
 
 /**
  * Rate Limiter service interface

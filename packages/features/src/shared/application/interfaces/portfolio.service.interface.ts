@@ -1,6 +1,7 @@
 // import type { WalletInfo, WalletPosition } from '@schemas/lpagent.schema';
 
-import type { WalletAddress } from 'shared/domain';
+import type { WalletPosition } from '@shared/discord/types/lpagent.types';
+import type { WalletAddress } from '@shared/domain';
 
 export interface IPortfolioService {
   /** Get SOL balance for the configured wallet */

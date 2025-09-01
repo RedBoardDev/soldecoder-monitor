@@ -15,6 +15,7 @@
     "baseUrl": ".",
     "paths": {
       "@soldecoder-monitor/*": ["../packages/*/src"],
+      "@shared/*": ["../packages/features/src/shared/*"],
       "@shared": ["../packages/features/src/shared/index"]
     },
     "noEmit": true

@@ -98,9 +98,4 @@ export interface IHttpClient {
    * @param cacheKey - Optional specific key to clear
    */
   clearCache(cacheKey?: string): void;
-
-  /**
-   * Checks if HTTP client is healthy
-   */
-  isHealthy(): Promise<boolean>;
 }

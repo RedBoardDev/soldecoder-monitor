@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/complexity/noStaticOnlyClass: <explanation> */
-import type { LpAgentPosition, LpAgentResponse, WalletPosition } from '../../discord/types/lpagent.types';
+import type { LpAgentPosition, LpAgentResponse, WalletPosition } from '@shared/discord/types/lpagent.types';
 
 export class LpAgentMapper {
   public static toWalletPositions(lpAgentResponse: LpAgentResponse): WalletPosition[] {

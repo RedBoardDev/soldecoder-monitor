@@ -8,7 +8,7 @@ import type { CalculatePositionSizesUseCase } from '../../core/application/use-c
 import {
   buildPositionSizeRecommendationsEmbed,
   buildPositionSizeSettingsFallbackEmbed,
-} from '../../ui/position-size-recommendations.embed';
+} from '../ui/position-size-recommendations.embed';
 
 const logger = createFeatureLogger('position-size-command');
 
@@ -33,16 +33,9 @@ export class PositionSizeCommandHandler {
       const options = getOptions(interaction, positionSizeOptionsSchema);
       const command = CalculatePositionSizesCommand.fromOptions(guildId, options);
 
-      logger.debug('Processing position size calculation request', {
-        guildId: command.guildId,
-        hasWallet: command.hasWalletOverride(),
-        hasStoploss: command.hasStoplossOverride(),
-        hasCurrentSize: command.hasCurrentSize(),
-      });
-
       const result = await this.calculatePositionSizesUseCase.execute(command);
 
-      // Choose appropriate embed based on whether calculations succeeded
+      // Choose appropriate embed  on whether calculations succeeded
       const calculationData = result.getCalculationData();
       let embed: EmbedBuilder;
 
@@ -54,26 +47,12 @@ export class PositionSizeCommandHandler {
           currentSize: result.currentSize,
           items: calculationData.positionItems,
         });
-
-        logger.debug('Position size recommendations displayed successfully', {
-          guildId: result.guildId,
-          shortWallet: result.getShortWalletAddress(),
-          totalNetWorth: calculationData.totalNetWorth,
-          itemsCount: calculationData.positionItems.length,
-        });
       } else {
         // TODO mmh voir ça
         embed = buildPositionSizeSettingsFallbackEmbed({
           shortWallet: result.getShortWalletAddress(),
           stopLossPercent: result.stopLossPercent,
           currentSize: result.currentSize,
-          defaultsUsageSummary: result.getDefaultsUsageSummary(),
-        });
-
-        logger.debug('Position settings displayed (calculations unavailable)', {
-          guildId: result.guildId,
-          shortWallet: result.getShortWalletAddress(),
-          defaultsUsed: result.getDefaultsUsageSummary(),
         });
       }
 

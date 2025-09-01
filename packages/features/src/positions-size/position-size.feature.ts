@@ -1,4 +1,5 @@
 import { time } from '@shared';
+import { PortfolioService } from '@shared/infrastructure/portfolio.service';
 import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import {
   Feature,
@@ -9,7 +10,6 @@ import {
 } from '@soldecoder-monitor/features-sdk';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { CalculatePositionSizesUseCase } from './core/application/use-cases/calculate-position-sizes.use-case';
-import { WalletInfoMockService } from './core/infrastructure/wallet-info-mock.service';
 import { PositionSizeCommandHandler } from './discord/commands/position-size.command';
 
 @FeatureDecorator({
@@ -36,15 +36,13 @@ export class PositionSizeFeature extends Feature {
 
     // 🏭 Setup repositories and services
     const guildSettingsRepository = DynamoGuildSettingsRepository.create();
-    const walletInfoService = new WalletInfoMockService(); // TODO: Replace with production service
+    const portfolioService = PortfolioService.getInstance();
 
     // 🎯 Setup use cases (application layer)
-    this.calculatePositionSizesUseCase = new CalculatePositionSizesUseCase(guildSettingsRepository, walletInfoService);
+    this.calculatePositionSizesUseCase = new CalculatePositionSizesUseCase(guildSettingsRepository, portfolioService);
 
     // 🎮 Setup Discord handlers (with dependency injection)
     this.positionSizeHandler = new PositionSizeCommandHandler(this.calculatePositionSizesUseCase);
-
-    context.logger.info('Position Size feature loaded with DDD architecture');
   }
 
   @SlashCommand({
@@ -86,8 +84,8 @@ export class PositionSizeFeature extends Feature {
     },
   })
   @RateLimit({
-    max: 2,
-    window: time.minutes(15),
+    max: 200,
+    window: time.minutes(5),
     scope: 'user',
     message: '⏱️ Please wait {timeRemaining} before checking position sizes again.',
   })

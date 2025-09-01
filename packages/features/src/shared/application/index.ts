@@ -2,4 +2,4 @@
 
 export * from './interfaces/http-client.interface';
 export * from './interfaces/nft-data.service.interface';
-export * from './interfaces/wallet-info.service.interface';
+export * from './interfaces/portfolio.service.interface';

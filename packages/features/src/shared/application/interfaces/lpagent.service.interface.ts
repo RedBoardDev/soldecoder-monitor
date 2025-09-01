@@ -2,8 +2,8 @@ import type {
   LpAgentHistoricalResponse,
   LpAgentOverviewResponse,
   LpAgentResponse,
-} from 'shared/discord/types/lpagent.types';
-import type { WalletAddress } from 'shared/domain/value-objects/wallet-address.vo';
+} from '@shared/discord/types/lpagent.types';
+import type { WalletAddress } from '@shared/domain/value-objects/wallet-address.vo';
 
 /**
  * Cache information for LpAgent data
