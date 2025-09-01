@@ -26,18 +26,18 @@ export class Config {
   /**
    * AWS configuration
    */
-  // get aws() {
-  //   return {
-  //     region: this.env.AWS_REGION,
-  //     credentials: {
-  //       accessKeyId: this.env.AWS_ACCESS_KEY_ID,
-  //       secretAccessKey: this.env.AWS_SECRET_ACCESS_KEY,
-  //     },
-  //     tables: {
-  //       config: this.env.DYNAMODB_CONFIG_TABLE_NAME,
-  //     },
-  //   } as const;
-  // }
+  get aws() {
+    return {
+      region: this.env.AWS_REGION,
+      credentials: {
+        accessKeyId: this.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: this.env.AWS_SECRET_ACCESS_KEY,
+      },
+      tables: {
+        config: this.env.DYNAMODB_CONFIG_TABLE_NAME,
+      },
+    } as const;
+  }
 
   /**
    * Solana configuration

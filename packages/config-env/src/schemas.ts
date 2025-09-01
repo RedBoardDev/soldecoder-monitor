@@ -54,7 +54,7 @@ export const LoggingSchema = z.object({
  */
 export const EnvironmentSchema = z.object({
   ...DiscordSchema.shape,
-  // ...AWSSchema.shape,
+  ...AWSSchema.shape,
   // ...SolanaSchema.shape,
   // ...LpAgentSchema.shape,
   ...DonationSchema.shape,
