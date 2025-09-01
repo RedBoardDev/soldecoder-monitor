@@ -1,0 +1,21 @@
+{
+  "name": "@soldecoder-monitor/data",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.738.0",
+    "@aws-sdk/lib-dynamodb": "^3.738.0",
+    "@soldecoder-monitor/config-env": "*",
+    "@soldecoder-monitor/logger": "*"
+  },
+  "devDependencies": {
+    "@soldecoder-monitor/typescript-config": "*"
+  }
+}
