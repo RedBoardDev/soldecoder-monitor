@@ -50,8 +50,6 @@ export class GlobalPositionsFeature extends Feature {
     );
 
     this.globalPositionsHandler = new GlobalPositionsCommandHandler(this.getGlobalPositionsUseCase);
-
-    context.logger.info('Global positions feature loaded with scheduler');
   }
 
   @SlashCommand({
