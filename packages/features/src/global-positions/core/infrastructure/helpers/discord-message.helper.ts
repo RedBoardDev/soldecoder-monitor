@@ -1,3 +1,4 @@
+import { time } from '@shared/domain';
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import type { Client, EmbedBuilder, Message, TextChannel } from 'discord.js';
 import { ChannelType, DiscordAPIError } from 'discord.js';
@@ -19,7 +20,7 @@ export function getTextChannel(client: Client, channelId: string): TextChannel |
  * Check if a message is too old (based on age in days)
  */
 export function isMessageTooOld(message: Message, maxAgeDays: number): boolean {
-  const messageAgeDays = (Date.now() - message.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+  const messageAgeDays = (Date.now() - message.createdAt.getTime()) / time.days(1);
   return messageAgeDays > maxAgeDays;
 }
 

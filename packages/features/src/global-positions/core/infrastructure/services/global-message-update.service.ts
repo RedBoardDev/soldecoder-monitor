@@ -13,7 +13,7 @@ const logger = createFeatureLogger('global-message-update-service');
  * Simplified service focused on coordinating message updates.
  */
 export class GlobalMessageUpdateService {
-  private readonly MESSAGE_MAX_AGE_DAYS = 7;
+  private readonly MESSAGE_MAX_AGE_DAYS = 6;
 
   constructor(private readonly globalMessageRepository: GlobalMessageRepository) {}
 

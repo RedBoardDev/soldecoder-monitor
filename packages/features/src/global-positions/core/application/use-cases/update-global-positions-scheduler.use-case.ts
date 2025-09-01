@@ -1,4 +1,4 @@
-import { time } from '@shared/domain';
+import { time } from '@shared';
 import type { DynamoChannelConfigRepository, GuildSettingsRepository } from '@soldecoder-monitor/data';
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import type { Client } from 'discord.js';

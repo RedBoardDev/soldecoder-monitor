@@ -87,8 +87,8 @@ export class GlobalPositionsFeature extends Feature {
 
   @Interval({
     name: 'global-positions-auto-update',
-    milliseconds: 30000, // Every 30 seconds
-    runOnInit: false, // Start 30s after initialization
+    milliseconds: time.seconds(30),
+    runOnInit: false,
   })
   async updateGlobalPositions(): Promise<void> {
     if (!this.context?.client) {
