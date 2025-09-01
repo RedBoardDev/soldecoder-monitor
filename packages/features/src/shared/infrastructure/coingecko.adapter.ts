@@ -1,17 +1,9 @@
 import { time } from '@shared';
-import { z } from 'zod';
 import type { IHttpClient } from '../application/interfaces/http-client.interface';
 import type { INftDataService, NftCacheInfo } from '../application/interfaces/nft-data.service.interface';
 import type { NftCollection } from '../domain/nft.types';
 import { NftCollectionSchema } from '../domain/nft.types';
 import { HttpClientService } from './http-client.service';
-
-/**
- * CoinGecko ping response schema
- */
-const _CoinGeckoPingSchema = z.object({
-  gecko_says: z.string(),
-});
 
 /**
  * CoinGecko API adapter - Infrastructure implementation
@@ -27,12 +19,13 @@ export class CoinGeckoAdapter implements INftDataService {
       userAgent: 'SolDecoder-Bot/1.0 (CoinGecko)',
       cacheKeyPrefix: 'coingecko',
       defaultCacheTtlMs: time.minutes(5),
-    }); 
+      rateLimiter: {
+        maxRequests: 10,
+        windowMs: time.minutes(1),
+      },
+    });
   }
 
-  /**
-   * Gets singleton instance of CoinGecko adapter
-   */
   public static getInstance(): CoinGeckoAdapter {
     if (!CoinGeckoAdapter.instance) {
       CoinGeckoAdapter.instance = new CoinGeckoAdapter();

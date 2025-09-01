@@ -33,56 +33,22 @@ export class WalletAddress {
     return new WalletAddress(cleaned);
   }
 
-  /**
-   * Get the full wallet address
-   */
-  public getValue(): string {
+  get address(): string {
     return this.value;
   }
 
-  /**
-   * Get shortened address for display (first 4 + last 4 chars)
-   */
-  public getShortAddress(): string {
+  get shortAddress(): string {
     if (this.value.length <= 8) {
       return this.value;
     }
     return `${this.value.slice(0, 4)}...${this.value.slice(-4)}`;
   }
 
-  /**
-   * Check if this wallet equals another
-   */
-  public equals(other: WalletAddress): boolean {
+  equals(other: WalletAddress): boolean {
     return this.value === other.value;
   }
 
-  /**
-   * String representation
-   */
-  public toString(): string {
-    return this.value;
-  }
-
-  /**
-   * Check if address looks like a valid Solana address (more thorough)
-   */
-  public isValidSolanaAddress(): boolean {
+  get isValidSolanaAddress(): boolean {
     return this.value.length === 44;
-  }
-
-  /**
-   * Get wallet address type/format info
-   */
-  public getAddressInfo(): {
-    length: number;
-    isStandardSolana: boolean;
-    shortAddress: string;
-  } {
-    return {
-      length: this.value.length,
-      isStandardSolana: this.isValidSolanaAddress(),
-      shortAddress: this.getShortAddress(),
-    };
   }
 }
