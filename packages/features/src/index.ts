@@ -9,3 +9,5 @@ export { GlobalPositionsFeature } from './global-positions/global-positions.feat
 export { NftPriceFeature } from './nft-price/nft-price.feature';
 
 export { PositionSizeFeature } from './positions-size/position-size.feature';
+
+export { SettingsServerFeature } from './settings-server/settings-server.feature';
