@@ -140,7 +140,9 @@ export class InteractionRouter {
   ): ExtendedInteractionRegistration | undefined {
     // First try exact match
     const exactMatch = handlers.get(customId);
-    if (exactMatch) return exactMatch;
+    if (exactMatch) {
+      return exactMatch;
+    }
 
     // Then try regex patterns
     for (const [pattern, registration] of handlers) {

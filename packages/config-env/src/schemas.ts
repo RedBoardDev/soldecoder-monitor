@@ -23,7 +23,7 @@ export const AWSSchema = z.object({
  */
 export const SolanaSchema = z.object({
   SOLANA_RPC_ENDPOINT: z.string().url().default('https://rpc.ankr.com/solana'),
-  // METEORA_PROGRAM_ID: z.string().min(1, 'Meteora program ID is required'),
+  METEORA_PROGRAM_ID: z.string().min(1, 'Meteora program ID is required'),
 });
 
 /**

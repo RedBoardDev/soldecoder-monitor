@@ -110,7 +110,7 @@ export class SettingsServerFeature extends Feature {
   @ButtonHandler(/^settings:server:toggle:/)
   @ButtonHandler('settings:server:channel:select')
   @ButtonHandler('settings:server:position-defaults:modal')
-  async handleButtons(interaction: ButtonInteraction): Promise<void> {
+  async handleServerButtons(interaction: ButtonInteraction): Promise<void> {
     return this.interactionRouter.routeInteraction(interaction);
   }
 

@@ -45,7 +45,7 @@ export class Config {
   get solana() {
     return {
       rpcEndpoint: this.env.SOLANA_RPC_ENDPOINT,
-      // programId: this.env.METEORA_PROGRAM_ID,
+      programId: this.env.METEORA_PROGRAM_ID,
     } as const;
   }
 

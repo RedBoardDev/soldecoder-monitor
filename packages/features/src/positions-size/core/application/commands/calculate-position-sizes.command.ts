@@ -1,4 +1,4 @@
-import type { PositionSizeOptions } from 'positions-size/discord/commands/position-size.command';
+import type { PositionSizeOptions } from '../../../discord/commands/position-size.command';
 
 /**
  * Command DTO for calculating position sizes
