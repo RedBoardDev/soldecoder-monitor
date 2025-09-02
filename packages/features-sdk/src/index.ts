@@ -40,6 +40,7 @@ export { GuardExecutor } from './guards/guard.executor';
 export type { Guard } from './guards/guard.interface';
 
 // Handler exports (if needed for extension)
+export { type AnyInteraction, BaseInteractionHandler } from './handlers/base-interaction.handler';
 export { CommandHandler } from './handlers/command.handler';
 export { EventDispatcher } from './handlers/event.dispatcher';
 export { InteractionRouter } from './handlers/interaction.router';

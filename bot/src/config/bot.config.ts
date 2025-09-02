@@ -2,6 +2,7 @@ import { DonateFeature } from '@soldecoder-monitor/features/src/donate/donate.fe
 import { GlobalPositionsFeature } from '@soldecoder-monitor/features/src/global-positions/global-positions.feature';
 import { NftPriceFeature } from '@soldecoder-monitor/features/src/nft-price/nft-price.feature';
 import { PositionSizeFeature } from '@soldecoder-monitor/features/src/positions-size/position-size.feature';
+import { SettingsChannelsFeature } from '@soldecoder-monitor/features/src/settings-channels/settings-channels.feature';
 import type { Feature } from '@soldecoder-monitor/features-sdk';
 import { GatewayIntentBits, Partials } from 'discord.js';
 
@@ -33,6 +34,7 @@ export const botConfig = {
     { name: 'NftPriceFeature', class: NftPriceFeature },
     { name: 'PositionSizeFeature', class: PositionSizeFeature },
     { name: 'GlobalPositionsFeature', class: GlobalPositionsFeature },
+    { name: 'SettingsChannelsFeature', class: SettingsChannelsFeature },
   ] as Array<{ name: string; class: new () => Feature }>,
 
   /**

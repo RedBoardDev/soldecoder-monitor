@@ -89,6 +89,43 @@ export function buildRemoveChannelSelect(
 }
 
 /**
+ * Build channel config buttons for individual channel management
+ */
+export function buildChannelConfigButtons(
+  result: ChannelSettingsResult,
+  guildChannels: Array<{ id: string; name: string }>,
+): ActionRowBuilder<ButtonBuilder>[] {
+  const components: ActionRowBuilder<ButtonBuilder>[] = [];
+
+  if (!result.hasConfiguredChannels) {
+    return components;
+  }
+
+  // Group channels into rows of 5 buttons max per row
+  for (let i = 0; i < result.channelConfigs.length; i += 5) {
+    const channelRow = new ActionRowBuilder<ButtonBuilder>();
+    const channelsSlice = result.channelConfigs.slice(i, i + 5);
+
+    channelsSlice.forEach((config) => {
+      const guildChannel = guildChannels.find((ch) => ch.id === config.channelId);
+      const channelName = guildChannel?.name || 'Unknown';
+
+      channelRow.addComponents(
+        new ButtonBuilder()
+          .setCustomId(`settings:channel:config:${config.channelId}`)
+          .setLabel(`# ${channelName}`)
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('⚙️'),
+      );
+    });
+
+    components.push(channelRow);
+  }
+
+  return components;
+}
+
+/**
  * Build all components for channel list view
  */
 export function buildChannelListComponents(
@@ -99,9 +136,9 @@ export function buildChannelListComponents(
 ): ActionRowBuilder<ButtonBuilder | ChannelSelectMenuBuilder | StringSelectMenuBuilder>[] {
   const components: ActionRowBuilder<ButtonBuilder | ChannelSelectMenuBuilder | StringSelectMenuBuilder>[] = [];
 
-  // Add management buttons
-  const buttons = buildChannelListButtons(result);
-  components.push(...buttons);
+  // Add management buttons (Add/Remove)
+  const managementButtons = buildChannelListButtons(result);
+  components.push(...managementButtons);
 
   // Add dropdown menus if requested
   if (showAddDropdown && result.hasAvailableChannels) {
@@ -111,6 +148,10 @@ export function buildChannelListComponents(
   if (showRemoveDropdown && result.hasConfiguredChannels) {
     components.push(buildRemoveChannelSelect(result, guildChannels));
   }
+
+  // Add individual channel config buttons
+  const channelButtons = buildChannelConfigButtons(result, guildChannels);
+  components.push(...channelButtons);
 
   return components;
 }

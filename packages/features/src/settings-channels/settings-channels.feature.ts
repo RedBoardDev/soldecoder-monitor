@@ -7,6 +7,7 @@ import {
   Feature,
   type FeatureContext,
   FeatureDecorator,
+  ModalHandler,
   RateLimit,
   SelectHandler,
   SlashCommand,
@@ -15,11 +16,26 @@ import type {
   ButtonInteraction,
   ChannelSelectMenuInteraction,
   ChatInputCommandInteraction,
+  ModalSubmitInteraction,
+  RoleSelectMenuInteraction,
   StringSelectMenuInteraction,
+  UserSelectMenuInteraction,
 } from 'discord.js';
-import { AddChannelUseCase, GetChannelSettingsUseCase, RemoveChannelUseCase } from './core/application';
-import { SettingsChannelsCommandHandler } from './discord/commands/settings-channels.command';
-import { SettingsChannelsInteractionHandler } from './discord/interactions/settings-channels.interaction-handler';
+import {
+  AddChannelUseCase,
+  GetChannelConfigUseCase,
+  GetChannelSettingsUseCase,
+  RemoveChannelUseCase,
+  UpdateChannelConfigUseCase,
+} from './core/application';
+import {
+  ChannelDetailInteractionHandler,
+  ChannelListInteractionHandler,
+  SettingsChannelsCommandHandler,
+  SettingsChannelsInteractionRouter,
+  TagInteractionHandler,
+  ThresholdInteractionHandler,
+} from './discord';
 
 @FeatureDecorator({
   name: 'settings-channels',
@@ -29,10 +45,12 @@ import { SettingsChannelsInteractionHandler } from './discord/interactions/setti
 })
 export class SettingsChannelsFeature extends Feature {
   private settingsChannelsHandler!: SettingsChannelsCommandHandler;
-  private interactionHandler!: SettingsChannelsInteractionHandler;
+  private interactionRouter!: SettingsChannelsInteractionRouter;
   private getChannelSettingsUseCase!: GetChannelSettingsUseCase;
+  private getChannelConfigUseCase!: GetChannelConfigUseCase;
   private addChannelUseCase!: AddChannelUseCase;
   private removeChannelUseCase!: RemoveChannelUseCase;
+  private updateChannelConfigUseCase!: UpdateChannelConfigUseCase;
 
   get metadata() {
     return {
@@ -52,15 +70,43 @@ export class SettingsChannelsFeature extends Feature {
 
     // Setup use cases
     this.getChannelSettingsUseCase = new GetChannelSettingsUseCase(channelConfigRepository);
+    this.getChannelConfigUseCase = new GetChannelConfigUseCase(channelConfigRepository);
     this.addChannelUseCase = new AddChannelUseCase(channelConfigRepository, permissionValidator);
     this.removeChannelUseCase = new RemoveChannelUseCase(channelConfigRepository);
+    this.updateChannelConfigUseCase = new UpdateChannelConfigUseCase(channelConfigRepository);
 
     // Setup handlers
     this.settingsChannelsHandler = new SettingsChannelsCommandHandler(this.getChannelSettingsUseCase);
-    this.interactionHandler = new SettingsChannelsInteractionHandler(
+
+    // Setup specialized interaction handlers
+    const channelListHandler = new ChannelListInteractionHandler(
       this.getChannelSettingsUseCase,
       this.addChannelUseCase,
       this.removeChannelUseCase,
+    );
+
+    const channelDetailHandler = new ChannelDetailInteractionHandler(
+      this.getChannelConfigUseCase,
+      this.updateChannelConfigUseCase,
+      permissionValidator,
+    );
+
+    const thresholdHandler = new ThresholdInteractionHandler(
+      this.getChannelConfigUseCase,
+      this.updateChannelConfigUseCase,
+    );
+
+    const tagHandler = new TagInteractionHandler(
+      this.getChannelConfigUseCase,
+      this.updateChannelConfigUseCase,
+      permissionValidator,
+    );
+
+    this.interactionRouter = new SettingsChannelsInteractionRouter(
+      channelListHandler,
+      channelDetailHandler,
+      thresholdHandler,
+      tagHandler,
     );
   }
 
@@ -86,30 +132,36 @@ export class SettingsChannelsFeature extends Feature {
     return this.settingsChannelsHandler.execute(interaction);
   }
 
-  // Button Interaction Handlers
+  // Button Handlers
   @ButtonHandler('settings:channels:show_add')
-  async handleShowAddButton(interaction: ButtonInteraction): Promise<void> {
-    return this.interactionHandler.handleInteraction(interaction);
-  }
-
   @ButtonHandler('settings:channels:show_remove')
-  async handleShowRemoveButton(interaction: ButtonInteraction): Promise<void> {
-    return this.interactionHandler.handleInteraction(interaction);
-  }
-
   @ButtonHandler('settings:channels:back')
-  async handleBackButton(interaction: ButtonInteraction): Promise<void> {
-    return this.interactionHandler.handleInteraction(interaction);
+  @ButtonHandler(/^settings:channel:config:/)
+  @ButtonHandler(/^settings:channel:toggle:/)
+  @ButtonHandler(/^settings:channel:threshold:/)
+  @ButtonHandler(/^settings:channel:tag:/)
+  async handleButtons(interaction: ButtonInteraction): Promise<void> {
+    return this.interactionRouter.routeInteraction(interaction);
   }
 
   // Select Menu Handlers
   @SelectHandler('settings:channels:add')
-  async handleAddChannelSelect(interaction: ChannelSelectMenuInteraction): Promise<void> {
-    return this.interactionHandler.handleInteraction(interaction);
+  @SelectHandler('settings:channels:remove')
+  @SelectHandler(/^settings:tag:user:/)
+  @SelectHandler(/^settings:tag:role:/)
+  async handleSelects(
+    interaction:
+      | ChannelSelectMenuInteraction
+      | StringSelectMenuInteraction
+      | UserSelectMenuInteraction
+      | RoleSelectMenuInteraction,
+  ): Promise<void> {
+    return this.interactionRouter.routeInteraction(interaction);
   }
 
-  @SelectHandler('settings:channels:remove')
-  async handleRemoveChannelSelect(interaction: StringSelectMenuInteraction): Promise<void> {
-    return this.interactionHandler.handleInteraction(interaction);
+  // Modal Handlers
+  @ModalHandler(/^settings:threshold:submit:/)
+  async handleModals(interaction: ModalSubmitInteraction): Promise<void> {
+    return this.interactionRouter.routeInteraction(interaction);
   }
 }
