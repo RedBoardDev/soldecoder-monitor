@@ -1,6 +1,8 @@
 import { time } from '@shared';
+import { buildDonateEmbed } from '@shared/discord/ui/donate.embed';
 import { DynamoChannelConfigRepository, DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import {
+  ButtonHandler,
   Ephemeral,
   Feature,
   type FeatureContext,
@@ -9,7 +11,7 @@ import {
   RateLimit,
   SlashCommand,
 } from '@soldecoder-monitor/features-sdk';
-import type { ChatInputCommandInteraction } from 'discord.js';
+import type { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
 import { GetGlobalPositionsUseCase } from './core/application/use-cases/get-global-positions.use-case';
 import { UpdateGlobalPositionsSchedulerUseCase } from './core/application/use-cases/update-global-positions-scheduler.use-case';
 import { GlobalMessageUpdateService } from './core/infrastructure/services/global-message-update.service';
@@ -99,5 +101,15 @@ export class GlobalPositionsFeature extends Feature {
     } catch (error) {
       this.context?.logger.error('Global positions scheduler failed', error as Error);
     }
+  }
+
+  @ButtonHandler('global-positions:donate')
+  async handleDonateButton(interaction: ButtonInteraction): Promise<void> {
+    const donateEmbed = buildDonateEmbed();
+
+    await interaction.reply({
+      embeds: [donateEmbed],
+      ephemeral: true,
+    });
   }
 }

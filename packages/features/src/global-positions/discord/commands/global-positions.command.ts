@@ -6,6 +6,7 @@ import { GetGlobalPositionsCommand } from '../../core/application/commands/get-g
 import type { GetGlobalPositionsUseCase } from '../../core/application/use-cases/get-global-positions.use-case';
 import { globalPositionsOptionsSchema } from '../../core/domain/types/global-positions.types';
 import { buildGlobalPositionsEmbed } from '../ui/global-positions.embed';
+import { buildGlobalPositionsComponents } from '../ui/global-positions-components.builder';
 
 const logger = createFeatureLogger('global-positions-command');
 
@@ -30,12 +31,11 @@ export class GlobalPositionsCommandHandler {
         footerText: 'soldecoder-monitor',
       });
 
-      // TODO: Add donate button component when available
-      // const components = [buildDonateButton()];
+      const components = buildGlobalPositionsComponents();
 
       await interaction.editReply({
         embeds: [embed],
-        // components,
+        components,
       });
     } catch (error) {
       await this.handleError(interaction, error);

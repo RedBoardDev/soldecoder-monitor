@@ -1,5 +1,5 @@
+import { buildDonateEmbed } from '@shared/discord/ui/donate.embed';
 import type { ChatInputCommandInteraction } from 'discord.js';
-import { buildDonateEmbed } from '../ui/donate.embed';
 
 /**
  * Donate command handler - Pure implementation without decorators

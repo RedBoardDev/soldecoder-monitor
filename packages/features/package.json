@@ -11,9 +11,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "@soldecoder-monitor/data": "*",
     "@soldecoder-monitor/discord": "*",
     "@soldecoder-monitor/features-sdk": "*",
-    "@soldecoder-monitor/data": "*",
     "axios": "^1.6.7"
   },
   "devDependencies": {
