@@ -82,7 +82,7 @@ export class CalculatePositionSizesUseCase {
       const positionItems = calculateAllPositionRecommendations(netWorthVO, stopLossVO, command.currentSize);
 
       return new PositionSizeCalculationsResult(
-        walletVO.address,
+        walletVO,
         stopLossVO.getValue(),
         command.currentSize ?? null,
         command.guildId,
@@ -99,7 +99,7 @@ export class CalculatePositionSizesUseCase {
 
       // Return result without calculations (fallback mode)
       return new PositionSizeCalculationsResult(
-        walletVO.address,
+        walletVO,
         stopLossVO.getValue(),
         command.currentSize ?? null,
         command.guildId,

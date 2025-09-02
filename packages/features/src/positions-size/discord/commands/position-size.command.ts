@@ -41,7 +41,7 @@ export class PositionSizeCommandHandler {
 
       if (calculationData) {
         embed = buildPositionSizeRecommendationsEmbed({
-          shortWallet: result.getShortWalletAddress(),
+          shortWallet: result.walletAddress.shortAddress,
           netWorth: calculationData.totalNetWorth,
           stoploss: result.stopLossPercent,
           currentSize: result.currentSize,
@@ -50,7 +50,7 @@ export class PositionSizeCommandHandler {
       } else {
         // TODO mmh voir ça
         embed = buildPositionSizeSettingsFallbackEmbed({
-          shortWallet: result.getShortWalletAddress(),
+          shortWallet: result.walletAddress.shortAddress,
           stopLossPercent: result.stopLossPercent,
           currentSize: result.currentSize,
         });

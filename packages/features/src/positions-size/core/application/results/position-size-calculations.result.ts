@@ -1,3 +1,4 @@
+import type { WalletAddress } from '../../../../shared/domain/value-objects/wallet-address.vo';
 import type { PositionSizeItem } from '../../domain/value-objects/position-size-item.vo';
 
 /**
@@ -6,7 +7,7 @@ import type { PositionSizeItem } from '../../domain/value-objects/position-size-
  */
 export class PositionSizeCalculationsResult {
   constructor(
-    public readonly walletAddress: string,
+    public readonly walletAddress: WalletAddress,
     public readonly stopLossPercent: number,
     public readonly currentSize: number | null,
     public readonly guildId: string,
@@ -17,14 +18,6 @@ export class PositionSizeCalculationsResult {
     public readonly totalNetWorth?: number,
     public readonly positionItems?: PositionSizeItem[],
   ) {}
-
-  public getShortWalletAddress(): string {
-    // TODO mmh ouais mais y'a deja WalletAddress donc a voir
-    if (this.walletAddress.length <= 8) {
-      return this.walletAddress;
-    }
-    return `${this.walletAddress.slice(0, 4)}...${this.walletAddress.slice(-4)}`;
-  }
 
   public getDefaultsUsageSummary(): string {
     const used = [];
