@@ -34,6 +34,7 @@ export class BotService {
         globalConfig: {
           environment: process.env.NODE_ENV || 'development',
         },
+        helpCommand: botConfig.helpCommand,
       });
 
       // Store dependencies
@@ -45,9 +46,11 @@ export class BotService {
       // Load features
       const featuresResult = await this.loadFeatures(botConfig.features);
 
+      // Initialize feature manager (must be before login to register help command)
+      await featureManager.initialize();
+
       // Login to Discord
       await client.login(config.discord.token);
-      await featureManager.initialize();
 
       logger.info('🚀 Bot is now running!');
 

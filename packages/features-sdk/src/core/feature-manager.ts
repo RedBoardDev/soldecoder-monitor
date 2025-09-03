@@ -12,10 +12,16 @@ import { createFeatureContext } from './feature-context';
 
 type InteractionType = 'button' | 'select' | 'modal';
 
+export interface HelpCommandConfig {
+  enabled: boolean;
+  commandName: string;
+}
+
 export interface FeatureManagerOptions {
   client: Client;
   logger: Logger;
   globalConfig?: Record<string, unknown>;
+  helpCommand?: HelpCommandConfig;
 }
 
 /**
@@ -200,8 +206,11 @@ export class FeatureManager {
       }
     });
 
-    // Register help command
-    await this.registerHelpCommand();
+    // Register help command if enabled
+    const helpConfig = this.options.helpCommand || { enabled: true, commandName: 'help' };
+    if (helpConfig.enabled) {
+      await this.registerHelpCommand();
+    }
 
     this.isInitialized = true;
     this.options.logger.info('Feature manager initialized');
@@ -281,16 +290,19 @@ export class FeatureManager {
    * Register the built-in help command
    */
   private async registerHelpCommand(): Promise<void> {
+    const helpConfig = this.options.helpCommand || { enabled: true, commandName: 'help' };
+    const commandName = helpConfig.commandName;
+
     const helpCommand: CommandRegistration = {
       feature: 'core',
       method: 'help',
       metadata: {
-        name: 'help',
+        name: commandName,
         description: 'Show available commands and their usage',
         docs: {
           category: 'Core',
           description: 'Display all available commands organized by category',
-          usage: '/help [command]',
+          usage: `/${commandName} [command]`,
         },
         builder: (builder) => {
           builder.addStringOption((option) =>
@@ -324,7 +336,7 @@ export class FeatureManager {
     this.commandHandler.registerAutocomplete({
       feature: 'core',
       method: 'helpAutocomplete',
-      commandName: 'help',
+      commandName: commandName,
       optionName: 'command',
       handler: async (interaction) => {
         if ('options' in interaction && 'respond' in interaction) {

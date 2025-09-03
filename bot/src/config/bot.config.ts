@@ -1,3 +1,4 @@
+import { ClosedMessagesFeature } from '@soldecoder-monitor/features/src/closed-messages/closed-messages.feature';
 import { DonateFeature } from '@soldecoder-monitor/features/src/donate/donate.feature';
 import { GlobalPositionsFeature } from '@soldecoder-monitor/features/src/global-positions/global-positions.feature';
 import { NftPriceFeature } from '@soldecoder-monitor/features/src/nft-price/nft-price.feature';
@@ -37,7 +38,16 @@ export const botConfig = {
     { name: 'GlobalPositionsFeature', class: GlobalPositionsFeature },
     { name: 'SettingsChannelsFeature', class: SettingsChannelsFeature },
     { name: 'SettingsServerFeature', class: SettingsServerFeature },
+    { name: 'ClosedMessagesFeature', class: ClosedMessagesFeature },
   ] as Array<{ name: string; class: new () => Feature }>,
+
+  /**
+   * Help command configuration
+   */
+  helpCommand: {
+    enabled: true,
+    commandName: 'help',
+  },
 
   /**
    * Global bot configuration

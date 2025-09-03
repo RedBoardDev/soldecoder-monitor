@@ -2,7 +2,7 @@
 export { Feature } from './core/feature-base';
 export { createFeatureContext } from './core/feature-context';
 export { FeatureLoader, type LoaderOptions } from './core/feature-loader';
-export { FeatureManager, type FeatureManagerOptions } from './core/feature-manager';
+export { FeatureManager, type FeatureManagerOptions, type HelpCommandConfig } from './core/feature-manager';
 
 // Decorator exports
 export {
