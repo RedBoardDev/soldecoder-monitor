@@ -1,7 +1,7 @@
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import type { GetAllGuildConfigsUseCase } from '../../core/application/use-cases/get-all-guild-configs.use-case';
 import { SummaryContextVO } from '../../core/domain/value-objects/summary-context.vo';
-import type { SummaryType } from '../../core/domain/types/summary.types';
+import type { GuildSettingsEntity } from '@soldecoder-monitor/data';
 
 const logger = createFeatureLogger('summary-scheduler-handler');
 
@@ -13,85 +13,111 @@ export class SummarySchedulerHandler {
   constructor(private readonly getAllGuildConfigsUseCase: GetAllGuildConfigsUseCase) {}
 
   /**
-   * Execute the summary process for the specified type
-   * @param type The type of summary to execute ('weekly' or 'monthly')
+   * Execute the summary process with the provided system context
+   * @param systemContext The system context containing summary type and execution details
    */
-  async execute(type: SummaryType): Promise<void> {
+  async execute(systemContext: SummaryContextVO): Promise<void> {
     try {
-      const contextVO = SummaryContextVO[type === 'weekly' ? 'weekly' : 'monthly']('system');
-      logger.info(`Starting ${contextVO.getTypeLabel().toLowerCase()} summary process`);
+      logger.info(`🚀 Starting ${systemContext.getTypeLabel().toLowerCase()} summary process`);
 
-      // Retrieve all guild configurations
-      const allGuildConfigs = await this.getAllGuildConfigsUseCase.execute();
-
-      // Filter guilds that have summaries enabled (you can add this field later)
-      const eligibleGuilds = allGuildConfigs.filter(
-        (guild) => guild.guildId && guild.positionDisplayEnabled, // Add your specific criteria
-      );
+      const eligibleGuilds = await this.getEligibleGuilds();
 
       if (eligibleGuilds.length === 0) {
-        logger.debug(`No eligible guilds found for ${type} summary`);
+        logger.debug(`No eligible guilds found for ${systemContext.getTypeLabel().toLowerCase()} summary`);
         return;
       }
 
-      logger.info(`Processing ${type} summary for ${eligibleGuilds.length} guilds`, {
-        summaryType: type,
-        guildCount: eligibleGuilds.length,
-        guildIds: eligibleGuilds.map((g) => g.guildId),
-      });
+      logger.info(`📊 Processing ${systemContext.getTypeLabel().toLowerCase()} summary for ${eligibleGuilds.length} guilds`);
 
-      // TODO: Process each guild for summary
-      // This is where you'll add the actual summary generation logic
-      for (const guildConfig of eligibleGuilds) {
-        try {
-          const guildContext = new SummaryContextVO(type, guildConfig.guildId);
-          logger.debug(`Processing ${type} summary for guild: ${guildConfig.guildId}`, {
-            summaryType: type,
-            guildId: guildConfig.guildId,
-            period: guildContext.getPeriodDescription(),
-          });
+      await this.processAllGuilds(systemContext, eligibleGuilds);
 
-          // TODO: Add your summary processing logic here
-          // This could include:
-          // - Fetching position data for the period
-          // - Calculating statistics
-          // - Generating summary messages
-          // - Sending to configured channels
-
-          await this.processGuildSummary(guildContext, guildConfig);
-        } catch (error) {
-          logger.warn(`Failed to process ${type} summary for guild: ${guildConfig.guildId}`, {
-            summaryType: type,
-            guildId: guildConfig.guildId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
-
-      logger.info(`${contextVO.getTypeLabel()} summary process completed successfully`);
+      logger.info(`✅ ${systemContext.getTypeLabel()} summary process completed successfully`);
     } catch (error) {
-      logger.error(`${type} summary scheduler failed`, error as Error);
+      logger.error(`❌ ${systemContext.getTypeLabel().toLowerCase()} summary scheduler failed`, error as Error);
       throw error;
     }
   }
 
   /**
+   * Get eligible guilds for summary processing
+   */
+  private async getEligibleGuilds(): Promise<GuildSettingsEntity[]> {
+    const allGuildConfigs = await this.getAllGuildConfigsUseCase.execute();
+
+    return allGuildConfigs.filter(
+      (guild) => guild.guildId && guild.positionDisplayEnabled
+    );
+  }
+
+  /**
+   * Process all guilds for the summary
+   */
+  private async processAllGuilds(systemContext: SummaryContextVO, guilds: GuildSettingsEntity[]): Promise<void> {
+    const results = await Promise.allSettled(
+      guilds.map(guild => this.processGuildSummary(systemContext, guild))
+    );
+
+    const successful = results.filter(result => result.status === 'fulfilled').length;
+    const failed = results.filter(result => result.status === 'rejected').length;
+
+    logger.info(`📈 Summary processing results: ${successful} successful, ${failed} failed`);
+  }
+
+  /**
    * Process summary for a specific guild
-   * @param context Summary execution context
+   * @param systemContext The system context (contains summary type)
    * @param guildConfig Guild configuration
    */
-  private async processGuildSummary(context: SummaryContextVO, _guildConfig: { guildId: string }): Promise<void> {
-    // TODO: Implement the actual summary processing logic
-    // This is a placeholder for your future implementation
+  private async processGuildSummary(systemContext: SummaryContextVO, guildConfig: GuildSettingsEntity): Promise<void> {
+    const guildContext = new SummaryContextVO(systemContext.type, guildConfig.guildId);
 
-    logger.debug(`${context.getTypeLabel()} summary processing placeholder for guild: ${context.guildId}`, {
+    try {
+      logger.debug(`🔄 Processing ${guildContext.getTypeLabel()} summary for guild: ${guildContext.guildId}`);
+
+      await this.executeGuildSummary(guildContext, guildConfig);
+
+      logger.debug(`✅ ${guildContext.getTypeLabel()} summary completed for guild: ${guildContext.guildId}`);
+    } catch (error) {
+      logger.warn(`❌ Failed to process ${guildContext.getTypeLabel()} summary for guild: ${guildContext.guildId}`, {
+        summaryType: systemContext.type,
+        guildId: guildContext.guildId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Execute the actual summary logic for a guild
+   * This is where you'll implement your business logic
+   */
+  private async executeGuildSummary(context: SummaryContextVO, guildConfig: GuildSettingsEntity): Promise<void> {
+    // TODO: Implement your summary generation logic here
+    // Example:
+    // 1. Fetch position data for the period
+    // 2. Calculate statistics (PnL, volume, etc.)
+    // 3. Generate summary message/embed
+    // 4. Send to configured channel
+
+    logger.debug(`📝 ${context.getTypeLabel()} summary placeholder for guild: ${context.guildId}`, {
       summaryType: context.type,
       guildId: context.guildId,
       period: context.getPeriodDescription(),
       executedAt: context.executedAt.toISOString(),
     });
 
-    // You can remove this placeholder once you implement the actual logic
-    // For now, it just logs that it would process this guild
+    // Remove this once you implement the actual logic
+    await this.placeholderSummaryLogic(context, guildConfig);
+  }
+
+  /**
+   * Placeholder logic for summary processing
+   */
+  private async placeholderSummaryLogic(context: SummaryContextVO, guildConfig: GuildSettingsEntity): Promise<void> {
+    // This is a temporary placeholder - replace with actual implementation
+    logger.info(`🎯 Would process ${context.getTypeLabel()} summary for guild: ${guildConfig.guildId}`);
+
+    // Simulate some processing time
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 }

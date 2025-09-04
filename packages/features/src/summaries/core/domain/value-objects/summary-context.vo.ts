@@ -70,4 +70,11 @@ export class SummaryContextVO {
   public static monthly(guildId: string): SummaryContextVO {
     return new SummaryContextVO('monthly', guildId);
   }
+
+  /**
+   * Factory method for system context (used by schedulers)
+   */
+  public static system(type: SummaryType): SummaryContextVO {
+    return new SummaryContextVO(type, 'system');
+  }
 }

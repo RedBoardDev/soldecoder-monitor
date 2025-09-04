@@ -2,6 +2,7 @@ import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import { Cron, Feature, type FeatureContext, FeatureDecorator } from '@soldecoder-monitor/features-sdk';
 import { GetAllGuildConfigsUseCase } from './core/application/use-cases/get-all-guild-configs.use-case';
 import { SummarySchedulerHandler } from './discord/handlers/summary-scheduler.handler';
+import { SummaryContextVO } from './core/domain/value-objects/summary-context.vo';
 
 @FeatureDecorator({
   name: 'summaries',
@@ -38,15 +39,8 @@ export class SummariesFeature extends Feature {
     timezone: 'UTC',
   })
   async executeWeeklySummary(): Promise<void> {
-    try {
-      this.context?.logger.info('Starting weekly summary scheduler execution');
-
-      await this.summaryHandler.execute('weekly');
-
-      this.context?.logger.info('Weekly summary scheduler execution completed');
-    } catch (error) {
-      this.context?.logger.error('Weekly summary scheduler failed', error as Error);
-    }
+    const context = SummaryContextVO.system('weekly');
+    await this.executeScheduledSummary(context);
   }
 
   @Cron({
@@ -55,14 +49,22 @@ export class SummariesFeature extends Feature {
     timezone: 'UTC',
   })
   async executeMonthlySummary(): Promise<void> {
+    const context = SummaryContextVO.system('monthly');
+    await this.executeScheduledSummary(context);
+  }
+
+  /**
+   * Execute scheduled summary with proper context
+   */
+  private async executeScheduledSummary(context: SummaryContextVO): Promise<void> {
     try {
-      this.context?.logger.info('Starting monthly summary scheduler execution');
+      this.context?.logger.info(`Starting ${context.getTypeLabel().toLowerCase()} summary scheduler execution`);
 
-      await this.summaryHandler.execute('monthly');
+      await this.summaryHandler.execute(context);
 
-      this.context?.logger.info('Monthly summary scheduler execution completed');
+      this.context?.logger.info(`${context.getTypeLabel()} summary scheduler execution completed`);
     } catch (error) {
-      this.context?.logger.error('Monthly summary scheduler failed', error as Error);
+      this.context?.logger.error(`${context.getTypeLabel()} summary scheduler failed`, error as Error);
     }
   }
 }
