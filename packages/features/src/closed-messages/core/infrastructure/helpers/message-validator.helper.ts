@@ -15,6 +15,11 @@ export const validateMessageForProcessing = (message: Message): boolean => {
     return false;
   }
 
+  // Only process messages from users or webhooks, not from bots to avoid loop
+  if (message.author.bot && !message.webhookId) {
+    return false;
+  }
+
   const filter = MessageFilter.fromDiscordMessage(message.content, message.guildId, message.channel.type);
 
   return filter.matchesClosedMessage();

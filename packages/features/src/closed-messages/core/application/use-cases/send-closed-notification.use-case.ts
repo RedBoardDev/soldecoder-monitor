@@ -28,8 +28,10 @@ export class SendClosedNotificationUseCase {
         channelConfig,
       );
 
+      const cleanMessage = await this.deleteAndResendOriginalMessage(originalMessage);
+
       const sentMessage = await this.sendToChannel(
-        originalMessage,
+        cleanMessage,
         preparedContent.content,
         preparedContent.files,
         mentionData.allowedMentions,
@@ -92,6 +94,31 @@ export class SendClosedNotificationUseCase {
         ...(files && { files }),
         allowedMentions,
       });
+    }
+  }
+
+  /**
+   * Deletes the original message and resends it without attachments
+   * This is the only way I found to remove attachments from another bot's message
+   */
+  private async deleteAndResendOriginalMessage(originalMessage: Message): Promise<Message> {
+    const channel = originalMessage.channel as TextChannel;
+
+    try {
+      await originalMessage.delete();
+
+      const cleanMessage = await channel.send({
+        content: originalMessage.content || undefined,
+        embeds: originalMessage.embeds,
+        components: originalMessage.components,
+      });
+      return cleanMessage;
+    } catch (error) {
+      logger.error('Failed to delete and resend original message', error as Error, {
+        messageId: originalMessage.id,
+        channelId: channel.id,
+      });
+      return originalMessage;
     }
   }
 }

@@ -15,7 +15,7 @@ async function findPositionByHash(
 
   for (let page = 1; page <= maxPage; page++) {
     try {
-      const historicalResponse = await lpAgentService.getHistoricalPositions(wallet, page, 20);
+      const historicalResponse = await lpAgentService.getHistoricalPositions(wallet, page, 10);
       const historicalData = historicalResponse.data;
 
       if (!historicalData.data || historicalData.data.length === 0) {
@@ -27,7 +27,7 @@ async function findPositionByHash(
         return mapLpAgentToClosedPosition(matchingPosition, wallet);
       }
 
-      if (historicalData.data.length < 20) {
+      if (historicalData.data.length < 10) {
         break;
       }
     } catch (error) {
