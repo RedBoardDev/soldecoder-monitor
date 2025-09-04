@@ -3,7 +3,7 @@ import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from
 
 export function buildPositionDefaultsModal(currentDefaults: PositionSizeDefaults): ModalBuilder {
   const modal = new ModalBuilder()
-    .setCustomId('settings:server:position-defaults:submit')
+    .setCustomId('settings-server:position-defaults:submit')
     .setTitle('Edit Position Size Defaults');
 
   const walletInput = new TextInputBuilder()

@@ -20,7 +20,7 @@ export class ToggleInteractionHandler extends BaseInteractionHandler {
 
   async handle(interaction: ButtonInteraction): Promise<void> {
     const customIdParts = this.parseCustomId(interaction.customId);
-    const action = customIdParts[3]; // settings:server:toggle:{action}
+    const action = customIdParts[2]; // settings-server:toggle:{action}
 
     await this.safeDefer(interaction);
 

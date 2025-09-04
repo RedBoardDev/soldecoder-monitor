@@ -1,5 +1,5 @@
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
-import type { ButtonInteraction, ChannelSelectMenuInteraction, ModalSubmitInteraction } from 'discord.js';
+import type { ButtonInteraction, ChannelSelectMenuInteraction } from 'discord.js';
 import { PermissionFlagsBits } from 'discord.js';
 import type { ChannelInteractionHandler } from './channel.interaction-handler';
 import type { PositionDefaultsInteractionHandler } from './position-defaults.interaction-handler';
@@ -18,9 +18,7 @@ export class SettingsServerInteractionRouter {
     private readonly positionDefaultsHandler: PositionDefaultsInteractionHandler,
   ) {}
 
-  async routeInteraction(
-    interaction: ButtonInteraction | ChannelSelectMenuInteraction | ModalSubmitInteraction,
-  ): Promise<void> {
+  async routeInteraction(interaction: ButtonInteraction | ChannelSelectMenuInteraction): Promise<void> {
     // Validate guild context
     if (!interaction.guildId) {
       await interaction.reply({ content: '❌ This can only be used in a server.', ephemeral: true });
@@ -45,8 +43,6 @@ export class SettingsServerInteractionRouter {
         await this.channelHandler.handleChannelSet(interaction as ChannelSelectMenuInteraction);
       } else if (this.isPositionDefaultsModalInteraction(customId)) {
         await this.positionDefaultsHandler.handleModalOpen(interaction as ButtonInteraction);
-      } else if (this.isPositionDefaultsSubmitInteraction(customId)) {
-        await this.positionDefaultsHandler.handleModalSubmit(interaction as ModalSubmitInteraction);
       } else {
         logger.warn('Unknown interaction custom ID', { customId });
       }
@@ -59,22 +55,18 @@ export class SettingsServerInteractionRouter {
   }
 
   private isToggleInteraction(customId: string): boolean {
-    return customId.startsWith('settings:server:toggle:');
+    return customId.startsWith('settings-server:toggle:');
   }
 
   private isChannelSelectInteraction(customId: string): boolean {
-    return customId === 'settings:server:channel:select';
+    return customId === 'settings-server:channel:select';
   }
 
   private isChannelSetInteraction(customId: string): boolean {
-    return customId === 'settings:server:channel:set';
+    return customId === 'settings-server:channel:set';
   }
 
   private isPositionDefaultsModalInteraction(customId: string): boolean {
-    return customId === 'settings:server:position-defaults:modal';
-  }
-
-  private isPositionDefaultsSubmitInteraction(customId: string): boolean {
-    return customId === 'settings:server:position-defaults:submit';
+    return customId === 'settings-server:position-defaults:modal';
   }
 }

@@ -2,7 +2,7 @@ import { ActionRowBuilder, ChannelSelectMenuBuilder, ChannelType } from 'discord
 
 export function buildChannelSelectComponent(): ActionRowBuilder<ChannelSelectMenuBuilder> {
   const channelSelect = new ChannelSelectMenuBuilder()
-    .setCustomId('settings:server:channel:set')
+    .setCustomId('settings-server:channel:set')
     .setPlaceholder('Select a channel for summaries and position display...')
     .setChannelTypes(ChannelType.GuildText)
     .setMinValues(1)

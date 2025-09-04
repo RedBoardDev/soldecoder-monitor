@@ -32,6 +32,7 @@ import {
   version: '1.0.0',
   description: 'Interactive server configuration management',
   category: 'Settings',
+  interactionPrefix: 'settings-server:',
 })
 export class SettingsServerFeature extends Feature {
   private settingsServerHandler!: SettingsServerCommandHandler;
@@ -45,6 +46,7 @@ export class SettingsServerFeature extends Feature {
       version: '1.0.0',
       description: 'Interactive server configuration management',
       category: 'Settings',
+      interactionPrefix: 'settings-server:',
     };
   }
 
@@ -106,23 +108,28 @@ export class SettingsServerFeature extends Feature {
     return this.settingsServerHandler.execute(interaction);
   }
 
-  // Button Handlers
-  @ButtonHandler(/^settings:server:toggle:/)
-  @ButtonHandler('settings:server:channel:select')
-  @ButtonHandler('settings:server:position-defaults:modal')
+  // Button Handlers (prefix 'settings-server:' added automatically)
+  @ButtonHandler(/^toggle:/)
+  @ButtonHandler('channel:select')
+  @ButtonHandler('position-defaults:modal')
   async handleServerButtons(interaction: ButtonInteraction): Promise<void> {
     return this.interactionRouter.routeInteraction(interaction);
   }
 
   // Select Menu Handlers
-  @SelectHandler('settings:server:channel:set')
+  @SelectHandler('channel:set')
   async handleSelects(interaction: ChannelSelectMenuInteraction): Promise<void> {
     return this.interactionRouter.routeInteraction(interaction);
   }
 
-  // Modal Handlers
-  @ModalHandler('settings:server:position-defaults:submit')
-  async handleModals(interaction: ModalSubmitInteraction): Promise<void> {
-    return this.interactionRouter.routeInteraction(interaction);
+  // Modal Handlers - Direct handler method
+  @ModalHandler('position-defaults:submit')
+  async handlePositionDefaultsModal(interaction: ModalSubmitInteraction): Promise<void> {
+    // Create and call the position defaults handler directly
+    const positionDefaultsHandler = new PositionDefaultsInteractionHandler(
+      this.getServerSettingsUseCase,
+      this.updateServerSettingsUseCase,
+    );
+    return positionDefaultsHandler.handleModalSubmit(interaction);
   }
 }
