@@ -10,3 +10,5 @@ export { NftPriceFeature } from './nft-price/nft-price.feature';
 export { PositionSizeFeature } from './positions-size/position-size.feature';
 
 export { SettingsServerFeature } from './settings-server/settings-server.feature';
+
+export { SummariesFeature } from './summaries/summaries.feature';
