@@ -33,21 +33,19 @@ export class InteractionRouter {
 
   /**
    * Register an interaction handler
-   * Note: The type should be passed from the decorator
+   * The type is now required from the decorator
    */
-  registerHandler(registration: InteractionRegistration, type?: InteractionType): void {
-    // Determine type based on context if not provided
-    const handlerType = type || this.inferType(registration);
-    const typeHandlers = this.handlers.get(handlerType);
+  registerHandler(registration: InteractionRegistration, type: InteractionType): void {
+    const typeHandlers = this.handlers.get(type);
 
     if (!typeHandlers) {
-      this.logger.warn(`Unknown interaction type: ${handlerType}`);
+      this.logger.warn(`Unknown interaction type: ${type}`);
       return;
     }
 
     const extendedRegistration: ExtendedInteractionRegistration = {
       ...registration,
-      type: handlerType,
+      type,
     };
 
     typeHandlers.set(registration.pattern, extendedRegistration);
@@ -152,14 +150,5 @@ export class InteractionRouter {
     }
 
     return undefined;
-  }
-
-  /**
-   * Infer interaction type from registration
-   * This is a fallback - ideally type should be passed explicitly
-   */
-  private inferType(_registration: InteractionRegistration): InteractionType {
-    // Default to button if we can't determine
-    return 'button';
   }
 }

@@ -27,6 +27,7 @@ export interface FeatureMetadata {
   description?: string;
   category?: string;
   enabled?: boolean;
+  interactionPrefix?: string;
 }
 
 export interface FeatureContext {
@@ -178,6 +179,7 @@ export interface InteractionRegistration {
   guards: Guard[];
   handler: Function;
   persistent: boolean;
+  type: 'button' | 'select' | 'modal';
 }
 
 export interface EventRegistration {

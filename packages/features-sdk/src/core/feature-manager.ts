@@ -37,6 +37,7 @@ export class FeatureManager {
   private readonly eventDispatcher: EventDispatcher;
   private readonly schedulerService: SchedulerService;
   private readonly helpGenerator = new HelpGenerator();
+  private readonly featurePrefixes = new Map<string, string[]>(); // Map of feature name to interaction prefixes
   private isInitialized = false;
 
   constructor(private readonly options: FeatureManagerOptions) {
@@ -70,6 +71,14 @@ export class FeatureManager {
     feature.setContext(context);
     this.features.set(metadata.name, feature);
     this.contexts.set(metadata.name, context);
+
+    // Store interaction prefix if provided
+    if (metadata.interactionPrefix) {
+      this.featurePrefixes.set(metadata.name, [metadata.interactionPrefix]);
+      this.options.logger.debug(
+        `Feature ${metadata.name} registered with interaction prefix: ${metadata.interactionPrefix}`,
+      );
+    }
 
     // Scan for decorators
     this.scanner.scanFeature(feature, metadata.name);
@@ -113,11 +122,25 @@ export class FeatureManager {
         this.helpGenerator.addCommand(cmd);
       });
 
-      // Register interactions
+      // Register interactions with automatic prefixing
       metadata.interactions.forEach((int) => {
-        // Pass type if available
-        const interactionType = 'type' in int ? (int as { type?: InteractionType }).type : undefined;
-        this.interactionRouter.registerHandler(int, interactionType);
+        const featurePrefix = this.featurePrefixes.get(name)?.[0];
+
+        if (featurePrefix) {
+          // Feature has a prefix - automatically prepend it to the pattern
+          const prefixedPattern = this.addPrefixToPattern(int.pattern, featurePrefix);
+
+          // Create a new registration with the prefixed pattern
+          const prefixedRegistration = {
+            ...int,
+            pattern: prefixedPattern,
+          };
+
+          this.interactionRouter.registerHandler(prefixedRegistration, int.type);
+        } else {
+          // No prefix - register normally
+          this.interactionRouter.registerHandler(int, int.type);
+        }
       });
 
       // Register events
@@ -351,6 +374,35 @@ export class FeatureManager {
         }
       },
     });
+  }
+
+  /**
+   * Add a prefix to a pattern (string or RegExp)
+   */
+  private addPrefixToPattern(pattern: string | RegExp, prefix: string): string | RegExp {
+    if (typeof pattern === 'string') {
+      // For string patterns, simply prepend the prefix
+      return prefix + pattern;
+    } else if (pattern instanceof RegExp) {
+      // For regex patterns, we need to be careful
+      const source = pattern.source;
+      const flags = pattern.flags;
+
+      // Remove ^ from the beginning if present (we'll add it back with the prefix)
+      let cleanSource = source;
+      if (source.startsWith('^')) {
+        cleanSource = source.slice(1);
+      }
+
+      // Escape the prefix for regex safety
+      const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Create new regex with prefix
+      // Always add ^ to ensure it matches from the start
+      return new RegExp(`^${escapedPrefix}${cleanSource}`, flags);
+    }
+
+    return pattern;
   }
 
   /**
