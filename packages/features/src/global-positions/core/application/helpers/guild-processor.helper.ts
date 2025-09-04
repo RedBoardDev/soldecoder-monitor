@@ -17,33 +17,24 @@ export async function processGuildPositions(
   channelConfigRepository: DynamoChannelConfigRepository,
   globalMessageService: GlobalMessageUpdateService,
 ): Promise<void> {
-  // Validate guild is still eligible
   const guildSettings = await guildSettingsRepository.getByGuildId(guildId);
   if (!guildSettings?.positionDisplayEnabled || !guildSettings?.globalChannelId) {
     return;
   }
 
-  // Get channels for this guild
   const channels = await channelConfigRepository.getByGuildId(guildId);
   if (channels.length === 0) {
     return;
   }
 
-  // Fetch position statuses from all channels
   const positionStatuses = await fetchPositionStatuses(
     client,
     channels.map((c) => c.channelId),
   );
 
-  if (positionStatuses.length === 0) {
-    return;
-  }
-
-  // Group positions by wallet (using channel creation order)
   const channelCreatedAtMap = createChannelCreatedAtMap(channels);
   const positionsByWallet = groupPositionsByWallet(positionStatuses, channelCreatedAtMap);
 
-  // Update the global message
   await globalMessageService.updateGlobalMessage(client, guildId, guildSettings.globalChannelId, positionsByWallet);
 
   logger.debug('Guild positions processed successfully', { guildId, positionCount: positionStatuses.length });
