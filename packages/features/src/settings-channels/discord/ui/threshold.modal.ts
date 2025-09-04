@@ -2,7 +2,7 @@ import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from
 
 export function buildThresholdModal(channelId: string, currentThreshold: number | null): ModalBuilder {
   const modal = new ModalBuilder()
-    .setCustomId(`settings:threshold:submit:${channelId}`)
+    .setCustomId(`settings-channels:threshold:submit:${channelId}`)
     .setTitle('Set Alert Threshold Percentage');
 
   const thresholdInput = new TextInputBuilder()

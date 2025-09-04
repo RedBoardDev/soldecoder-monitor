@@ -28,7 +28,7 @@ export class ChannelDetailInteractionHandler extends BaseInteractionHandler {
     await this.safeDefer(interaction);
 
     try {
-      const channelId = this.extractChannelId(interaction.customId, 3);
+      const channelId = this.extractChannelId(interaction.customId, 2);
       await this.showChannelDetailView(interaction, channelId);
     } catch (error) {
       await this.handleInteractionError(interaction, error, 'Channel config');
@@ -42,8 +42,8 @@ export class ChannelDetailInteractionHandler extends BaseInteractionHandler {
       const { setting, channelId } = this.parseStructuredCustomId(
         interaction.customId,
         (parts) => {
-          if (parts.length < 5) throw new Error('Expected 5 parts');
-          return { setting: parts[3], channelId: parts[4] };
+          if (parts.length < 4) throw new Error('Expected 4 parts');
+          return { setting: parts[2], channelId: parts[3] };
         },
         'Invalid toggle custom ID format',
       );
@@ -70,7 +70,7 @@ export class ChannelDetailInteractionHandler extends BaseInteractionHandler {
 
   async handleThresholdModal(interaction: ButtonInteraction): Promise<void> {
     try {
-      const channelId = this.extractChannelId(interaction.customId, 3);
+      const channelId = this.extractChannelId(interaction.customId, 2);
       const guild = this.validateGuildContext(interaction);
 
       const result = await this.getChannelConfigUseCase.execute(new GetChannelConfigCommand(channelId), guild);
@@ -89,8 +89,8 @@ export class ChannelDetailInteractionHandler extends BaseInteractionHandler {
       const { action, channelId } = this.parseStructuredCustomId(
         interaction.customId,
         (parts) => {
-          if (parts.length < 5) throw new Error('Expected 5 parts');
-          return { action: parts[3], channelId: parts[4] };
+          if (parts.length < 4) throw new Error('Expected 4 parts');
+          return { action: parts[2], channelId: parts[3] };
         },
         'Invalid tag action custom ID format',
       );

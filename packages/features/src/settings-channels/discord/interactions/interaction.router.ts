@@ -74,27 +74,27 @@ export class SettingsChannelsInteractionRouter {
     interaction: ButtonInteraction | ChannelSelectMenuInteraction | StringSelectMenuInteraction,
     customId: string,
   ): Promise<void> {
-    if (customId === 'settings:channels:show_add') {
+    if (customId === 'settings-channels:show_add') {
       await this.channelListHandler.handleShowAddDropdown(interaction as ButtonInteraction);
-    } else if (customId === 'settings:channels:show_remove') {
+    } else if (customId === 'settings-channels:show_remove') {
       await this.channelListHandler.handleShowRemoveDropdown(interaction as ButtonInteraction);
-    } else if (customId === 'settings:channels:add') {
+    } else if (customId === 'settings-channels:add') {
       await this.channelListHandler.handleAddChannel(interaction as ChannelSelectMenuInteraction);
-    } else if (customId === 'settings:channels:remove') {
+    } else if (customId === 'settings-channels:remove') {
       await this.channelListHandler.handleRemoveChannel(interaction as StringSelectMenuInteraction);
-    } else if (customId === 'settings:channels:back') {
+    } else if (customId === 'settings-channels:back') {
       await this.channelListHandler.handleBackToChannels(interaction as ButtonInteraction);
     }
   }
 
   private async routeToChannelDetailHandler(interaction: ButtonInteraction, customId: string): Promise<void> {
-    if (customId.startsWith('settings:channel:config:')) {
+    if (customId.startsWith('settings-channels:config:')) {
       await this.channelDetailHandler.handleChannelConfig(interaction);
-    } else if (customId.startsWith('settings:channel:toggle:')) {
+    } else if (customId.startsWith('settings-channels:toggle:')) {
       await this.channelDetailHandler.handleToggle(interaction);
-    } else if (customId.startsWith('settings:channel:threshold:')) {
+    } else if (customId.startsWith('settings-channels:threshold:')) {
       await this.channelDetailHandler.handleThresholdModal(interaction);
-    } else if (customId.startsWith('settings:channel:tag:')) {
+    } else if (customId.startsWith('settings-channels:tag:')) {
       await this.channelDetailHandler.handleTagAction(interaction);
     }
   }
@@ -103,26 +103,37 @@ export class SettingsChannelsInteractionRouter {
     interaction: UserSelectMenuInteraction | RoleSelectMenuInteraction,
     customId: string,
   ): Promise<void> {
-    if (customId.startsWith('settings:tag:user:')) {
+    if (customId.startsWith('settings-channels:tag:user:')) {
       await this.tagHandler.handleUserTagSelect(interaction as UserSelectMenuInteraction);
-    } else if (customId.startsWith('settings:tag:role:')) {
+    } else if (customId.startsWith('settings-channels:tag:role:')) {
       await this.tagHandler.handleRoleTagSelect(interaction as RoleSelectMenuInteraction);
     }
   }
 
   private isChannelListInteraction(customId: string): boolean {
-    return customId.startsWith('settings:channels:') || customId === 'settings:channels:back';
+    return (
+      customId === 'settings-channels:back' ||
+      customId === 'settings-channels:show_add' ||
+      customId === 'settings-channels:show_remove' ||
+      customId === 'settings-channels:add' ||
+      customId === 'settings-channels:remove'
+    );
   }
 
   private isChannelDetailInteraction(customId: string): boolean {
-    return customId.startsWith('settings:channel:');
+    return (
+      customId.startsWith('settings-channels:config:') ||
+      customId.startsWith('settings-channels:toggle:') ||
+      (customId.startsWith('settings-channels:threshold:') && !customId.includes(':submit:')) ||
+      (customId.startsWith('settings-channels:tag:') && !customId.includes(':user:') && !customId.includes(':role:'))
+    );
   }
 
   private isThresholdInteraction(customId: string): boolean {
-    return customId.startsWith('settings:threshold:submit:');
+    return customId.startsWith('settings-channels:threshold:submit:');
   }
 
   private isTagInteraction(customId: string): boolean {
-    return customId.startsWith('settings:tag:');
+    return customId.startsWith('settings-channels:tag:user:') || customId.startsWith('settings-channels:tag:role:');
   }
 }

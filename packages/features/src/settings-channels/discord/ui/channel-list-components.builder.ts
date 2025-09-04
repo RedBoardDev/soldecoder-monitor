@@ -19,7 +19,7 @@ export function buildChannelListButtons(result: ChannelSettingsResult): ActionRo
   if (result.hasAvailableChannels) {
     managementRow.addComponents(
       new ButtonBuilder()
-        .setCustomId('settings:channels:show_add')
+        .setCustomId('settings-channels:show_add')
         .setLabel('Add Channel')
         .setStyle(ButtonStyle.Success)
         .setEmoji('➕'),
@@ -30,7 +30,7 @@ export function buildChannelListButtons(result: ChannelSettingsResult): ActionRo
   if (result.hasConfiguredChannels) {
     managementRow.addComponents(
       new ButtonBuilder()
-        .setCustomId('settings:channels:show_remove')
+        .setCustomId('settings-channels:show_remove')
         .setLabel('Remove Channel')
         .setStyle(ButtonStyle.Danger)
         .setEmoji('➖'),
@@ -50,7 +50,7 @@ export function buildChannelListButtons(result: ChannelSettingsResult): ActionRo
 export function buildAddChannelSelect(): ActionRowBuilder<ChannelSelectMenuBuilder> {
   return new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(
     new ChannelSelectMenuBuilder()
-      .setCustomId('settings:channels:add')
+      .setCustomId('settings-channels:add')
       .setPlaceholder('Select a channel to add for monitoring')
       .setChannelTypes(ChannelType.GuildText)
       .setMinValues(1)
@@ -80,7 +80,7 @@ export function buildRemoveChannelSelect(
 
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()
-      .setCustomId('settings:channels:remove')
+      .setCustomId('settings-channels:remove')
       .setPlaceholder('Select a channel to remove')
       .setMinValues(1)
       .setMaxValues(1)
@@ -112,7 +112,7 @@ export function buildChannelConfigButtons(
 
       channelRow.addComponents(
         new ButtonBuilder()
-          .setCustomId(`settings:channel:config:${config.channelId}`)
+          .setCustomId(`settings-channels:config:${config.channelId}`)
           .setLabel(`# ${channelName}`)
           .setStyle(ButtonStyle.Secondary)
           .setEmoji('⚙️'),

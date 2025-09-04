@@ -42,6 +42,7 @@ import {
   version: '1.0.0',
   description: 'Interactive channel configuration management',
   category: 'Settings',
+  interactionPrefix: 'settings-channels:',
 })
 export class SettingsChannelsFeature extends Feature {
   private settingsChannelsHandler!: SettingsChannelsCommandHandler;
@@ -58,6 +59,7 @@ export class SettingsChannelsFeature extends Feature {
       version: '1.0.0',
       description: 'Interactive channel configuration management',
       category: 'Settings',
+      interactionPrefix: 'settings-channels:',
     };
   }
 
@@ -91,15 +93,16 @@ export class SettingsChannelsFeature extends Feature {
       permissionValidator,
     );
 
-    const thresholdHandler = new ThresholdInteractionHandler(
-      this.getChannelConfigUseCase,
-      this.updateChannelConfigUseCase,
-    );
-
     const tagHandler = new TagInteractionHandler(
       this.getChannelConfigUseCase,
       this.updateChannelConfigUseCase,
       permissionValidator,
+    );
+
+    // Initialize threshold handler
+    const thresholdHandler = new ThresholdInteractionHandler(
+      this.getChannelConfigUseCase,
+      this.updateChannelConfigUseCase,
     );
 
     this.interactionRouter = new SettingsChannelsInteractionRouter(
@@ -132,23 +135,29 @@ export class SettingsChannelsFeature extends Feature {
     return this.settingsChannelsHandler.execute(interaction);
   }
 
-  // Button Handlers
-  @ButtonHandler('settings:channels:show_add')
-  @ButtonHandler('settings:channels:show_remove')
-  @ButtonHandler('settings:channels:back')
-  @ButtonHandler(/^settings:channel:config:/)
-  @ButtonHandler(/^settings:channel:toggle:/)
-  @ButtonHandler(/^settings:channel:threshold:/)
-  @ButtonHandler(/^settings:channel:tag:/)
+  // Modal Handlers (prefix 'settings-channels:' added automatically)
+  @ModalHandler(/^threshold:submit:/)
+  async handleModals(interaction: ModalSubmitInteraction): Promise<void> {
+    return this.interactionRouter.routeInteraction(interaction);
+  }
+
+  // Button Handlers (prefix 'settings-channels:' added automatically)
+  @ButtonHandler('show_add')
+  @ButtonHandler('show_remove')
+  @ButtonHandler('back')
+  @ButtonHandler(/^config:/)
+  @ButtonHandler(/^toggle:/)
+  @ButtonHandler(/^threshold:/)
+  @ButtonHandler(/^tag:/)
   async handleButtons(interaction: ButtonInteraction): Promise<void> {
     return this.interactionRouter.routeInteraction(interaction);
   }
 
-  // Select Menu Handlers
-  @SelectHandler('settings:channels:add')
-  @SelectHandler('settings:channels:remove')
-  @SelectHandler(/^settings:tag:user:/)
-  @SelectHandler(/^settings:tag:role:/)
+  // Select Menu Handlers (prefix 'settings-channels:' added automatically)
+  @SelectHandler('add')
+  @SelectHandler('remove')
+  @SelectHandler(/^tag:user:/)
+  @SelectHandler(/^tag:role:/)
   async handleSelects(
     interaction:
       | ChannelSelectMenuInteraction
@@ -156,12 +165,6 @@ export class SettingsChannelsFeature extends Feature {
       | UserSelectMenuInteraction
       | RoleSelectMenuInteraction,
   ): Promise<void> {
-    return this.interactionRouter.routeInteraction(interaction);
-  }
-
-  // Modal Handlers
-  @ModalHandler(/^settings:threshold:submit:/)
-  async handleModals(interaction: ModalSubmitInteraction): Promise<void> {
     return this.interactionRouter.routeInteraction(interaction);
   }
 }
