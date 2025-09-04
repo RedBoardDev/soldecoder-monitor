@@ -1,8 +1,8 @@
 import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import { Cron, Feature, type FeatureContext, FeatureDecorator } from '@soldecoder-monitor/features-sdk';
 import { GetAllGuildConfigsUseCase } from './core/application/use-cases/get-all-guild-configs.use-case';
-import { SummarySchedulerHandler } from './discord/handlers/summary-scheduler.handler';
 import { SummaryContextVO } from './core/domain/value-objects/summary-context.vo';
+import { SummarySchedulerHandler } from './discord/handlers/summary-scheduler.handler';
 
 @FeatureDecorator({
   name: 'summaries',

@@ -1,7 +1,7 @@
+import type { GuildSettingsEntity } from '@soldecoder-monitor/data';
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import type { GetAllGuildConfigsUseCase } from '../../core/application/use-cases/get-all-guild-configs.use-case';
-import { SummaryContextVO } from '../../core/domain/value-objects/summary-context.vo';
-import type { GuildSettingsEntity } from '@soldecoder-monitor/data';
+import type { SummaryContextVO } from '../../core/domain/value-objects/summary-context.vo';
 
 const logger = createFeatureLogger('summary-scheduler-handler');
 
@@ -27,7 +27,9 @@ export class SummarySchedulerHandler {
         return;
       }
 
-      logger.info(`📊 Processing ${systemContext.getTypeLabel().toLowerCase()} summary for ${eligibleGuilds.length} guilds`);
+      logger.info(
+        `📊 Processing ${systemContext.getTypeLabel().toLowerCase()} summary for ${eligibleGuilds.length} guilds`,
+      );
 
       await this.processAllGuilds(systemContext, eligibleGuilds);
 
@@ -44,21 +46,17 @@ export class SummarySchedulerHandler {
   private async getEligibleGuilds(): Promise<GuildSettingsEntity[]> {
     const allGuildConfigs = await this.getAllGuildConfigsUseCase.execute();
 
-    return allGuildConfigs.filter(
-      (guild) => guild.guildId && guild.positionDisplayEnabled
-    );
+    return allGuildConfigs.filter((guild) => guild.guildId && guild.positionDisplayEnabled);
   }
 
   /**
    * Process all guilds for the summary
    */
   private async processAllGuilds(systemContext: SummaryContextVO, guilds: GuildSettingsEntity[]): Promise<void> {
-    const results = await Promise.allSettled(
-      guilds.map(guild => this.processGuildSummary(systemContext, guild))
-    );
+    const results = await Promise.allSettled(guilds.map((guild) => this.processGuildSummary(systemContext, guild)));
 
-    const successful = results.filter(result => result.status === 'fulfilled').length;
-    const failed = results.filter(result => result.status === 'rejected').length;
+    const successful = results.filter((result) => result.status === 'fulfilled').length;
+    const failed = results.filter((result) => result.status === 'rejected').length;
 
     logger.info(`📈 Summary processing results: ${successful} successful, ${failed} failed`);
   }
@@ -69,7 +67,7 @@ export class SummarySchedulerHandler {
    * @param guildConfig Guild configuration
    */
   private async processGuildSummary(systemContext: SummaryContextVO, guildConfig: GuildSettingsEntity): Promise<void> {
-    const guildContext = new SummaryContextVO(systemContext.type, guildConfig.guildId);
+    const guildContext = systemContext.forGuild(guildConfig.guildId);
 
     try {
       logger.debug(`🔄 Processing ${guildContext.getTypeLabel()} summary for guild: ${guildContext.guildId}`);
@@ -118,6 +116,6 @@ export class SummarySchedulerHandler {
     logger.info(`🎯 Would process ${context.getTypeLabel()} summary for guild: ${guildConfig.guildId}`);
 
     // Simulate some processing time
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 }
