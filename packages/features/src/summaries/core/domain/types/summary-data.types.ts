@@ -24,7 +24,4 @@ export interface LpAgentPeriodData {
   closed_lp: { '7D': number; '1M': number };
   avg_inflow_native: { '7D': number; '1M': number };
   expected_value_native: { '7D': number; '1M': number };
-  avg_monthly_pnl_native: { '7D': number; '1M': number };
-  avg_monthly_inflow_native: { '7D': number; '1M': number };
 }
-

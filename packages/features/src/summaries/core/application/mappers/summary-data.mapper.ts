@@ -14,8 +14,6 @@ export function extractSummaryData(overview: LpAgentOverviewData, context: Summa
     closed_lp: overview.closed_lp,
     avg_inflow_native: overview.avg_inflow_native,
     expected_value_native: overview.expected_value_native,
-    avg_monthly_pnl_native: overview.avg_monthly_pnl_native,
-    avg_monthly_inflow_native: overview.avg_monthly_inflow_native,
   };
 
   const extractedData = context.extractPeriodData(periodData);
