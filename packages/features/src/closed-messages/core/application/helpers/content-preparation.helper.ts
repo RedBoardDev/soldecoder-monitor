@@ -6,7 +6,6 @@ import { buildPositionImage } from '../../../discord/ui/image-generation';
 import { buildPositionMessage, buildTriggeredMessage } from '../../../discord/ui/message-builders';
 import type { PreparedContent } from '../../domain/types/prepared-content.types';
 import type { ClosedPosition } from '../../domain/value-objects/closed-position.vo';
-import { mapClosedPositionToFinalData } from '../../infrastructure/adapters/closed-position-to-final-data.adapter';
 import { parseTriggerMessage } from './trigger-parser.helper';
 
 const logger = createFeatureLogger('content-preparation-helper');
@@ -25,14 +24,12 @@ export async function prepareClosedPositionContent(
     const previousMessage = await getPreviousMessage(originalMessage);
     const triggerData = previousMessage ? parseTriggerMessage(previousMessage.content) : null;
 
-    const finalPositionData = mapClosedPositionToFinalData(closedPosition);
-
     let contentBody: string;
 
     if (triggerData) {
-      contentBody = buildTriggeredMessage(finalPositionData, triggerData);
+      contentBody = buildTriggeredMessage(closedPosition, triggerData);
     } else {
-      contentBody = buildPositionMessage(finalPositionData);
+      contentBody = buildPositionMessage(closedPosition);
     }
 
     const content = mention ? `${contentBody} ||${mention}||` : contentBody;
@@ -40,8 +37,8 @@ export async function prepareClosedPositionContent(
     const files = channelConfig.image
       ? [
           {
-            attachment: await buildPositionImage(finalPositionData, triggerData ?? undefined),
-            name: `${closedPosition.walletAddress.address}.png`,
+            attachment: await buildPositionImage(closedPosition, triggerData ?? undefined),
+            name: `${closedPosition.pairName}.png`,
           },
         ]
       : undefined;
@@ -55,7 +52,7 @@ export async function prepareClosedPositionContent(
   } catch (error) {
     logger.error('Failed to prepare closed position content', error as Error, {
       messageId: originalMessage.id,
-      positionAddress: closedPosition.positionAddress,
+      positionAddress: closedPosition.pairName,
     });
     throw error;
   }

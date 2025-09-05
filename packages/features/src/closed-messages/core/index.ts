@@ -7,4 +7,4 @@ export * from './application';
 export * from './domain';
 
 // Infrastructure layer
-export * from './infrastructure';
+export * from './infrastructure/helpers/message-validator.helper';

@@ -60,7 +60,7 @@ export class SendClosedNotificationUseCase {
       logger.error('Failed to send closed position notification', error as Error, {
         messageId: originalMessage.id,
         channelId: originalMessage.channelId,
-        positionAddress: closedPosition.positionAddress,
+        positionAddress: closedPosition.pairName,
       });
       throw error;
     }

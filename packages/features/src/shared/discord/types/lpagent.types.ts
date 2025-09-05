@@ -320,6 +320,55 @@ export const LpAgentHistoricalResponseSchema = z.object({
   data: LpAgentHistoricalDataSchema,
 });
 
+/**
+ * Detailed PnL information for a specific position
+ */
+export const LpAgentDetailedPnlSchema = z.object({
+  value: z.number(),
+  percent: z.number(),
+  valueNative: z.number(),
+  percentNative: z.number(),
+});
+
+/**
+ * Detailed LP position data from LpAgent API
+ */
+export const LpAgentDetailedPositionSchema = z
+  .object({
+    status: z.string(),
+    tokenId: z.string(),
+    pairName: z.string(),
+    currentValue: z.string(),
+    inputValue: z.number(),
+    inputNative: z.number(),
+    outputValue: z.number(),
+    outputNative: z.number(),
+    collectedFee: z.number(),
+    collectedFeeNative: z.number(),
+    uncollectedFee: z.string(),
+    token0: z.string(),
+    token1: z.string(),
+    inRange: z.boolean(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+    pnl: LpAgentDetailedPnlSchema,
+    pnlNative: z.number(),
+    owner: z.string(),
+    tokenName0: z.string(),
+    tokenName1: z.string(),
+    value: z.number(),
+    valueNative: z.number(),
+  })
+  .strip();
+
+/**
+ * LpAgent detailed position API response
+ */
+export const LpAgentPositionResponseSchema = z.object({
+  status: z.string(),
+  data: LpAgentDetailedPositionSchema,
+});
+
 // Export domain types
 export type LpAgentPnl = z.infer<typeof LpAgentPnlSchema>;
 export type LpAgentTokenInfo = z.infer<typeof LpAgentTokenInfoSchema>;
@@ -335,6 +384,9 @@ export type LpAgentPagination = z.infer<typeof LpAgentPaginationSchema>;
 export type LpAgentHistoricalPosition = z.infer<typeof LpAgentHistoricalPositionSchema>;
 export type LpAgentHistoricalData = z.infer<typeof LpAgentHistoricalDataSchema>;
 export type LpAgentHistoricalResponse = z.infer<typeof LpAgentHistoricalResponseSchema>;
+export type LpAgentDetailedPnl = z.infer<typeof LpAgentDetailedPnlSchema>;
+export type LpAgentDetailedPosition = z.infer<typeof LpAgentDetailedPositionSchema>;
+export type LpAgentPositionResponse = z.infer<typeof LpAgentPositionResponseSchema>;
 
 /**
  * Domain Value Objects for LpAgent business logic

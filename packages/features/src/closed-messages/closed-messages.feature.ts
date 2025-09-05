@@ -1,5 +1,4 @@
 import { LpAgentAdapter } from '@shared/infrastructure/lpagent.adapter';
-import { SolanaAdapter } from '@shared/infrastructure/solana.adapter';
 import { DynamoChannelConfigRepository, DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import { Feature, type FeatureContext, FeatureDecorator, On } from '@soldecoder-monitor/features-sdk';
 import type { Message } from 'discord.js';
@@ -31,13 +30,11 @@ export class ClosedMessagesFeature extends Feature {
     const channelConfigRepo = DynamoChannelConfigRepository.create();
     const guildConfigRepo = DynamoGuildSettingsRepository.create();
     const lpAgentService = LpAgentAdapter.getInstance();
-    const solanaService = SolanaAdapter.getInstance();
 
     const processClosedMessageUseCase = new ProcessClosedMessageUseCase(
       channelConfigRepo,
       guildConfigRepo,
       lpAgentService,
-      solanaService,
     );
     const sendNotificationUseCase = new SendClosedNotificationUseCase(guildConfigRepo);
 

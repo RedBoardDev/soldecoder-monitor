@@ -39,7 +39,6 @@ export type StopLossTrigger = z.infer<typeof StopLossTriggerSchema>;
  */
 export const FinalPositionDataSchema = z.object({
   metadata: z.object({
-    address: z.string(),
     pair_name: z.string(),
     duration_hours: z.number(),
   }),
