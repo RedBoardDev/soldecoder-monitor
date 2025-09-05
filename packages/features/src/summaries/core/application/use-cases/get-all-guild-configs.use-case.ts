@@ -16,18 +16,12 @@ export class GetAllGuildConfigsUseCase {
    */
   async execute() {
     try {
-      logger.debug('Retrieving all guild configurations for weekly summary');
-
       const allGuildConfigs = await this.guildSettingsRepository.getAllGuilds();
-
-      logger.debug(`Found ${allGuildConfigs.length} guild configurations`, {
-        guildCount: allGuildConfigs.length,
-      });
 
       return allGuildConfigs;
     } catch (error) {
       logger.error('Failed to retrieve guild configurations', error as Error);
-      throw error;
+      return [];
     }
   }
 }
