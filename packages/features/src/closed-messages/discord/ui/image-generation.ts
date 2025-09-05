@@ -1,10 +1,8 @@
 import path from 'node:path';
 import { createCanvas, GlobalFonts, loadImage } from '@napi-rs/canvas';
-import { createFeatureLogger } from '@soldecoder-monitor/logger';
-import type { FinalPositionData, TriggerData } from '../../core/domain/types/trigger.types';
+import type { ClosedPosition } from 'closed-messages/core';
+import type { TriggerData } from '../../core/domain/types/trigger.types';
 import { formatValue, selectBackgroundPNLCard } from '../helpers/select-background-image';
-
-const _logger = createFeatureLogger('image-generation');
 
 GlobalFonts.registerFromPath(path.resolve(__dirname, '../../assets/fonts/VarelaRound-Regular.ttf'), 'Varela Round');
 
@@ -25,30 +23,31 @@ export function formatDisplayValue(value: number): ValueFormat {
 /**
  * Generates position image (placeholder implementation)
  */
-export async function buildPositionImage(response: FinalPositionData, triggerData?: TriggerData): Promise<Buffer> {
-  const { metadata, performance } = response;
-
-  // pair symbols - extract from pair_name (format: "token1-token2")
-  const pairParts = metadata.pair_name.split('-');
-  const pairLeft = pairParts[0] || 'TOKEN1';
-  const pairRight = pairParts[1] || 'TOKEN2';
+export async function buildPositionImage(closedPosition: ClosedPosition, triggerData?: TriggerData): Promise<Buffer> {
+  const {
+    tokenName0,
+    tokenName1,
+    pnlPercentageSol: pnlPercentage,
+    netResult,
+    positionTVL,
+    durationHours,
+  } = closedPosition;
 
   // PnL numbers
-  const pnlUSD = performance.net_result.usd;
-  const pnlSOL = performance.net_result.sol;
-  const pct = performance.pnl_percentage;
+  const pnlUSD = netResult.usd;
+  const pnlSOL = netResult.sol;
 
   // TVL numbers
-  const tvlUSD = performance.tvl.usd;
-  const tvlSOL = performance.tvl.sol;
+  const tvlUSD = positionTVL.usd;
+  const tvlSOL = positionTVL.sol;
 
   // Duration (convert back to hours for display)
-  const elapsedHours = metadata.duration_hours;
+  const elapsedHours = durationHours;
 
   // formatValue shared
   const usdFmt: ValueFormat = formatValue(pnlUSD);
   const solFmt: ValueFormat = formatValue(pnlSOL);
-  const pctFmt: ValueFormat = formatValue(pct);
+  const pctFmt: ValueFormat = formatValue(pnlPercentage);
 
   // elapsed time formatting
   const h = Math.floor(elapsedHours);
@@ -70,7 +69,7 @@ export async function buildPositionImage(response: FinalPositionData, triggerDat
   const ctx = canvas.getContext('2d');
 
   // background
-  const bg = await loadImage(selectBackgroundPNLCard(pct, triggerData?.type));
+  const bg = await loadImage(selectBackgroundPNLCard(pnlPercentage, triggerData?.type));
   ctx.drawImage(bg, 0, 0, width, height);
 
   const x = width - margin;
@@ -85,16 +84,16 @@ export async function buildPositionImage(response: FinalPositionData, triggerDat
 
   // 1) Pair with colored slash
   ctx.font = 'bold 72px "Varela Round"';
-  const wLeft = ctx.measureText(pairLeft).width;
+  const wLeft = ctx.measureText(tokenName0).width;
   const wSlash = ctx.measureText('/').width;
-  const wRight = ctx.measureText(pairRight).width;
+  const wRight = ctx.measureText(tokenName1).width;
   const fullW = wLeft + wSlash + wRight;
   const startX = x - fullW;
 
   ctx.textAlign = 'left';
   ctx.fillStyle = '#f8f8f8';
   setGlow('#ffd700', 10);
-  ctx.fillText(pairLeft, startX, topY);
+  ctx.fillText(tokenName0, startX, topY);
 
   ctx.fillStyle = '#ffd700';
   setGlow('#f8f8f8', 20);
@@ -102,7 +101,7 @@ export async function buildPositionImage(response: FinalPositionData, triggerDat
 
   ctx.fillStyle = '#f8f8f8';
   setGlow('#ffd700', 20);
-  ctx.fillText(pairRight, startX + wLeft + wSlash, topY);
+  ctx.fillText(tokenName1, startX + wLeft + wSlash, topY);
 
   // 2) Profit line
   ctx.font = 'bold 72px "Varela Round"';
@@ -149,7 +148,7 @@ export async function buildPositionImage(response: FinalPositionData, triggerDat
 
   // PNL label + value
   const pnlLabel = 'PNL: ';
-  const pnlValueText = `${pctFmt.sign}${Math.abs(pct).toFixed(2)}%`;
+  const pnlValueText = `${pctFmt.sign}${Math.abs(pnlPercentage).toFixed(2)}%`;
   const pnlFull = pnlLabel + pnlValueText;
   const wPnlFull = ctx.measureText(pnlFull).width;
   const wPnlLbl = ctx.measureText(pnlLabel).width;

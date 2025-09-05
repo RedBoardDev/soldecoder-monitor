@@ -1,13 +1,10 @@
-import type { WalletAddress } from '@shared/domain';
-
 /**
  * Rich Value Object representing a closed position with complete performance and metadata
  */
 export class ClosedPosition {
   constructor(
-    public readonly walletAddress: WalletAddress,
-    public readonly token0Symbol: string,
-    public readonly token1Symbol: string,
+    public readonly tokenName0: string,
+    public readonly tokenName1: string,
     public readonly pnlPercentageSol: number,
     public readonly pnlPercentageUsd: number,
     public readonly pnlSol: number,
@@ -15,12 +12,11 @@ export class ClosedPosition {
     public readonly valueSol: number,
     public readonly valueUsd: number,
     public readonly durationHours: number,
-    public readonly positionAddress?: string,
   ) {
-    if (!token0Symbol.trim()) {
+    if (!tokenName0.trim()) {
       throw new Error('Token0 symbol cannot be empty');
     }
-    if (!token1Symbol.trim()) {
+    if (!tokenName1.trim()) {
       throw new Error('Token1 symbol cannot be empty');
     }
     if (durationHours < 0) {
@@ -32,48 +28,48 @@ export class ClosedPosition {
     return Math.abs(this.pnlPercentageSol) >= threshold;
   }
 
-  pairName(): string {
-    return `${this.token0Symbol}-${this.token1Symbol}`;
+  get pairName(): string {
+    return `${this.tokenName0}/${this.tokenName1}`;
   }
 
-  isInProfit(): boolean {
+  get isInProfit(): boolean {
     return this.pnlPercentageSol > 0;
   }
 
-  isInLoss(): boolean {
+  get isInLoss(): boolean {
     return this.pnlPercentageSol < 0;
   }
 
-  getAbsolutePnL(): number {
+  get absolutePnL(): number {
     return Math.abs(this.pnlPercentageSol);
   }
 
-  getFormattedPnL(): string {
-    const sign = this.isInProfit() ? '+' : '-';
+  get formattedPnL(): string {
+    const sign = this.isInProfit ? '+' : '-';
     return `${sign}${this.pnlPercentageSol.toFixed(2)}%`;
   }
 
-  getPnLEmoji(): string {
-    if (this.isInProfit()) return '🟢';
-    if (this.isInLoss()) return '🔴';
+  get pnLEmoji(): string {
+    if (this.isInProfit) return '🟢';
+    if (this.isInLoss) return '🔴';
     return '⚪';
   }
 
-  getNetResult(): { usd: number; sol: number } {
+  get netResult(): { usd: number; sol: number } {
     return {
       usd: this.pnlUsd,
       sol: this.pnlSol,
     };
   }
 
-  getTVL(): { usd: number; sol: number } {
+  get positionTVL(): { usd: number; sol: number } {
     return {
       usd: this.valueUsd,
       sol: this.valueSol,
     };
   }
 
-  getFormattedDuration(): string {
+  get formattedDuration(): string {
     const hours = Math.floor(this.durationHours);
     const minutes = Math.round((this.durationHours - hours) * 60);
 

@@ -1,6 +1,7 @@
 import type {
   LpAgentHistoricalResponse,
   LpAgentOverviewResponse,
+  LpAgentPositionResponse,
   LpAgentResponse,
 } from '@shared/discord/types/lpagent.types';
 import type { WalletAddress } from '@shared/domain/value-objects/wallet-address.vo';
@@ -36,6 +37,14 @@ export interface ILpAgentService {
    * @throws {ExternalServiceError} When external API is unavailable or returns error
    */
   getHistoricalPositions(wallet: WalletAddress, page?: number, limit?: number): Promise<LpAgentHistoricalResponse>;
+
+  /**
+   * Retrieves detailed information for a specific LP position
+   * @param positionId - The position ID/token ID to retrieve details for
+   * @returns Promise resolving to detailed position response
+   * @throws {ExternalServiceError} When external API is unavailable or returns error
+   */
+  getLpPosition(positionId: string): Promise<LpAgentPositionResponse>;
 
   /**
    * Retrieves portfolio overview/statistics for a wallet

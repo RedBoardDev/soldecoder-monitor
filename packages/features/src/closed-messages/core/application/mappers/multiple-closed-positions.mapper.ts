@@ -1,21 +1,15 @@
-import type { WalletAddress } from '@shared/domain';
 import { ClosedPosition } from '../../domain/value-objects/closed-position.vo';
 
 /**
  * Aggregates multiple closed positions into a single cumulative position
  * Used when multiple positions are closed in the same transaction or batch
  */
-export function cumulateMultipleClosedPositions(
-  positions: ClosedPosition[],
-  walletAddress: WalletAddress,
-): ClosedPosition {
+export function cumulateMultipleClosedPositions(positions: ClosedPosition[]): ClosedPosition {
   if (positions.length === 0) {
     throw new Error('Cannot cumulate zero positions');
   }
 
-  if (positions.length === 1) {
-    return positions[0];
-  }
+  if (positions.length === 1) return positions[0];
 
   let totalPnlPercentageSol = 0;
   let totalPnlPercentageUsd = 0;
@@ -42,9 +36,8 @@ export function cumulateMultipleClosedPositions(
   const firstPosition = positions[0];
 
   return new ClosedPosition(
-    walletAddress,
-    firstPosition.token0Symbol,
-    firstPosition.token1Symbol,
+    firstPosition.tokenName0,
+    firstPosition.tokenName1,
     avgPnlPercentageSol,
     avgPnlPercentageUsd,
     totalPnlSol,

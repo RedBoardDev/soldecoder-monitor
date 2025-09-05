@@ -2,13 +2,11 @@
 
 export * from './helpers/content-preparation.helper';
 export * from './helpers/global-channel.helper';
-export * from './helpers/position-search.helper';
+export * from './helpers/position-fetcher.helper';
 export * from './helpers/trigger-parser.helper';
-export * from './helpers/wallet-extraction.helper';
-
 // Application mappers
-export * from './mappers/lpagent-to-closed-position.mapper';
 export * from './mappers/multiple-closed-positions.mapper';
+export * from './mappers/position-data.mapper';
 
 // Application parsers
 export * from './parsers/closed-message.parser';

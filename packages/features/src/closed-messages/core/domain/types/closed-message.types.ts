@@ -16,9 +16,7 @@ export const ClosedMessageDataSchema = z.object({
   positionHashes: z
     .array(z.string().min(1, 'Position hash is required'))
     .min(1, 'At least one position hash is required'),
-  positionAddresses: z
-    .array(z.string().min(1, 'Position address is required'))
-    .min(1, 'At least one position address is required'),
+  positionIds: z.array(z.string().min(1, 'Position ID is required')).min(1, 'At least one position ID is required'),
   links: z.array(MetlexLinkSchema).min(1, 'At least one Metlex link is required'),
 });
 

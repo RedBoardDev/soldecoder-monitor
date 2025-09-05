@@ -6,11 +6,13 @@ import type { ILpAgentService, LpAgentCacheInfo } from '../application/interface
 import type {
   LpAgentHistoricalResponse,
   LpAgentOverviewResponse,
+  LpAgentPositionResponse,
   LpAgentResponse,
 } from '../discord/types/lpagent.types';
 import {
   LpAgentHistoricalResponseSchema,
   LpAgentOverviewResponseSchema,
+  LpAgentPositionResponseSchema,
   LpAgentResponseSchema,
 } from '../discord/types/lpagent.types';
 import type { WalletAddress } from '../domain/value-objects/wallet-address.vo';
@@ -96,6 +98,34 @@ export class LpAgentAdapter implements ILpAgentService {
         walletAddress: wallet.shortAddress,
         page,
         limit,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public async getLpPosition(positionId: string): Promise<LpAgentPositionResponse> {
+    try {
+      const url = `/lp-positions/position?position=${positionId}`;
+
+      const response = await this.httpClient.get(url, LpAgentPositionResponseSchema, {
+        headers: {
+          'x-api-key': config.lpagent.xAuth,
+        },
+        cache: {
+          enabled: true,
+          key: `position-details:${positionId}`,
+          ttlMs: time.minutes(1),
+        },
+      });
+
+      return response;
+    } catch (error) {
+      logger.error('❌ Failed to fetch position details', {
+        positionId,
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;

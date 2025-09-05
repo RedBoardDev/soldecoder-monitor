@@ -57,20 +57,20 @@ async function parseClosedMessage(
       };
     }
 
-    // Get position addresses from signatures using SolanaAdapter
+    // Get position IDs from signatures using SolanaAdapter
     const solanaAdapter = SolanaAdapter.getInstance();
-    const positionAddresses: string[] = [];
+    const positionIds: string[] = [];
     for (const link of links) {
       try {
-        const positionAddress = await solanaAdapter.getMainPosition(link.hash);
-        positionAddresses.push(positionAddress);
+        const positionId = await solanaAdapter.getMainPosition(link.hash);
+        positionIds.push(positionId);
       } catch (error) {
         return {
           success: false,
           error: z.ZodError.create([
             {
               code: z.ZodIssueCode.custom,
-              message: `Failed to get position address for hash ${link.hash}: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to get position ID for hash ${link.hash}: ${error instanceof Error ? error.message : String(error)}`,
               path: [],
             },
           ]),
@@ -81,7 +81,7 @@ async function parseClosedMessage(
     const parsedData = {
       walletPrefix,
       positionHashes: links.map((l) => l.hash),
-      positionAddresses,
+      positionIds,
       links,
     };
 
