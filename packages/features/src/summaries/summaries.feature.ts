@@ -1,3 +1,4 @@
+import { LpAgentAdapter } from '@shared/infrastructure/lpagent.adapter';
 import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import { Cron, Feature, type FeatureContext, FeatureDecorator } from '@soldecoder-monitor/features-sdk';
 import { GetAllGuildConfigsUseCase } from './core/application/use-cases/get-all-guild-configs.use-case';
@@ -27,10 +28,11 @@ export class SummariesFeature extends Feature {
     this.setContext(context);
 
     const guildSettingsRepository = DynamoGuildSettingsRepository.create();
+    const lpAgentAdapter = LpAgentAdapter.getInstance();
 
-    // Initialize summaries dependencies
     this.getAllGuildConfigsUseCase = new GetAllGuildConfigsUseCase(guildSettingsRepository);
-    this.summaryHandler = new SummarySchedulerHandler(this.getAllGuildConfigsUseCase);
+
+    this.summaryHandler = new SummarySchedulerHandler(this.getAllGuildConfigsUseCase, lpAgentAdapter);
   }
 
   @Cron({
@@ -39,7 +41,7 @@ export class SummariesFeature extends Feature {
     timezone: 'UTC',
   })
   async executeWeeklySummary(): Promise<void> {
-    const context = SummaryContextVO.system('weekly');
+    const context = SummaryContextVO.create('weekly');
     await this.executeScheduledSummary(context);
   }
 
@@ -49,7 +51,7 @@ export class SummariesFeature extends Feature {
     timezone: 'UTC',
   })
   async executeMonthlySummary(): Promise<void> {
-    const context = SummaryContextVO.system('monthly');
+    const context = SummaryContextVO.create('monthly');
     await this.executeScheduledSummary(context);
   }
 
@@ -58,13 +60,13 @@ export class SummariesFeature extends Feature {
    */
   private async executeScheduledSummary(context: SummaryContextVO): Promise<void> {
     try {
-      this.context?.logger.info(`Starting ${context.getTypeLabel().toLowerCase()} summary scheduler execution`);
+      this.context?.logger.info(`Starting ${context.typeLabel.toLowerCase()} summary scheduler execution`);
 
       await this.summaryHandler.execute(context);
 
-      this.context?.logger.info(`${context.getTypeLabel()} summary scheduler execution completed`);
+      this.context?.logger.info(`${context.typeLabel} summary scheduler execution completed`);
     } catch (error) {
-      this.context?.logger.error(`${context.getTypeLabel()} summary scheduler failed`, error as Error);
+      this.context?.logger.error(`${context.typeLabel} summary scheduler failed`, error as Error);
     }
   }
 }

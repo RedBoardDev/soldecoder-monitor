@@ -1,7 +1,12 @@
+import type { ILpAgentService } from '@shared/application/interfaces/lpagent.service.interface';
+import { WalletAddress } from '@shared/domain/value-objects/wallet-address.vo';
 import type { GuildSettingsEntity } from '@soldecoder-monitor/data';
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
+import { extractSummaryData } from '../../core/application/mappers/summary-data.mapper';
 import type { GetAllGuildConfigsUseCase } from '../../core/application/use-cases/get-all-guild-configs.use-case';
-import type { SummaryContextVO } from '../../core/domain/value-objects/summary-context.vo';
+import type { SummaryType } from '../../core/domain/types/summary.types';
+import type { SummaryData } from '../../core/domain/types/summary-data.types';
+import { SummaryContextVO } from '../../core/domain/value-objects/summary-context.vo';
 
 const logger = createFeatureLogger('summary-scheduler-handler');
 
@@ -10,7 +15,10 @@ const logger = createFeatureLogger('summary-scheduler-handler');
  * Processes all guild configurations for the specified summary type.
  */
 export class SummarySchedulerHandler {
-  constructor(private readonly getAllGuildConfigsUseCase: GetAllGuildConfigsUseCase) {}
+  constructor(
+    private readonly getAllGuildConfigsUseCase: GetAllGuildConfigsUseCase,
+    private readonly lpAgentAdapter: ILpAgentService,
+  ) {}
 
   /**
    * Execute the summary process with the provided system context
@@ -18,35 +26,27 @@ export class SummarySchedulerHandler {
    */
   async execute(systemContext: SummaryContextVO): Promise<void> {
     try {
-      logger.info(`🚀 Starting ${systemContext.getTypeLabel().toLowerCase()} summary process`);
+      const eligibleGuilds = await this.getEligibleGuilds(systemContext.type);
 
-      const eligibleGuilds = await this.getEligibleGuilds();
-
-      if (eligibleGuilds.length === 0) {
-        logger.debug(`No eligible guilds found for ${systemContext.getTypeLabel().toLowerCase()} summary`);
-        return;
-      }
-
-      logger.info(
-        `📊 Processing ${systemContext.getTypeLabel().toLowerCase()} summary for ${eligibleGuilds.length} guilds`,
-      );
+      if (eligibleGuilds.length === 0) return;
 
       await this.processAllGuilds(systemContext, eligibleGuilds);
-
-      logger.info(`✅ ${systemContext.getTypeLabel()} summary process completed successfully`);
     } catch (error) {
-      logger.error(`❌ ${systemContext.getTypeLabel().toLowerCase()} summary scheduler failed`, error as Error);
+      logger.error(`❌ ${systemContext.typeLabel.toLowerCase()} summary scheduler failed`, error as Error);
       throw error;
     }
   }
 
-  /**
-   * Get eligible guilds for summary processing
-   */
-  private async getEligibleGuilds(): Promise<GuildSettingsEntity[]> {
+  private async getEligibleGuilds(summaryType: SummaryType): Promise<GuildSettingsEntity[]> {
     const allGuildConfigs = await this.getAllGuildConfigsUseCase.execute();
 
-    return allGuildConfigs.filter((guild) => guild.guildId && guild.positionDisplayEnabled);
+    return allGuildConfigs.filter((guild) => {
+      if (!guild.guildId || !guild.globalChannelId || !guild.hasSummaryEnabled) {
+        return false;
+      }
+
+      return SummaryContextVO.isGuildEligible(summaryType, guild.summaryPreferences);
+    });
   }
 
   /**
@@ -61,24 +61,18 @@ export class SummarySchedulerHandler {
     logger.info(`📈 Summary processing results: ${successful} successful, ${failed} failed`);
   }
 
-  /**
-   * Process summary for a specific guild
-   * @param systemContext The system context (contains summary type)
-   * @param guildConfig Guild configuration
-   */
-  private async processGuildSummary(systemContext: SummaryContextVO, guildConfig: GuildSettingsEntity): Promise<void> {
-    const guildContext = systemContext.forGuild(guildConfig.guildId);
-
+  private async processGuildSummary(summaryContext: SummaryContextVO, guildConfig: GuildSettingsEntity): Promise<void> {
     try {
-      logger.debug(`🔄 Processing ${guildContext.getTypeLabel()} summary for guild: ${guildContext.guildId}`);
+      if (!guildConfig.positionSizeDefaults.walletAddress) {
+        throw new Error('Wallet address is not set');
+      }
 
-      await this.executeGuildSummary(guildContext, guildConfig);
-
-      logger.debug(`✅ ${guildContext.getTypeLabel()} summary completed for guild: ${guildContext.guildId}`);
+      const wallet = WalletAddress.create(guildConfig.positionSizeDefaults.walletAddress);
+      await this.executeGuildSummary(summaryContext, guildConfig, wallet);
     } catch (error) {
-      logger.warn(`❌ Failed to process ${guildContext.getTypeLabel()} summary for guild: ${guildContext.guildId}`, {
-        summaryType: systemContext.type,
-        guildId: guildContext.guildId,
+      logger.warn(`❌ Failed to process ${summaryContext.typeLabel} summary for guild: ${guildConfig.guildId}`, {
+        summaryType: summaryContext.type,
+        guildId: guildConfig.guildId,
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -89,33 +83,55 @@ export class SummarySchedulerHandler {
    * Execute the actual summary logic for a guild
    * This is where you'll implement your business logic
    */
-  private async executeGuildSummary(context: SummaryContextVO, guildConfig: GuildSettingsEntity): Promise<void> {
-    // TODO: Implement your summary generation logic here
-    // Example:
-    // 1. Fetch position data for the period
-    // 2. Calculate statistics (PnL, volume, etc.)
-    // 3. Generate summary message/embed
-    // 4. Send to configured channel
+  private async executeGuildSummary(
+    summaryContext: SummaryContextVO,
+    guildConfig: GuildSettingsEntity,
+    wallet: WalletAddress,
+  ): Promise<void> {
+    try {
+      logger.debug(`🔄 Processing ${summaryContext.typeLabel} summary for guild: ${guildConfig.guildId}`);
 
-    logger.debug(`📝 ${context.getTypeLabel()} summary placeholder for guild: ${context.guildId}`, {
-      summaryType: context.type,
-      guildId: context.guildId,
-      period: context.getPeriodDescription(),
-      executedAt: context.executedAt.toISOString(),
-    });
+      // Fetch overview data from LpAgent
+      const overviewResponse = await this.lpAgentAdapter.getOverview(wallet);
+      const overview = overviewResponse.data;
 
-    // Remove this once you implement the actual logic
-    await this.placeholderSummaryLogic(context, guildConfig);
+      // Extract period-specific data based on summary type (7D for weekly, 1M for monthly)
+      const summaryData = extractSummaryData(overview, summaryContext);
+
+      logger.debug(`📊 Extracted ${summaryContext.typeLabel} summary data`, {
+        guildId: guildConfig.guildId,
+        period: summaryContext.periodDescription,
+        totalPnlNative: summaryData.totalPnlNative,
+        winRateNative: summaryData.winRateNative,
+        closedLp: summaryData.closedLp,
+      });
+
+      // TODO: Generate and send summary message to Discord
+      await this.generateAndSendSummary(summaryContext, guildConfig, summaryData);
+
+      logger.debug(`✅ ${summaryContext.typeLabel} summary completed for guild: ${guildConfig.guildId}`);
+    } catch (error) {
+      logger.error(
+        `❌ Failed to process ${summaryContext.typeLabel} summary for guild: ${guildConfig.guildId}`,
+        error as Error,
+      );
+      throw error;
+    }
   }
 
   /**
-   * Placeholder logic for summary processing
+   * Generate and send summary message to Discord
    */
-  private async placeholderSummaryLogic(context: SummaryContextVO, guildConfig: GuildSettingsEntity): Promise<void> {
-    // This is a temporary placeholder - replace with actual implementation
-    logger.info(`🎯 Would process ${context.getTypeLabel()} summary for guild: ${guildConfig.guildId}`);
-
-    // Simulate some processing time
-    await new Promise((resolve) => setTimeout(resolve, 100));
+  private async generateAndSendSummary(
+    summaryContext: SummaryContextVO,
+    guildConfig: GuildSettingsEntity,
+    summaryData: SummaryData,
+  ): Promise<void> {
+    // TODO: Implement summary message generation and Discord sending
+    logger.info(`🎯 Would generate ${summaryContext.typeLabel} summary for guild: ${guildConfig.guildId}`, {
+      totalPnlNative: summaryData.totalPnlNative,
+      winRateNative: summaryData.winRateNative,
+      closedLp: summaryData.closedLp,
+    });
   }
 }
