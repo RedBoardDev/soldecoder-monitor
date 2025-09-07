@@ -1,7 +1,6 @@
 import path from 'node:path';
 import { type CanvasRenderingContext2D, createCanvas, GlobalFonts, loadImage } from '@napi-rs/canvas';
 import type { ClosedPosition } from 'closed-messages/core';
-import type { TriggerData } from '../../core/domain/types/trigger.types';
 import { selectBackgroundPNLCard } from '../helpers/select-background-image';
 
 GlobalFonts.registerFromPath(path.resolve(__dirname, '../../assets/fonts/VarelaRound-Regular.ttf'), 'Varela Round');
@@ -10,31 +9,31 @@ GlobalFonts.registerFromPath(path.resolve(__dirname, '../../assets/fonts/VarelaR
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface ValueFormat {
+interface ValueFormat {
   sign: string;
   color: string;
 }
 
-export interface TextStyle {
+interface TextStyle {
   font: string;
   fillStyle: string;
   glowColor?: string;
   glowBlur?: number;
 }
 
-export interface Position {
+interface Position {
   x: number;
   y: number;
 }
 
-export interface LayoutConfig {
+interface LayoutConfig {
   width: number;
   height: number;
   margin: number;
   lineGap: number;
 }
 
-export interface TextElement {
+interface TextElement {
   text: string;
   style: TextStyle;
   position?: Position;
@@ -119,9 +118,8 @@ const STYLES = {
 class CanvasRenderer {
   private ctx: CanvasRenderingContext2D;
 
-  constructor(ctx: CanvasRenderingContext2D, layout: LayoutConfig = DEFAULT_LAYOUT) {
+  constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
-    this.layout = layout;
     this.ctx.textBaseline = 'middle';
   }
 
@@ -175,7 +173,7 @@ class CanvasRenderer {
 // FORMATTERS
 // ============================================================================
 
-export function formatDisplayValue(value: number): ValueFormat {
+function formatDisplayValue(value: number): ValueFormat {
   if (value > 0) return { sign: '+', color: '#66ff66' };
   if (value < 0) return { sign: '-', color: '#ff7878' };
   return { sign: '', color: '#ffd700' };
@@ -299,7 +297,6 @@ class PositionCardBuilder {
 
 export async function buildPositionImage(
   closedPosition: ClosedPosition,
-  triggerData?: TriggerData,
   layoutConfig: LayoutConfig = DEFAULT_LAYOUT,
 ): Promise<Buffer> {
   const {
@@ -316,11 +313,11 @@ export async function buildPositionImage(
   const ctx = canvas.getContext('2d');
 
   // Draw background
-  const bg = await loadImage(selectBackgroundPNLCard(pnlPercentage, triggerData?.type));
+  const bg = await loadImage(selectBackgroundPNLCard(pnlPercentage));
   ctx.drawImage(bg, 0, 0, layoutConfig.width, layoutConfig.height);
 
   // Initialize renderer and builder
-  const renderer = new CanvasRenderer(ctx, layoutConfig);
+  const renderer = new CanvasRenderer(ctx);
   const builder = new PositionCardBuilder(renderer, layoutConfig);
 
   // Draw all components

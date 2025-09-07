@@ -34,7 +34,7 @@ export async function prepareClosedPositionContent(
     const files = channelConfig.image
       ? [
           {
-            attachment: await buildPositionImage(closedPosition, triggerData ?? undefined),
+            attachment: await buildPositionImage(closedPosition),
             name: `${closedPosition.pairName}.png`,
           },
         ]
