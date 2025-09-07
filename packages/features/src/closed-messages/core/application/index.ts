@@ -1,7 +1,7 @@
 // Application helpers
 
 export * from './helpers/content-preparation.helper';
-export * from './helpers/global-channel.helper';
+export * from './helpers/global-forward.helper';
 export * from './helpers/position-fetcher.helper';
 export * from './helpers/trigger-parser.helper';
 // Application mappers

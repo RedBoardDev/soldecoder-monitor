@@ -1,4 +1,5 @@
 import { time } from '@shared';
+import { GuildConfigGuard } from '@shared/domain';
 import { DynamoChannelConfigRepository } from '@soldecoder-monitor/data';
 import { PermissionValidatorService } from '@soldecoder-monitor/discord';
 import {
@@ -11,6 +12,7 @@ import {
   RateLimit,
   SelectHandler,
   SlashCommand,
+  UseGuards,
 } from '@soldecoder-monitor/features-sdk';
 import type {
   ButtonInteraction,
@@ -113,6 +115,7 @@ export class SettingsChannelsFeature extends Feature {
     );
   }
 
+  @UseGuards(new GuildConfigGuard())
   @SlashCommand({
     name: 'settings-channels',
     description: 'Manage channel configuration settings interactively',

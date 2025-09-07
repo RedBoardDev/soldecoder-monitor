@@ -1,4 +1,5 @@
 import { time } from '@shared';
+import { GuildConfigGuard } from '@shared/domain';
 import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import { PermissionValidatorService } from '@soldecoder-monitor/discord';
 import {
@@ -11,6 +12,7 @@ import {
   RateLimit,
   SelectHandler,
   SlashCommand,
+  UseGuards,
 } from '@soldecoder-monitor/features-sdk';
 import type {
   ButtonInteraction,
@@ -86,6 +88,7 @@ export class SettingsServerFeature extends Feature {
     );
   }
 
+  @UseGuards(new GuildConfigGuard())
   @SlashCommand({
     name: 'settings-server',
     description: 'Manage server configuration settings interactively',
