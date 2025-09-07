@@ -35,8 +35,8 @@ export class FinalizeHandler {
           autoDeleteWarnings: false,
           summaryPreferences: {
             dailySummary: false,
-            weeklySummary: false,
-            monthlySummary: false,
+            weeklySummary: session.data.summaryPreferences?.weeklySummary ?? false,
+            monthlySummary: session.data.summaryPreferences?.monthlySummary ?? false,
           },
           positionSizeDefaults: {
             walletAddress: session.data.walletAddress || null,
@@ -53,7 +53,13 @@ export class FinalizeHandler {
           timezone: existingSettings.timezone,
           forward: session.data.forward ?? existingSettings.forward,
           autoDeleteWarnings: existingSettings.autoDeleteWarnings,
-          summaryPreferences: existingSettings.summaryPreferences,
+          summaryPreferences: {
+            dailySummary: existingSettings.summaryPreferences.dailySummary,
+            weeklySummary:
+              session.data.summaryPreferences?.weeklySummary ?? existingSettings.summaryPreferences.weeklySummary,
+            monthlySummary:
+              session.data.summaryPreferences?.monthlySummary ?? existingSettings.summaryPreferences.monthlySummary,
+          },
           positionSizeDefaults: {
             walletAddress: session.data.walletAddress ?? existingSettings.positionSizeDefaults.walletAddress,
             stopLossPercent: session.data.stopLossPercent ?? existingSettings.positionSizeDefaults.stopLossPercent,

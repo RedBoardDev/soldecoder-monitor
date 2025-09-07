@@ -32,6 +32,22 @@ export class FeatureTogglesHandler {
         case 'toggle-forward':
           updates = { forward: !currentData.forward };
           break;
+        case 'toggle-weekly-summary':
+          updates = {
+            summaryPreferences: {
+              ...currentData.summaryPreferences,
+              weeklySummary: !currentData.summaryPreferences?.weeklySummary,
+            },
+          };
+          break;
+        case 'toggle-monthly-summary':
+          updates = {
+            summaryPreferences: {
+              ...currentData.summaryPreferences,
+              monthlySummary: !currentData.summaryPreferences?.monthlySummary,
+            },
+          };
+          break;
         default:
           logger.warn('Unknown toggle action', { action });
           return;

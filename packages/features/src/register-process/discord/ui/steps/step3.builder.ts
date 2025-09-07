@@ -27,6 +27,12 @@ export function buildStep3Embed(session: SetupSession): EmbedBuilder {
           '',
           `• **Forward Alerts:** ${session.data.forward ? '✅ Enabled' : '❌ Disabled'}`,
           `  *Forwards alerts based on channel threshold settings*`,
+          '',
+          `• **Summary Weekly:** ${session.data.summaryPreferences?.weeklySummary ? '✅ Enabled' : '❌ Disabled'}`,
+          `  *Receive weekly position summaries*`,
+          '',
+          `• **Summary Monthly:** ${session.data.summaryPreferences?.monthlySummary ? '✅ Enabled' : '❌ Disabled'}`,
+          `  *Receive monthly position summaries*`,
         ].join('\n'),
       },
     )
@@ -47,6 +53,20 @@ export function buildStep3Components(session: SetupSession): ActionRowBuilder<Bu
         .setLabel(session.data.forward ? 'Disable Forward' : 'Enable Forward')
         .setStyle(ButtonStyle.Secondary)
         .setEmoji('🔄'),
+    ),
+    new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId('register-process:step3:toggle-weekly-summary')
+        .setLabel(session.data.summaryPreferences?.weeklySummary ? 'Disable Weekly Summary' : 'Enable Weekly Summary')
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji('📅'),
+      new ButtonBuilder()
+        .setCustomId('register-process:step3:toggle-monthly-summary')
+        .setLabel(
+          session.data.summaryPreferences?.monthlySummary ? 'Disable Monthly Summary' : 'Enable Monthly Summary',
+        )
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji('📊'),
     ),
     new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()

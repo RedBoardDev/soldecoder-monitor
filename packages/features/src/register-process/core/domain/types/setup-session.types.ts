@@ -4,6 +4,10 @@ export interface SetupSessionData {
   stopLossPercent?: number;
   positionDisplayEnabled?: boolean;
   forward?: boolean;
+  summaryPreferences?: {
+    weeklySummary?: boolean;
+    monthlySummary?: boolean;
+  };
 }
 
 export interface SetupSession {

@@ -43,6 +43,10 @@ export class SetupSessionService {
       data: {
         positionDisplayEnabled: true,
         forward: true,
+        summaryPreferences: {
+          weeklySummary: false,
+          monthlySummary: false,
+        },
       },
     };
 

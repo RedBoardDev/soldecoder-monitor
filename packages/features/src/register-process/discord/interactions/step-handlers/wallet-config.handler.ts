@@ -1,8 +1,8 @@
 import type { ButtonInteraction, ModalSubmitInteraction } from 'discord.js';
-import { buildWalletConfigModal } from 'register-process/discord/ui/wallet-config.modal';
 import { WalletAddress } from '../../../../shared/domain/value-objects/wallet-address.vo';
 import { type SetupSession, type SetupSessionService, SetupStep } from '../../../core';
 import { buildStep3Components, buildStep3Embed } from '../../ui/steps';
+import { buildWalletConfigModal } from '../../ui/wallet-config.modal';
 
 export class WalletConfigHandler {
   constructor(private readonly sessionService: SetupSessionService) {}

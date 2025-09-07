@@ -15,6 +15,11 @@ export function buildServerSettingsEmbed(result: ServerSettingsResult): EmbedBui
     `• **Forward Alerts:** ${guildSettings.forward ? '✅ Enabled' : '❌ Disabled'}`,
   ].join('\n');
 
+  const summarySettings = [
+    `• **Weekly Summary:** ${guildSettings.summaryPreferences.weeklySummary ? '✅ Enabled' : '❌ Disabled'}`,
+    `• **Monthly Summary:** ${guildSettings.summaryPreferences.monthlySummary ? '✅ Enabled' : '❌ Disabled'}`,
+  ].join('\n');
+
   const positionDefaults = guildSettings.positionSizeDefaults;
   const systemSettings = [
     `• **Position Size Defaults:** ${
@@ -31,6 +36,11 @@ export function buildServerSettingsEmbed(result: ServerSettingsResult): EmbedBui
       inline: false,
     },
     {
+      name: '📈 Summary Settings',
+      value: summarySettings,
+      inline: false,
+    },
+    {
       name: '⚙️ Position Settings',
       value: systemSettings,
       inline: false,
@@ -40,6 +50,7 @@ export function buildServerSettingsEmbed(result: ServerSettingsResult): EmbedBui
       value: [
         '• **Position Display**: Shows position summaries from followed channels in global channel',
         '• **Forward Alerts**: Forwards alerts based on channel threshold settings to global channel',
+        '• **Weekly/Monthly Summary**: Automated performance reports sent to global channel',
         '• **Position Size Defaults**: Default wallet and stop-loss for `/position-size` command',
       ].join('\n'),
       inline: false,

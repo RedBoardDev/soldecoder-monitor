@@ -33,7 +33,14 @@ export class ToggleInteractionHandler extends BaseInteractionHandler {
       const currentSettings = currentResult.guildSettings;
 
       // Determine updates based on action
-      let updates: { positionDisplayEnabled?: boolean; forward?: boolean } = {};
+      let updates: {
+        positionDisplayEnabled?: boolean;
+        forward?: boolean;
+        summaryPreferences?: {
+          weeklySummary?: boolean;
+          monthlySummary?: boolean;
+        };
+      } = {};
 
       switch (action) {
         case 'positionDisplay':
@@ -41,6 +48,20 @@ export class ToggleInteractionHandler extends BaseInteractionHandler {
           break;
         case 'forward':
           updates = { forward: !currentSettings.forward };
+          break;
+        case 'weeklySummary':
+          updates = {
+            summaryPreferences: {
+              weeklySummary: !currentSettings.summaryPreferences.weeklySummary,
+            },
+          };
+          break;
+        case 'monthlySummary':
+          updates = {
+            summaryPreferences: {
+              monthlySummary: !currentSettings.summaryPreferences.monthlySummary,
+            },
+          };
           break;
         default:
           throw new Error(`Unknown toggle action: ${action}`);

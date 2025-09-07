@@ -28,6 +28,12 @@ export const serverSettingsUpdateSchema = z.object({
       stopLossPercent: z.number().nullable().optional(),
     })
     .optional(),
+  summaryPreferences: z
+    .object({
+      weeklySummary: z.boolean().optional(),
+      monthlySummary: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 export type ServerSettingsOverview = z.infer<typeof serverSettingsOverviewSchema>;

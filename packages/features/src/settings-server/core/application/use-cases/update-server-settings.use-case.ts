@@ -38,6 +38,30 @@ export class UpdateServerSettingsUseCase {
       updatedFields.push('Position Size Defaults');
     }
 
+    // Merge summary preferences
+    const mergedSummaryPreferences = command.updates.summaryPreferences
+      ? {
+          weeklySummary:
+            command.updates.summaryPreferences.weeklySummary !== undefined
+              ? command.updates.summaryPreferences.weeklySummary
+              : existingSettings.summaryPreferences.weeklySummary,
+          monthlySummary:
+            command.updates.summaryPreferences.monthlySummary !== undefined
+              ? command.updates.summaryPreferences.monthlySummary
+              : existingSettings.summaryPreferences.monthlySummary,
+          dailySummary: existingSettings.summaryPreferences.dailySummary, // Keep existing value
+        }
+      : existingSettings.summaryPreferences;
+
+    if (command.updates.summaryPreferences) {
+      if (command.updates.summaryPreferences.weeklySummary !== undefined) {
+        updatedFields.push('Weekly Summary');
+      }
+      if (command.updates.summaryPreferences.monthlySummary !== undefined) {
+        updatedFields.push('Monthly Summary');
+      }
+    }
+
     // Create updated entity
     const updatedSettings = GuildSettingsEntity.create({
       guildId: existingSettings.guildId,
@@ -52,7 +76,7 @@ export class UpdateServerSettingsUseCase {
           ? command.updates.globalChannelId
           : existingSettings.globalChannelId,
       forward: command.updates.forward !== undefined ? command.updates.forward : existingSettings.forward,
-      summaryPreferences: existingSettings.summaryPreferences,
+      summaryPreferences: mergedSummaryPreferences,
       positionSizeDefaults: mergedPositionSizeDefaults,
       createdAt: existingSettings.createdAt,
     });
