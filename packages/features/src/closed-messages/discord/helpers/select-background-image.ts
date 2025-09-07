@@ -2,7 +2,6 @@ import path from 'node:path';
 
 const ASSET_PATH = path.resolve(__dirname, '../../assets/pnl_card');
 
-// Liste des images disponibles
 const PROFIT_IMAGES = [
   'profit-0.jpeg',
   'profit-1.jpeg',
@@ -29,17 +28,4 @@ export function selectBackgroundPNLCard(pct: number): string {
 
   const selectedImage = getRandomImage(images);
   return path.join(ASSET_PATH, folder, selectedImage);
-}
-
-export interface ValueFormat {
-  /** "+" | "-" | "" */
-  sign: string;
-  /** hex color code */
-  color: string;
-}
-
-export function formatValue(value: number): ValueFormat {
-  if (value > 0) return { sign: '+', color: '#66ff66' };
-  if (value < 0) return { sign: '-', color: '#ff6666' };
-  return { sign: '', color: '#ffd700' };
 }

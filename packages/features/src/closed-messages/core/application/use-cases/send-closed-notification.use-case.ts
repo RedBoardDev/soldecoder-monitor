@@ -5,7 +5,7 @@ import { prepareMention } from '../../../discord/helpers/mention.helper';
 import { safePin } from '../../../discord/helpers/safe-pin.helper';
 import type { ClosedPosition } from '../../domain/value-objects/closed-position.vo';
 import { prepareClosedPositionContent } from '../helpers/content-preparation.helper';
-import { sendToGlobalChannelIfEnabled } from '../helpers/global-channel.helper';
+import { forwardToGlobalChannelIfEnabled } from '../helpers/global-forward.helper';
 
 const logger = createFeatureLogger('send-closed-notification-use-case');
 
@@ -50,12 +50,7 @@ export class SendClosedNotificationUseCase {
 
       if (!shouldSendToGlobal || !preparedContent.triggerData) return;
 
-      await sendToGlobalChannelIfEnabled(
-        this.guildSettingsRepository,
-        originalMessage,
-        preparedContent.contentBody,
-        channelConfig.guildId,
-      );
+      await forwardToGlobalChannelIfEnabled(this.guildSettingsRepository, sentMessage, channelConfig.guildId);
     } catch (error) {
       logger.error('Failed to send closed position notification', error as Error, {
         messageId: originalMessage.id,

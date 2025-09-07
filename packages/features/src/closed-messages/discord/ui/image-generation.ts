@@ -1,8 +1,8 @@
 import path from 'node:path';
-import { createCanvas, GlobalFonts, loadImage, type CanvasRenderingContext2D } from '@napi-rs/canvas';
+import { type CanvasRenderingContext2D, createCanvas, GlobalFonts, loadImage } from '@napi-rs/canvas';
 import type { ClosedPosition } from 'closed-messages/core';
 import type { TriggerData } from '../../core/domain/types/trigger.types';
-import { formatValue, selectBackgroundPNLCard } from '../helpers/select-background-image';
+import { selectBackgroundPNLCard } from '../helpers/select-background-image';
 
 GlobalFonts.registerFromPath(path.resolve(__dirname, '../../assets/fonts/VarelaRound-Regular.ttf'), 'Varela Round');
 
@@ -118,7 +118,6 @@ const STYLES = {
 
 class CanvasRenderer {
   private ctx: CanvasRenderingContext2D;
-  private layout: LayoutConfig;
 
   constructor(ctx: CanvasRenderingContext2D, layout: LayoutConfig = DEFAULT_LAYOUT) {
     this.ctx = ctx;
