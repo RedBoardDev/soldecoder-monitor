@@ -1,8 +1,11 @@
 import type { ILpAgentService } from '@shared/application/interfaces/lpagent.service.interface';
 import { time } from '@shared/domain';
 import type { DynamoChannelConfigRepository, GuildSettingsRepository } from '@soldecoder-monitor/data';
+import type { Message } from 'discord.js';
+import { getPreviousMessage } from '../../../discord/helpers/get-previous-message.helper';
 import { ClosedMessageProcessingError } from '../../domain/errors/closed-message.errors';
 import { fetchPositionsByIds } from '../helpers/position-fetcher.helper';
+import { parseTriggerMessage } from '../helpers/trigger-parser.helper';
 import { cumulateMultipleClosedPositions } from '../mappers/multiple-closed-positions.mapper';
 import { mapPositionsDataToClosedPositions } from '../mappers/position-data.mapper';
 import { parseClosedMessageSafe } from '../parsers/closed-message.parser';
@@ -15,41 +18,46 @@ export class ProcessClosedMessageUseCase {
     private readonly lpAgentService: ILpAgentService,
   ) {}
 
-  async execute(messageId: string, channelId: string, content: string): Promise<ClosedMessageProcessingResult> {
+  async execute(message: Message): Promise<ClosedMessageProcessingResult> {
     try {
       await new Promise((resolve) => setTimeout(resolve, time.seconds(1)));
 
-      const validationResult = await this.validateMessageAndConfig(messageId, channelId, content);
+      const validationResult = await this.validateMessageAndConfig(message.id, message.channelId, message.content);
       if (!validationResult.success) {
         return validationResult.result;
       }
 
       const { messageData, channelConfig } = validationResult;
 
+      // Get trigger information from previous message
+      const previousMessage = await getPreviousMessage(message);
+      const triggerData = previousMessage ? parseTriggerMessage(previousMessage.content) : null;
+
       const positionsData = await fetchPositionsByIds(this.lpAgentService, messageData.positionIds);
 
       if (positionsData.length === 0) {
-        return ClosedMessageProcessingResult.failure(messageId, channelId, 'No matching positions found');
+        return ClosedMessageProcessingResult.failure(message.id, message.channelId, 'No matching positions found');
       }
 
       const closedPositions = mapPositionsDataToClosedPositions(positionsData);
 
       const cumulatedPosition = cumulateMultipleClosedPositions(closedPositions);
 
-      if (!cumulatedPosition.meetsThreshold(channelConfig.threshold ?? 0)) {
-        return ClosedMessageProcessingResult.failure(
-          messageId,
-          channelId,
-          `PnL ${cumulatedPosition.pnlPercentageSol}% below threshold ${channelConfig.threshold ?? 0}%`,
-        );
-      }
-
       const guildConfig = await this.getGuildConfig(channelConfig.guildId);
       if (!guildConfig) {
-        return ClosedMessageProcessingResult.failure(messageId, channelId, 'Guild not configured');
+        return ClosedMessageProcessingResult.failure(message.id, message.channelId, 'Guild not configured');
       }
 
-      return ClosedMessageProcessingResult.success(messageId, channelId, cumulatedPosition, guildConfig.forwardTpSl);
+      const meetsThreshold = cumulatedPosition.meetsThreshold(channelConfig.threshold, triggerData?.type || null);
+
+      return ClosedMessageProcessingResult.success(
+        message.id,
+        message.channelId,
+        cumulatedPosition,
+        guildConfig.forward,
+        meetsThreshold,
+        triggerData,
+      );
     } catch (error) {
       throw new ClosedMessageProcessingError(
         `Failed to process closed message: ${error instanceof Error ? error.message : String(error)}`,
@@ -72,13 +80,6 @@ export class ProcessClosedMessageUseCase {
       return {
         success: false as const,
         result: ClosedMessageProcessingResult.failure(messageId, channelId, 'Channel not configured'),
-      };
-    }
-
-    if (!channelConfig.notifyOnClose) {
-      return {
-        success: false as const,
-        result: ClosedMessageProcessingResult.failure(messageId, channelId, 'Notifications disabled'),
       };
     }
 

@@ -3,6 +3,7 @@ import type { Message } from 'discord.js';
 import { DomainError } from '../../../shared/domain';
 import type { ProcessClosedMessageUseCase } from '../../core/application/use-cases/process-closed-message.use-case';
 import type { SendClosedNotificationUseCase } from '../../core/application/use-cases/send-closed-notification.use-case';
+import { InvalidChannelConfigError } from '../../core/domain/errors/closed-message.errors';
 import { validateMessageForProcessing } from '../../core/infrastructure/helpers/message-validator.helper';
 
 const logger = createFeatureLogger('closed-message-handler');
@@ -17,14 +18,22 @@ export class ClosedMessageHandler {
     try {
       if (!validateMessageForProcessing(message)) return;
 
-      const result = await this.processClosedMessageUseCase.execute(message.id, message.channelId, message.content);
+      const result = await this.processClosedMessageUseCase.execute(message);
 
       if (result.isFailure || !result.closedPosition) return;
 
       const channelConfig = await this.processClosedMessageUseCase.getChannelConfig(message.channelId);
-      if (channelConfig?.notifyOnClose) {
-        await this.sendNotificationUseCase.execute(message, result.closedPosition, result.shouldSendToGlobal, channelConfig);
-      }
+
+      if (!channelConfig) throw new InvalidChannelConfigError('Channel not configured');
+
+      await this.sendNotificationUseCase.execute(
+        message,
+        result.closedPosition,
+        result.shouldSendToGlobal,
+        channelConfig,
+        result.meetsThreshold,
+        result.triggerData,
+      );
     } catch (error) {
       await this.handleError(message, error);
     }
@@ -52,6 +61,8 @@ export class ClosedMessageHandler {
           errorMessage = '❌ **Network Error**: Unable to fetch position data from Solana.';
         } else if (error.message.includes('LpAgent')) {
           errorMessage = '❌ **API Error**: Unable to fetch position data from LpAgent API.';
+        } else if (error.message.includes('Invalid channel configuration')) {
+          errorMessage = '❌ **Invalid Channel Configuration**: Channel not configured.';
         }
       }
 

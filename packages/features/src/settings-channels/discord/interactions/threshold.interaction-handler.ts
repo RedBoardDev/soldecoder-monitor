@@ -1,6 +1,7 @@
+import type { ThresholdType } from '@soldecoder-monitor/data';
 import { BaseInteractionHandler } from '@soldecoder-monitor/features-sdk';
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
-import type { ModalSubmitInteraction } from 'discord.js';
+import type { ButtonInteraction, ModalSubmitInteraction } from 'discord.js';
 import {
   GetChannelConfigCommand,
   type GetChannelConfigUseCase,
@@ -47,7 +48,56 @@ export class ThresholdInteractionHandler extends BaseInteractionHandler {
     }
   }
 
+  async handleQuickThresholdSet(interaction: ButtonInteraction): Promise<void> {
+    await this.safeDefer(interaction);
+
+    try {
+      const parts = interaction.customId.split(':');
+      const thresholdType = parts[3]; // 'tp', 'sl', 'tpsl'
+      const channelId = parts[4];
+      const guild = this.validateGuildContext(interaction);
+
+      let thresholdValue: ThresholdType;
+      switch (thresholdType) {
+        case 'tp':
+          thresholdValue = 'TP';
+          break;
+        case 'sl':
+          thresholdValue = 'SL';
+          break;
+        case 'tpsl':
+          thresholdValue = 'TP/SL';
+          break;
+        default:
+          throw new Error(`Unknown threshold type: ${thresholdType}`);
+      }
+
+      // Update configuration
+      await this.updateChannelConfigUseCase.execute(
+        new UpdateChannelConfigCommand(channelId, { threshold: thresholdValue }),
+        guild,
+      );
+
+      // Return to channel detail view
+      await this.showChannelDetailViewButton(interaction, channelId);
+    } catch (error) {
+      await this.handleInteractionError(interaction, error, 'Quick threshold set');
+    }
+  }
+
   private async showChannelDetailView(interaction: ModalSubmitInteraction, channelId: string): Promise<void> {
+    const guild = this.validateGuildContext(interaction);
+    const result = await this.getChannelConfigUseCase.execute(new GetChannelConfigCommand(channelId), guild);
+
+    const tagDisplayName = this.buildMentionFromTag(result.channelConfig.tagType, result.channelConfig.tagId);
+
+    const embed = buildChannelDetailEmbed(result.channelConfig, result.channelName, tagDisplayName);
+    const components = buildChannelDetailComponents(result.channelConfig);
+
+    await this.safeUpdateReply(interaction, { embeds: [embed], components });
+  }
+
+  private async showChannelDetailViewButton(interaction: ButtonInteraction, channelId: string): Promise<void> {
     const guild = this.validateGuildContext(interaction);
     const result = await this.getChannelConfigUseCase.execute(new GetChannelConfigCommand(channelId), guild);
 

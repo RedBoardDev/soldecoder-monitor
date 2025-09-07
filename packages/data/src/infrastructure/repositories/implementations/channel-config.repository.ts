@@ -1,7 +1,7 @@
+import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import type { ChannelConfigEntity } from '../../../domain/entities/channel-config.entity';
 import type { ChannelConfigRepository } from '../../../domain/interfaces/channel-config.repository.interface';
 import { CacheKey } from '../../../domain/value-objects/cache-key.vo';
-import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import { DatabaseService } from '../../persistence/dynamo/database.service';
 import { CachedRepositoryBase } from '../base/cached-repository.base';
 

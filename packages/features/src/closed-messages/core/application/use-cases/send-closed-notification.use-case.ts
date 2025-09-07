@@ -3,6 +3,7 @@ import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import type { Message, TextChannel } from 'discord.js';
 import { prepareMention } from '../../../discord/helpers/mention.helper';
 import { safePin } from '../../../discord/helpers/safe-pin.helper';
+import type { TriggerData } from '../../domain/types/trigger.types';
 import type { ClosedPosition } from '../../domain/value-objects/closed-position.vo';
 import { prepareClosedPositionContent } from '../helpers/content-preparation.helper';
 import { forwardToGlobalChannelIfEnabled } from '../helpers/global-forward.helper';
@@ -17,15 +18,18 @@ export class SendClosedNotificationUseCase {
     closedPosition: ClosedPosition,
     shouldSendToGlobal: boolean,
     channelConfig: ChannelConfigEntity,
+    meetsThreshold: boolean,
+    triggerData: TriggerData | null = null,
   ): Promise<void> {
     try {
-      const mentionData = prepareMention(channelConfig);
+      const mentionData = prepareMention(channelConfig, meetsThreshold);
 
       const preparedContent = await prepareClosedPositionContent(
         originalMessage,
         closedPosition,
         mentionData.mention,
         channelConfig,
+        triggerData,
       );
 
       const cleanMessage = await this.deleteAndResendOriginalMessage(originalMessage);
@@ -37,20 +41,25 @@ export class SendClosedNotificationUseCase {
         mentionData.allowedMentions,
       );
 
-      if (channelConfig.pin) {
-        try {
-          await safePin(sentMessage);
-        } catch (pinError) {
-          logger.warn('Failed to pin message', {
-            error: pinError instanceof Error ? pinError.message : pinError,
-            messageId: sentMessage.id,
-          });
-        }
+      if (!channelConfig.pin || !meetsThreshold) return;
+
+      try {
+        await safePin(sentMessage);
+      } catch (pinError) {
+        logger.error('Failed to pin message', {
+          error: pinError instanceof Error ? pinError.message : pinError,
+          messageId: sentMessage.id,
+        });
       }
 
-      if (!shouldSendToGlobal || !preparedContent.triggerData) return;
+      if (!shouldSendToGlobal) return;
 
-      await forwardToGlobalChannelIfEnabled(this.guildSettingsRepository, sentMessage, channelConfig.guildId);
+      await forwardToGlobalChannelIfEnabled(
+        this.guildSettingsRepository,
+        sentMessage,
+        channelConfig.guildId,
+        meetsThreshold,
+      );
     } catch (error) {
       logger.error('Failed to send closed position notification', error as Error, {
         messageId: originalMessage.id,

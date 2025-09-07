@@ -1,17 +1,34 @@
 import { z } from 'zod';
 
 /**
+ * Threshold configuration types
+ * - number: Fixed percentage threshold
+ * - 'TP': Only apply threshold to Take Profit messages
+ * - 'SL': Only apply threshold to Stop Loss messages
+ * - 'TP/SL': Apply threshold to both TP and SL messages
+ * - null: No threshold
+ */
+export const ThresholdTypeSchema = z.union([
+  z.number().min(0),
+  z.literal('TP'),
+  z.literal('SL'),
+  z.literal('TP/SL'),
+  z.null(),
+]);
+
+export type ThresholdType = z.infer<typeof ThresholdTypeSchema>;
+
+/**
  * Channel Configuration entity schema
  */
 export const ChannelConfigSchema = z.object({
   channelId: z.string().min(1),
   guildId: z.string().min(1),
   image: z.boolean(),
-  notifyOnClose: z.boolean(),
   pin: z.boolean(),
   tagType: z.enum(['user', 'role']).nullable(),
   tagId: z.string().nullable(),
-  threshold: z.number().min(0).nullable(),
+  threshold: ThresholdTypeSchema,
   createdAt: z.number(),
 });
 
@@ -26,11 +43,10 @@ export class ChannelConfigEntity {
     public readonly channelId: string,
     public readonly guildId: string,
     public readonly image: boolean,
-    public readonly notifyOnClose: boolean,
     public readonly pin: boolean,
     public readonly tagType: 'user' | 'role' | null,
     public readonly tagId: string | null,
-    public readonly threshold: number | null,
+    public readonly threshold: ThresholdType,
     public readonly createdAt: number,
   ) {}
 
@@ -44,7 +60,6 @@ export class ChannelConfigEntity {
       validated.channelId,
       validated.guildId,
       validated.image,
-      validated.notifyOnClose,
       validated.pin,
       validated.tagType,
       validated.tagId,
@@ -61,7 +76,6 @@ export class ChannelConfigEntity {
       channelId,
       guildId,
       image: false,
-      notifyOnClose: true,
       pin: false,
       tagType: null,
       tagId: null,
@@ -74,14 +88,40 @@ export class ChannelConfigEntity {
    * Business logic: Check if notifications are enabled
    */
   public hasNotifications(): boolean {
-    return this.notifyOnClose || this.tagType !== null;
+    return this.tagType !== null;
   }
 
   /**
    * Business logic: Check if threshold is configured
    */
   public hasThreshold(): boolean {
-    return this.threshold !== null && this.threshold > 0;
+    return this.threshold !== null;
+  }
+
+  /**
+   * Business logic: Check if threshold applies to a specific trigger type
+   */
+  public thresholdAppliesTo(triggerType: 'take_profit' | 'stop_loss' | null): boolean {
+    if (this.threshold === null) return false;
+    if (typeof this.threshold === 'number') return true;
+
+    switch (this.threshold) {
+      case 'TP':
+        return triggerType === 'take_profit';
+      case 'SL':
+        return triggerType === 'stop_loss';
+      case 'TP/SL':
+        return triggerType === 'take_profit' || triggerType === 'stop_loss';
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Business logic: Get numeric threshold value if applicable
+   */
+  public getNumericThreshold(): number | null {
+    return typeof this.threshold === 'number' ? this.threshold : null;
   }
 
   /**
@@ -92,7 +132,6 @@ export class ChannelConfigEntity {
       channelId: this.channelId,
       guildId: this.guildId,
       image: updates.image ?? this.image,
-      notifyOnClose: updates.notifyOnClose ?? this.notifyOnClose,
       pin: updates.pin ?? this.pin,
       tagType: updates.tagType ?? this.tagType,
       tagId: updates.tagId ?? this.tagId,

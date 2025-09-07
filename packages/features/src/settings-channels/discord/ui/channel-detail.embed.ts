@@ -1,11 +1,14 @@
 import type { ChannelConfigEntity } from '@soldecoder-monitor/data';
 import { EmbedBuilder } from 'discord.js';
+import { ThresholdVO } from '../../core/domain/value-objects/threshold.vo';
 
 export function buildChannelDetailEmbed(
   channelConfig: ChannelConfigEntity,
   channelName: string,
   tagDisplayName?: string,
 ): EmbedBuilder {
+  const thresholdVO = new ThresholdVO(channelConfig.threshold);
+
   const embed = new EmbedBuilder()
     .setTitle(`⚙️ Channel Configuration: #${channelName}`)
     .setDescription(`**Configuring monitoring for** <#${channelConfig.channelId}>`)
@@ -13,8 +16,7 @@ export function buildChannelDetailEmbed(
       {
         name: '📋 Current Configuration',
         value: [
-          `**Close Notifications:** ${channelConfig.notifyOnClose ? '✅ Enabled' : '❌ Disabled'}`,
-          `**Alert Threshold:** ${channelConfig.threshold && channelConfig.threshold > 0 ? `±${channelConfig.threshold}%` : '❌ Not set'}`,
+          `**Alert Threshold:** ${thresholdVO.getEmoji()} ${thresholdVO.getDisplayText()}`,
           `**Position Images:** ${channelConfig.image ? '✅ Enabled' : '❌ Disabled'}`,
           `**Auto-Pin Messages:** ${channelConfig.pin ? '✅ Enabled' : '❌ Disabled'}`,
           `**Mention on Alert:** ${tagDisplayName || '❌ None configured'}`,
@@ -24,8 +26,7 @@ export function buildChannelDetailEmbed(
       {
         name: '💡 Feature Explanations',
         value: [
-          '• **Close Notifications**: Alert when positions are closed in this channel',
-          '• **Alert Threshold**: Trigger alerts when position changes by ±X%',
+          `• **Alert Threshold**: ${thresholdVO.getDescription()}`,
           '• **Position Images**: Include charts and stats from LPAgent data',
           '• **Auto-Pin Messages**: Pin important position notifications',
           '• **Mention on Alert**: Tag specific users/roles on notifications',
@@ -36,7 +37,7 @@ export function buildChannelDetailEmbed(
         name: '🎯 Quick Actions',
         value: [
           '• Use the **toggle buttons** below to enable/disable features',
-          '• Set **Alert Threshold** to ignore small position changes',
+          '• Set **Alert Threshold** to filter alerts by percentage or trigger type',
           '• Configure **Mentions** to notify specific users or roles',
           '• Click **Back** to return to the channel list',
         ].join('\n'),

@@ -1,5 +1,6 @@
 import type { ChannelConfigEntity } from '@soldecoder-monitor/data';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ThresholdVO } from '../../core/domain/value-objects/threshold.vo';
 
 /**
  * Build toggle buttons for channel configuration settings
@@ -7,18 +8,30 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 export function buildChannelDetailComponents(channelConfig: ChannelConfigEntity): ActionRowBuilder<ButtonBuilder>[] {
   const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
-  // Row 1: Notification settings
-  const notificationRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`settings-channels:toggle:notifyOnClose:${channelConfig.channelId}`)
-      .setLabel(channelConfig.notifyOnClose ? 'Disable Close Alerts' : 'Enable Close Alerts')
-      .setStyle(channelConfig.notifyOnClose ? ButtonStyle.Secondary : ButtonStyle.Success)
-      .setEmoji('🔔'),
+  const thresholdVO = new ThresholdVO(channelConfig.threshold);
+
+  // Row 1: Threshold settings
+  const thresholdRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`settings-channels:threshold:${channelConfig.channelId}`)
-      .setLabel('Set Alert Threshold')
-      .setStyle(ButtonStyle.Secondary)
+      .setLabel('Custom Threshold')
+      .setStyle(thresholdVO.isNumeric ? ButtonStyle.Primary : ButtonStyle.Secondary)
       .setEmoji('📊'),
+    new ButtonBuilder()
+      .setCustomId(`settings-channels:threshold:quick:tp:${channelConfig.channelId}`)
+      .setLabel('TP Only')
+      .setStyle(channelConfig.threshold === 'TP' ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setEmoji('🎯'),
+    new ButtonBuilder()
+      .setCustomId(`settings-channels:threshold:quick:sl:${channelConfig.channelId}`)
+      .setLabel('SL Only')
+      .setStyle(channelConfig.threshold === 'SL' ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setEmoji('🛑'),
+    new ButtonBuilder()
+      .setCustomId(`settings-channels:threshold:quick:tpsl:${channelConfig.channelId}`)
+      .setLabel('TP & SL')
+      .setStyle(channelConfig.threshold === 'TP/SL' ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setEmoji('⚡'),
   );
 
   // Row 2: Display settings
@@ -50,7 +63,6 @@ export function buildChannelDetailComponents(channelConfig: ChannelConfigEntity)
       .setEmoji('👥'),
   );
 
-  // Add clear button if there's a configured tag
   if (channelConfig.tagType && channelConfig.tagId) {
     tagRow.addComponents(
       new ButtonBuilder()
@@ -70,6 +82,6 @@ export function buildChannelDetailComponents(channelConfig: ChannelConfigEntity)
       .setEmoji('📋'),
   );
 
-  components.push(notificationRow, displayRow, tagRow, navRow);
+  components.push(thresholdRow, displayRow, tagRow, navRow);
   return components;
 }

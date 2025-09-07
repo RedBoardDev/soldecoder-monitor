@@ -43,7 +43,6 @@ export class AddChannelUseCase {
       channelId: command.channelId,
       guildId: command.guildId,
       image: false,
-      notifyOnClose: true, // Enable notifications by default
       pin: false,
       tagType: null,
       tagId: null,

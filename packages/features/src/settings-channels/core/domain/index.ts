@@ -22,3 +22,4 @@ export {
 
 // Value Objects
 export { ChannelSettings } from './value-objects/channel-settings.vo';
+export { ThresholdVO } from './value-objects/threshold.vo';

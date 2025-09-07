@@ -1,5 +1,5 @@
-import { CacheError } from '../../../domain/errors/data.errors';
 import { createFeatureLogger } from '@soldecoder-monitor/logger';
+import { CacheError } from '../../../domain/errors/data.errors';
 import type { IGenericCacheService } from '../../cache/cache.interface';
 import { GenericCacheService } from '../../cache/generic-cache.service';
 

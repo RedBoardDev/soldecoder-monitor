@@ -6,12 +6,13 @@ const logger = createFeatureLogger('global-forward-helper');
 
 /**
  * Forwards message to global channel if enabled in guild settings
- * Only forwards for triggered events (take profit / stop loss)
+ * Only forwards for triggered events (take profit / stop loss) and if threshold is met
  */
 export async function forwardToGlobalChannelIfEnabled(
   guildSettingsRepository: GuildSettingsRepository,
   originalMessage: Message,
   guildId: string,
+  meetsThreshold: boolean,
 ): Promise<void> {
   try {
     const guildSettings = await guildSettingsRepository.getByGuildId(guildId);
@@ -21,14 +22,16 @@ export async function forwardToGlobalChannelIfEnabled(
       return;
     }
 
-    if (!guildSettings.forwardTpSl || !guildSettings.globalChannelId) {
+    if (!guildSettings.forward || !guildSettings.globalChannelId) {
       logger.debug('Forward disabled or no global channel configured', {
         guildId,
-        forwardTpSl: guildSettings.forwardTpSl,
+        forward: guildSettings.forward,
         hasGlobalChannelId: !!guildSettings.globalChannelId,
       });
       return;
     }
+
+    if (!meetsThreshold) return;
 
     const globalChannel = originalMessage.guild?.channels.cache.get(guildSettings.globalChannelId);
 

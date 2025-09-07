@@ -1,13 +1,14 @@
+import type { ThresholdType } from '@soldecoder-monitor/data';
+
 /**
  * Channel configuration update payload
  */
 export interface ChannelConfigUpdates {
   image?: boolean;
-  notifyOnClose?: boolean;
   pin?: boolean;
   tagType?: 'user' | 'role' | null;
   tagId?: string | null;
-  threshold?: number | null;
+  threshold?: ThresholdType;
 }
 
 /**

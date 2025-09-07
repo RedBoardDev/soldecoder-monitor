@@ -37,7 +37,6 @@ export class UpdateChannelConfigUseCase {
   private getUpdatedFieldNames(updates: ChannelConfigUpdates): string[] {
     const fieldNames: string[] = [];
 
-    if (updates.notifyOnClose !== undefined) fieldNames.push('Close Alerts');
     if (updates.image !== undefined) fieldNames.push('Position Images');
     if (updates.pin !== undefined) fieldNames.push('Auto-Pin');
     if (updates.threshold !== undefined) fieldNames.push('Alert Threshold');
