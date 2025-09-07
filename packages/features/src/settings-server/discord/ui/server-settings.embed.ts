@@ -12,7 +12,7 @@ export function buildServerSettingsEmbed(result: ServerSettingsResult): EmbedBui
   const mainSettings = [
     `• **Global Channel:** ${globalChannelName ? `#${globalChannelName}` : 'Not configured'}`,
     `• **Position Display:** ${guildSettings.positionDisplayEnabled ? '✅ Enabled' : '❌ Disabled'}`,
-    `• **Forward TP/SL:** ${guildSettings.forwardTpSl ? '✅ Enabled' : '❌ Disabled'}`,
+    `• **Forward Alerts:** ${guildSettings.forward ? '✅ Enabled' : '❌ Disabled'}`,
   ].join('\n');
 
   const positionDefaults = guildSettings.positionSizeDefaults;
@@ -39,7 +39,7 @@ export function buildServerSettingsEmbed(result: ServerSettingsResult): EmbedBui
       name: '💡 Settings Explanation',
       value: [
         '• **Position Display**: Shows position summaries from followed channels in global channel',
-        '• **Forward TP/SL**: Sends take-profit and stop-loss alerts to global channel',
+        '• **Forward Alerts**: Forwards alerts based on channel threshold settings to global channel',
         '• **Position Size Defaults**: Default wallet and stop-loss for `/position-size` command',
       ].join('\n'),
       inline: false,

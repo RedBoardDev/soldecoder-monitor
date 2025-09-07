@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/complexity/noStaticOnlyClass: <explanation> */
+/** biome-ignore-all lint/complexity/noStaticOnlyClass: mapper with only static methods */
 import { type ChannelConfigData, ChannelConfigEntity } from '../../../../domain/entities/channel-config.entity';
 import { TableKey } from '../../../../domain/value-objects/table-key.vo';
 
@@ -25,7 +25,6 @@ export class ChannelConfigMapper {
       channelId,
       guildId,
       image: item.image as boolean,
-      notifyOnClose: item.notifyOnClose as boolean,
       pin: item.pin as boolean,
       tagType,
       tagId: item.tagId as string | null,
@@ -58,7 +57,6 @@ export class ChannelConfigMapper {
       GSI_SK: `GUILD#${entity.guildId}`,
       Type: 'channel_config',
       image: entity.image,
-      notifyOnClose: entity.notifyOnClose,
       pin: entity.pin,
       tagType: entity.tagType,
       tagId: entity.tagId,

@@ -33,14 +33,14 @@ export class ToggleInteractionHandler extends BaseInteractionHandler {
       const currentSettings = currentResult.guildSettings;
 
       // Determine updates based on action
-      let updates: { positionDisplayEnabled?: boolean; forwardTpSl?: boolean } = {};
+      let updates: { positionDisplayEnabled?: boolean; forward?: boolean } = {};
 
       switch (action) {
         case 'positionDisplay':
           updates = { positionDisplayEnabled: !currentSettings.positionDisplayEnabled };
           break;
-        case 'forwardTpSl':
-          updates = { forwardTpSl: !currentSettings.forwardTpSl };
+        case 'forward':
+          updates = { forward: !currentSettings.forward };
           break;
         default:
           throw new Error(`Unknown toggle action: ${action}`);

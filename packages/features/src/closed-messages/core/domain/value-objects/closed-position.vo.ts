@@ -24,8 +24,30 @@ export class ClosedPosition {
     }
   }
 
-  meetsThreshold(threshold: number): boolean {
-    return Math.abs(this.pnlPercentageSol) >= threshold;
+  /**
+   * Checks if position meets the configured threshold
+   * @param threshold - Threshold configuration from channel config
+   * @param triggerType - Type of trigger ('take_profit' | 'stop_loss' | null)
+   */
+  meetsThreshold(threshold: number | string | null, triggerType: 'take_profit' | 'stop_loss' | null = null): boolean {
+    if (threshold === null) return true;
+
+    // Legacy numeric threshold
+    if (typeof threshold === 'number') {
+      return Math.abs(this.pnlPercentageSol) >= threshold;
+    }
+
+    // String-based threshold logic
+    switch (threshold) {
+      case 'TP':
+        return triggerType === 'take_profit';
+      case 'SL':
+        return triggerType === 'stop_loss';
+      case 'TP/SL':
+        return triggerType === 'take_profit' || triggerType === 'stop_loss';
+      default:
+        return false;
+    }
   }
 
   get pairName(): string {

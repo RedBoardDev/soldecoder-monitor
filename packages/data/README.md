@@ -215,7 +215,6 @@ const config = ChannelConfigEntity.create({
   channelId: '123',
   guildId: '456',
   image: true,
-  notifyOnClose: true,
   pin: false,
   tagType: 'user',
   tagId: 'user-123',

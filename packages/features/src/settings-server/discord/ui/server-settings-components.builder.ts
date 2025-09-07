@@ -12,8 +12,8 @@ export function buildServerSettingsComponents(guildSettings: GuildSettingsEntity
       .setStyle(ButtonStyle.Secondary)
       .setEmoji('📊'),
     new ButtonBuilder()
-      .setCustomId('settings-server:toggle:forwardTpSl')
-      .setLabel(guildSettings.forwardTpSl ? 'Disable Forward TP/SL' : 'Enable Forward TP/SL')
+      .setCustomId('settings-server:toggle:forward')
+      .setLabel(guildSettings.forward ? 'Disable Forward' : 'Enable Forward')
       .setStyle(ButtonStyle.Secondary)
       .setEmoji('🔄'),
     new ButtonBuilder()

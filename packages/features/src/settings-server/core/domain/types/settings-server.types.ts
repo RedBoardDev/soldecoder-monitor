@@ -8,7 +8,7 @@ export const serverSettingsOverviewSchema = z.object({
   positionDisplayEnabled: z.boolean(),
   globalChannelId: z.string().nullable(),
   globalChannelName: z.string().optional(),
-  forwardTpSl: z.boolean(),
+  forward: z.boolean(),
   positionSizeDefaults: z.object({
     walletAddress: z.string().nullable(),
     stopLossPercent: z.number().nullable(),
@@ -21,7 +21,7 @@ export const serverSettingsOverviewSchema = z.object({
 export const serverSettingsUpdateSchema = z.object({
   positionDisplayEnabled: z.boolean().optional(),
   globalChannelId: z.string().nullable().optional(),
-  forwardTpSl: z.boolean().optional(),
+  forward: z.boolean().optional(),
   positionSizeDefaults: z
     .object({
       walletAddress: z.string().nullable().optional(),

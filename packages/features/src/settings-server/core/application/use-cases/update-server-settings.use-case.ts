@@ -51,8 +51,7 @@ export class UpdateServerSettingsUseCase {
         command.updates.globalChannelId !== undefined
           ? command.updates.globalChannelId
           : existingSettings.globalChannelId,
-      forwardTpSl:
-        command.updates.forwardTpSl !== undefined ? command.updates.forwardTpSl : existingSettings.forwardTpSl,
+      forward: command.updates.forward !== undefined ? command.updates.forward : existingSettings.forward,
       summaryPreferences: existingSettings.summaryPreferences,
       positionSizeDefaults: mergedPositionSizeDefaults,
       createdAt: existingSettings.createdAt,
@@ -65,8 +64,8 @@ export class UpdateServerSettingsUseCase {
     if (command.updates.globalChannelId !== undefined) {
       updatedFields.push('Global Channel');
     }
-    if (command.updates.forwardTpSl !== undefined) {
-      updatedFields.push('Forward TP/SL');
+    if (command.updates.forward !== undefined) {
+      updatedFields.push('Forward');
     }
 
     await this.guildSettingsRepository.save(updatedSettings);

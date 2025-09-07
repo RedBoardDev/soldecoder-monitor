@@ -18,8 +18,8 @@ export class ServerSettingsResult {
     return this.guildSettings.positionDisplayEnabled;
   }
 
-  get isForwardTpSlEnabled(): boolean {
-    return this.guildSettings.forwardTpSl;
+  get isForwardEnabled(): boolean {
+    return this.guildSettings.forward;
   }
 
   get hasPositionDefaults(): boolean {
@@ -35,7 +35,7 @@ export class ServerSettingsResult {
       positionDisplayEnabled: this.guildSettings.positionDisplayEnabled,
       globalChannelId: this.guildSettings.globalChannelId,
       globalChannelName: this.globalChannelName,
-      forwardTpSl: this.guildSettings.forwardTpSl,
+      forward: this.guildSettings.forward,
       positionSizeDefaults: this.guildSettings.positionSizeDefaults,
     };
   }

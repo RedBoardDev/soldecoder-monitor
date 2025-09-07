@@ -17,7 +17,7 @@ export class GuildSettingsMapper {
       positionDisplayEnabled: (item.positionDisplayEnabled as boolean) ?? true,
       globalChannelId: (item.globalChannelId as string) || null,
       timezone: (item.timezone as string) || 'UTC',
-      forwardTpSl: (item.forwardTpSl as boolean) ?? true,
+      forward: (item.forward as boolean) ?? true,
       autoDeleteWarnings: (item.autoDeleteWarnings as boolean) ?? false,
       summaryPreferences: (item.summaryPreferences as any) || {
         dailySummary: false,
@@ -54,7 +54,7 @@ export class GuildSettingsMapper {
       positionDisplayEnabled: entity.positionDisplayEnabled,
       globalChannelId: entity.globalChannelId,
       timezone: entity.timezone,
-      forwardTpSl: entity.forwardTpSl,
+      forward: entity.forward,
       autoDeleteWarnings: entity.autoDeleteWarnings,
       summaryPreferences: entity.summaryPreferences,
       positionSizeDefaults: entity.positionSizeDefaults,
