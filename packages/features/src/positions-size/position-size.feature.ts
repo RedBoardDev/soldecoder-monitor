@@ -37,14 +37,11 @@ export class PositionSizeFeature extends Feature {
   async onLoad(context: FeatureContext): Promise<void> {
     this.setContext(context);
 
-    // 🏭 Setup repositories and services
     const guildSettingsRepository = DynamoGuildSettingsRepository.create();
     const portfolioService = PortfolioService.getInstance();
 
-    // 🎯 Setup use cases (application layer)
     this.calculatePositionSizesUseCase = new CalculatePositionSizesUseCase(guildSettingsRepository, portfolioService);
 
-    // 🎮 Setup Discord handlers (with dependency injection)
     this.positionSizeHandler = new PositionSizeCommandHandler(this.calculatePositionSizesUseCase);
   }
 

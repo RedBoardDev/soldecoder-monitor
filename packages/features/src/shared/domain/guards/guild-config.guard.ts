@@ -2,11 +2,6 @@ import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import type { Guard, GuardContext } from '@soldecoder-monitor/features-sdk';
 import type { ChatInputCommandInteraction } from 'discord.js';
 
-/**
- * Guild configuration guard
- * Ensures that guild settings exist before allowing command execution
- * If settings don't exist, redirects user to run /start command
- */
 export class GuildConfigGuard implements Guard {
   private repository: DynamoGuildSettingsRepository | null = null;
 

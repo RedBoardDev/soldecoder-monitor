@@ -11,9 +11,6 @@ import { buildPositionDefaultsModal } from '../ui/position-defaults.modal';
 import { buildServerSettingsEmbed } from '../ui/server-settings.embed';
 import { buildServerSettingsComponents } from '../ui/server-settings-components.builder';
 
-/**
- * Handler for position defaults interactions (modal open/submit)
- */
 export class PositionDefaultsInteractionHandler extends BaseInteractionHandler {
   constructor(
     private readonly getServerSettingsUseCase: GetServerSettingsUseCase,
@@ -26,7 +23,6 @@ export class PositionDefaultsInteractionHandler extends BaseInteractionHandler {
     try {
       const guild = this.validateGuildContext(interaction);
 
-      // Get current settings to pre-fill modal
       const getCommand = new GetServerSettingsCommand(guild.id);
       const result = await this.getServerSettingsUseCase.execute(getCommand, guild);
 
@@ -46,7 +42,6 @@ export class PositionDefaultsInteractionHandler extends BaseInteractionHandler {
     try {
       const guild = this.validateGuildContext(interaction);
 
-      // Validate and prepare wallet address
       let validatedWallet: string | null = null;
       if (walletInput && walletInput.length > 0) {
         try {
@@ -61,17 +56,15 @@ export class PositionDefaultsInteractionHandler extends BaseInteractionHandler {
         }
       }
 
-      // Validate and prepare stop loss percentage
       let validatedStopLoss: number | null = null;
       if (stopLossInput && stopLossInput.length > 0) {
         const num = Number.parseFloat(stopLossInput);
         if (!Number.isFinite(num) || num < 0 || num > 100) {
           throw new InvalidServerSettingsError('Stop loss must be a number between 0 and 100');
         }
-        validatedStopLoss = Math.round(num * 100) / 100; // Round to 2 decimal places
+        validatedStopLoss = Math.round(num * 100) / 100;
       }
 
-      // Update settings
       const updateCommand = new UpdateServerSettingsCommand(guild.id, {
         positionSizeDefaults: {
           walletAddress: validatedWallet,
@@ -81,7 +74,6 @@ export class PositionDefaultsInteractionHandler extends BaseInteractionHandler {
 
       await this.updateServerSettingsUseCase.execute(updateCommand);
 
-      // Refresh the server settings view
       await this.refreshServerSettings(interaction);
     } catch (error) {
       if (error instanceof DomainError) {

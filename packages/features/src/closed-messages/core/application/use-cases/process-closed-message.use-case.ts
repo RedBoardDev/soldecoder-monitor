@@ -29,7 +29,6 @@ export class ProcessClosedMessageUseCase {
 
       const { messageData, channelConfig } = validationResult;
 
-      // Get trigger information from previous message
       const previousMessage = await getPreviousMessage(message);
       const triggerData = previousMessage ? parseTriggerMessage(previousMessage.content) : null;
 

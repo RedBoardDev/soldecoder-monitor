@@ -68,21 +68,17 @@ export class SettingsChannelsFeature extends Feature {
   async onLoad(context: FeatureContext): Promise<void> {
     this.setContext(context);
 
-    // Setup repositories and services
     const channelConfigRepository = DynamoChannelConfigRepository.create();
     const permissionValidator = new PermissionValidatorService();
 
-    // Setup use cases
     this.getChannelSettingsUseCase = new GetChannelSettingsUseCase(channelConfigRepository);
     this.getChannelConfigUseCase = new GetChannelConfigUseCase(channelConfigRepository);
     this.addChannelUseCase = new AddChannelUseCase(channelConfigRepository, permissionValidator);
     this.removeChannelUseCase = new RemoveChannelUseCase(channelConfigRepository);
     this.updateChannelConfigUseCase = new UpdateChannelConfigUseCase(channelConfigRepository);
 
-    // Setup handlers
     this.settingsChannelsHandler = new SettingsChannelsCommandHandler(this.getChannelSettingsUseCase);
 
-    // Setup specialized interaction handlers
     const channelListHandler = new ChannelListInteractionHandler(
       this.getChannelSettingsUseCase,
       this.addChannelUseCase,
@@ -101,7 +97,6 @@ export class SettingsChannelsFeature extends Feature {
       permissionValidator,
     );
 
-    // Initialize threshold handler
     const thresholdHandler = new ThresholdInteractionHandler(
       this.getChannelConfigUseCase,
       this.updateChannelConfigUseCase,
@@ -138,13 +133,11 @@ export class SettingsChannelsFeature extends Feature {
     return this.settingsChannelsHandler.execute(interaction);
   }
 
-  // Modal Handlers (prefix 'settings-channels:' added automatically)
   @ModalHandler(/^threshold:submit:/)
   async handleModals(interaction: ModalSubmitInteraction): Promise<void> {
     return this.interactionRouter.routeInteraction(interaction);
   }
 
-  // Button Handlers (prefix 'settings-channels:' added automatically)
   @ButtonHandler('show_add')
   @ButtonHandler('show_remove')
   @ButtonHandler('back')
@@ -156,7 +149,6 @@ export class SettingsChannelsFeature extends Feature {
     return this.interactionRouter.routeInteraction(interaction);
   }
 
-  // Select Menu Handlers (prefix 'settings-channels:' added automatically)
   @SelectHandler('add')
   @SelectHandler('remove')
   @SelectHandler(/^tag:user:/)

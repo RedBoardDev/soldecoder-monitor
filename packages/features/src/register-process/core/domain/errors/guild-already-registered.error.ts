@@ -1,8 +1,5 @@
 import { DomainError } from '../../../../shared/domain';
 
-/**
- * Guild Already Registered Error
- */
 export class GuildAlreadyRegisteredError extends DomainError {
   readonly code = 'GUILD_ALREADY_REGISTERED';
   readonly category = 'BUSINESS_RULE' as const;

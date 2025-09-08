@@ -1,25 +1,16 @@
 import { z } from 'zod';
 
-/**
- * Summary Preferences value object schema
- */
 export const SummaryPreferencesSchema = z.object({
   dailySummary: z.boolean(),
   weeklySummary: z.boolean(),
   monthlySummary: z.boolean(),
 });
 
-/**
- * Position Size Defaults value object schema
- */
 export const PositionSizeDefaultsSchema = z.object({
   walletAddress: z.string().nullable(),
   stopLossPercent: z.number().min(0).max(100).nullable(),
 });
 
-/**
- * Guild Settings entity schema
- */
 export const GuildSettingsSchema = z.object({
   guildId: z.string().min(1),
   positionDisplayEnabled: z.boolean(),
@@ -36,10 +27,6 @@ export type GuildSettingsData = z.infer<typeof GuildSettingsSchema>;
 export type SummaryPreferences = z.infer<typeof SummaryPreferencesSchema>;
 export type PositionSizeDefaults = z.infer<typeof PositionSizeDefaultsSchema>;
 
-/**
- * Guild Settings domain entity
- * Represents Discord guild configuration and preferences
- */
 export class GuildSettingsEntity {
   private constructor(
     public readonly guildId: string,
@@ -53,9 +40,6 @@ export class GuildSettingsEntity {
     public readonly createdAt: number,
   ) {}
 
-  /**
-   * Creates a new GuildSettingsEntity with validation
-   */
   static create(data: GuildSettingsData): GuildSettingsEntity {
     const validated = GuildSettingsSchema.parse(data);
 
@@ -72,9 +56,6 @@ export class GuildSettingsEntity {
     );
   }
 
-  /**
-   * Creates guild settings with default values
-   */
   static createDefault(guildId: string): GuildSettingsEntity {
     return GuildSettingsEntity.create({
       guildId,
@@ -96,16 +77,10 @@ export class GuildSettingsEntity {
     });
   }
 
-  /**
-   * Business logic: Check if guild has global channel configured
-   */
   public hasGlobalChannel(): boolean {
     return this.globalChannelId !== null;
   }
 
-  /**
-   * Business logic: Check if any summary is enabled
-   */
   public hasSummaryEnabled(): boolean {
     return (
       this.summaryPreferences.dailySummary ||
@@ -114,16 +89,10 @@ export class GuildSettingsEntity {
     );
   }
 
-  /**
-   * Business logic: Check if position size defaults are configured
-   */
   public hasPositionDefaults(): boolean {
     return this.positionSizeDefaults.walletAddress !== null || this.positionSizeDefaults.stopLossPercent !== null;
   }
 
-  /**
-   * Create updated entity with new values
-   */
   public update(updates: Partial<Omit<GuildSettingsData, 'guildId' | 'createdAt'>>): GuildSettingsEntity {
     return GuildSettingsEntity.create({
       guildId: this.guildId,

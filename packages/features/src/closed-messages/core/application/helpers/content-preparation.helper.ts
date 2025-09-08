@@ -9,10 +9,6 @@ import type { ClosedPosition } from '../../domain/value-objects/closed-position.
 
 const logger = createFeatureLogger('content-preparation-helper');
 
-/**
- * Prepares complete content for closed position notifications
- * Handles message formatting and image generation
- */
 export async function prepareClosedPositionContent(
   originalMessage: Message,
   closedPosition: ClosedPosition,

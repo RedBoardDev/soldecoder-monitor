@@ -1,8 +1,5 @@
 import { DomainError } from '../../../../shared/domain';
 
-/**
- * Session Not Found Error
- */
 export class SessionNotFoundError extends DomainError {
   readonly code = 'SESSION_NOT_FOUND';
   readonly category = 'BUSINESS_RULE' as const;
@@ -15,9 +12,6 @@ export class SessionNotFoundError extends DomainError {
   }
 }
 
-/**
- * Session Expired Error
- */
 export class SessionExpiredError extends DomainError {
   readonly code = 'SESSION_EXPIRED';
   readonly category = 'VALIDATION' as const;
@@ -30,9 +24,6 @@ export class SessionExpiredError extends DomainError {
   }
 }
 
-/**
- * Invalid Step Navigation Error
- */
 export class InvalidStepNavigationError extends DomainError {
   readonly code = 'INVALID_STEP_NAVIGATION';
   readonly category = 'VALIDATION' as const;
@@ -45,9 +36,6 @@ export class InvalidStepNavigationError extends DomainError {
   }
 }
 
-/**
- * Session Ownership Error
- */
 export class SessionOwnershipError extends DomainError {
   readonly code = 'SESSION_OWNERSHIP';
   readonly category = 'VALIDATION' as const;
@@ -60,9 +48,6 @@ export class SessionOwnershipError extends DomainError {
   }
 }
 
-/**
- * Session Data Incomplete Error
- */
 export class SessionDataIncompleteError extends DomainError {
   readonly code = 'SESSION_DATA_INCOMPLETE';
   readonly category = 'VALIDATION' as const;
@@ -74,9 +59,6 @@ export class SessionDataIncompleteError extends DomainError {
   }
 }
 
-/**
- * Session Already Exists Error
- */
 export class SessionAlreadyExistsError extends DomainError {
   readonly code = 'SESSION_ALREADY_EXISTS';
   readonly category = 'VALIDATION' as const;

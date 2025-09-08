@@ -18,7 +18,7 @@ export async function buildSummaryMessage(
   const uiData = mapSummaryToDiscordUI(summaryData, period);
   const imageData = mapSummaryToImageData(summaryData, period);
 
-  const backgroundImagePath = path.join(ASSET_PATH, 'test1.png');
+  const backgroundImagePath = path.join(ASSET_PATH, 'summary.png');
 
   const imageBuffer = await buildSummaryImage(imageData, backgroundImagePath);
   const fileName = `summary-${summaryType}.png`;

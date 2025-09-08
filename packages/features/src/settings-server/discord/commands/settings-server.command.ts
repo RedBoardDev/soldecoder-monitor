@@ -8,9 +8,6 @@ import { buildServerSettingsComponents } from '../ui/server-settings-components.
 
 const logger = createFeatureLogger('settings-server-command');
 
-/**
- * Handler for /settings-server slash command
- */
 export class SettingsServerCommandHandler {
   constructor(private readonly getServerSettingsUseCase: GetServerSettingsUseCase) {}
 
@@ -38,9 +35,6 @@ export class SettingsServerCommandHandler {
     }
   }
 
-  /**
-   * Handle errors with appropriate Discord responses
-   */
   private async handleError(interaction: ChatInputCommandInteraction, error: unknown): Promise<void> {
     logger.error('Settings server command failed', error as Error, {
       guildId: interaction.guildId,
@@ -50,11 +44,9 @@ export class SettingsServerCommandHandler {
     let message: string;
 
     if (error instanceof DomainError) {
-      // Handle domain-specific errors with user-friendly messages
       message = error.message;
       logger.debug('Domain error handled', error.toLogContext());
     } else {
-      // Handle unexpected errors
       message = '❌ An unexpected error occurred. Please try again later.';
       logger.error('Unexpected error in settings-server command', error as Error);
     }

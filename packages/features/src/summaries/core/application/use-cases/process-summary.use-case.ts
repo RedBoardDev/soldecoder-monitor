@@ -83,7 +83,6 @@ export class ProcessSummaryUseCase {
         });
       }
 
-      // Wait before processing the next guild to avoid rate limits
       if (guild !== guilds[guilds.length - 1]) {
         await new Promise((resolve) => setTimeout(resolve, time.seconds(30)));
       }

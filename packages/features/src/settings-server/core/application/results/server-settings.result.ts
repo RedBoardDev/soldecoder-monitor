@@ -1,9 +1,6 @@
 import type { GuildSettingsEntity } from '@soldecoder-monitor/data';
 import type { ServerSettingsOverview } from '../../domain/types/settings-server.types';
 
-/**
- * Result for GetServerSettingsUseCase
- */
 export class ServerSettingsResult {
   constructor(
     public readonly guildSettings: GuildSettingsEntity,

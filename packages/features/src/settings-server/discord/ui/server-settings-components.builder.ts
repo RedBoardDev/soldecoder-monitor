@@ -4,7 +4,6 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 export function buildServerSettingsComponents(guildSettings: GuildSettingsEntity): ActionRowBuilder<ButtonBuilder>[] {
   const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
-  // Première ligne : Change Global Channel et Edit Position
   const firstRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId('settings-server:channel:select')
@@ -18,7 +17,6 @@ export function buildServerSettingsComponents(guildSettings: GuildSettingsEntity
       .setEmoji('💰'),
   );
 
-  // Deuxième ligne : Disable Position Display et Disable Forward
   const secondRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId('settings-server:toggle:positionDisplay')
@@ -32,7 +30,6 @@ export function buildServerSettingsComponents(guildSettings: GuildSettingsEntity
       .setEmoji('🔄'),
   );
 
-  // Troisième ligne : Boutons Summary
   const thirdRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId('settings-server:toggle:weeklySummary')

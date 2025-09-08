@@ -70,9 +70,6 @@ export class SendClosedNotificationUseCase {
     }
   }
 
-  /**
-   * Sends message to Discord channel with fallback logic
-   */
   private async sendToChannel(
     originalMessage: Message,
     content: string,
@@ -101,10 +98,6 @@ export class SendClosedNotificationUseCase {
     }
   }
 
-  /**
-   * Deletes the original message and resends it without attachments
-   * This is the only way I found to remove attachments from another bot's message
-   */
   private async deleteAndResendOriginalMessage(originalMessage: Message): Promise<Message> {
     const channel = originalMessage.channel as TextChannel;
 

@@ -9,9 +9,6 @@ import { buildChannelSelectComponent } from '../ui/channel-select.component';
 import { buildServerSettingsEmbed } from '../ui/server-settings.embed';
 import { buildServerSettingsComponents } from '../ui/server-settings-components.builder';
 
-/**
- * Handler for channel selection interactions
- */
 export class ChannelInteractionHandler extends BaseInteractionHandler {
   constructor(
     private readonly getServerSettingsUseCase: GetServerSettingsUseCase,
@@ -44,16 +41,13 @@ export class ChannelInteractionHandler extends BaseInteractionHandler {
     try {
       const guild = this.validateGuildContext(interaction);
 
-      // Validate channel permissions
       await this.permissionValidator.validateChannelAccess(guild, selectedChannelId);
 
-      // Update guild settings
       const updateCommand = new UpdateServerSettingsCommand(guild.id, {
         globalChannelId: selectedChannelId,
       });
       await this.updateServerSettingsUseCase.execute(updateCommand);
 
-      // Refresh the server settings view
       await this.refreshServerSettings(interaction);
     } catch (error) {
       await this.handleErrorWithReset(interaction, error, () => this.refreshServerSettings(interaction));

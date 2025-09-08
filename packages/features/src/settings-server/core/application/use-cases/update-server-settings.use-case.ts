@@ -3,10 +3,6 @@ import { GuildSettingsNotFoundError } from '../../domain/errors/settings-server.
 import type { UpdateServerSettingsCommand } from '../commands/update-server-settings.command';
 import { UpdateServerSettingsResult } from '../results/update-server-settings.result';
 
-/**
- * Use Case: Update Server Settings
- * Updates specific guild settings and returns the updated entity
- */
 export class UpdateServerSettingsUseCase {
   constructor(private readonly guildSettingsRepository: GuildSettingsRepository) {}
 
@@ -17,7 +13,6 @@ export class UpdateServerSettingsUseCase {
       throw new GuildSettingsNotFoundError(command.guildId);
     }
 
-    // Track which fields are being updated
     const updatedFields: string[] = [];
 
     // Merge updates with existing settings
@@ -49,7 +44,7 @@ export class UpdateServerSettingsUseCase {
             command.updates.summaryPreferences.monthlySummary !== undefined
               ? command.updates.summaryPreferences.monthlySummary
               : existingSettings.summaryPreferences.monthlySummary,
-          dailySummary: existingSettings.summaryPreferences.dailySummary, // Keep existing value
+          dailySummary: existingSettings.summaryPreferences.dailySummary,
         }
       : existingSettings.summaryPreferences;
 

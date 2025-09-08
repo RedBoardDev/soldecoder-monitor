@@ -1,6 +1,3 @@
-/**
- * Rich Value Object representing a closed position with complete performance and metadata
- */
 export class ClosedPosition {
   constructor(
     public readonly tokenName0: string,
@@ -24,20 +21,13 @@ export class ClosedPosition {
     }
   }
 
-  /**
-   * Checks if position meets the configured threshold
-   * @param threshold - Threshold configuration from channel config
-   * @param triggerType - Type of trigger ('take_profit' | 'stop_loss' | null)
-   */
   meetsThreshold(threshold: number | string | null, triggerType: 'take_profit' | 'stop_loss' | null = null): boolean {
     if (threshold === null) return true;
 
-    // Legacy numeric threshold
     if (typeof threshold === 'number') {
       return Math.abs(this.pnlPercentageSol) >= threshold;
     }
 
-    // String-based threshold logic
     switch (threshold) {
       case 'TP':
         return triggerType === 'take_profit';

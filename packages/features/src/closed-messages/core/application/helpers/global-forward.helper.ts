@@ -4,10 +4,6 @@ import type { Message } from 'discord.js';
 
 const logger = createFeatureLogger('global-forward-helper');
 
-/**
- * Forwards message to global channel if enabled in guild settings
- * Only forwards for triggered events (take profit / stop loss) and if threshold is met
- */
 export async function forwardToGlobalChannelIfEnabled(
   guildSettingsRepository: GuildSettingsRepository,
   originalMessage: Message,

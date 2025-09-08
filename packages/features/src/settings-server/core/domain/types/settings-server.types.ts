@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Server Settings Overview Schema
- */
 export const serverSettingsOverviewSchema = z.object({
   guildId: z.string(),
   positionDisplayEnabled: z.boolean(),
@@ -15,9 +12,6 @@ export const serverSettingsOverviewSchema = z.object({
   }),
 });
 
-/**
- * Server Settings Update Schema
- */
 export const serverSettingsUpdateSchema = z.object({
   positionDisplayEnabled: z.boolean().optional(),
   globalChannelId: z.string().nullable().optional(),

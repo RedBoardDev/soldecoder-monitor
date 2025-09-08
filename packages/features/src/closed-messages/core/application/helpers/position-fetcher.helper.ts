@@ -25,12 +25,6 @@ async function fetchSinglePosition(
   }
 }
 
-/**
- * Fetches detailed position data for multiple position IDs with retry logic
- * @param lpAgentService - LpAgent service instance
- * @param positionIds - Array of position IDs to fetch
- * @returns Array of detailed position data
- */
 export async function fetchPositionsByIds(
   lpAgentService: ILpAgentService,
   positionIds: string[],

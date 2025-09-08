@@ -8,8 +8,6 @@ const logger = createFeatureLogger('cached-repo');
 /**
  * Base class for repositories with caching capabilities
  * Provides generic cache patterns while allowing dependency injection
- *
- * ⚠️ CRITICAL: Cache patterns are proven to work - preserve core logic
  */
 export abstract class CachedRepositoryBase {
   protected readonly defaultTtlMs = 30 * 60 * 1000; // 30 minutes

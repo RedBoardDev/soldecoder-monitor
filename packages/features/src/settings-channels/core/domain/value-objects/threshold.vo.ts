@@ -89,7 +89,6 @@ export class ThresholdVO {
   static fromString(input: string): { success: true; threshold: ThresholdVO } | { success: false; error: string } {
     const trimmed = input.trim().toUpperCase();
 
-    // Handle special values
     if (trimmed === 'TP') {
       return { success: true, threshold: new ThresholdVO('TP') };
     }
@@ -103,7 +102,6 @@ export class ThresholdVO {
       return { success: true, threshold: new ThresholdVO(null) };
     }
 
-    // Handle numeric values
     const num = Number.parseFloat(trimmed);
     if (Number.isNaN(num)) {
       return {
@@ -119,7 +117,6 @@ export class ThresholdVO {
       };
     }
 
-    // Round to 2 decimal places
     const rounded = Math.round(num * 100) / 100;
     return { success: true, threshold: new ThresholdVO(rounded) };
   }

@@ -1,8 +1,5 @@
 import type { GuildSettingsEntity } from '@soldecoder-monitor/data';
 
-/**
- * Result for UpdateServerSettingsUseCase
- */
 export class UpdateServerSettingsResult {
   constructor(
     public readonly guildSettings: GuildSettingsEntity,
