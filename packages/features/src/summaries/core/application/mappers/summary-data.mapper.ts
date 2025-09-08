@@ -2,10 +2,11 @@ import type { LpAgentOverviewData } from '@shared/discord/types/lpagent.types';
 import type { LpAgentPeriodData, SummaryData } from '../../domain/types/summary-data.types';
 import type { SummaryContextVO } from '../../domain/value-objects/summary-context.vo';
 
-/**
- * Extract summary data from LpAgent overview based on summary context
- */
-export function extractSummaryData(overview: LpAgentOverviewData, context: SummaryContextVO): SummaryData {
+export function extractSummaryData(
+  overview: LpAgentOverviewData,
+  context: SummaryContextVO,
+  netWorth: number,
+): SummaryData {
   const periodData: LpAgentPeriodData = {
     total_pnl: overview.total_pnl,
     total_pnl_native: overview.total_pnl_native,
@@ -16,17 +17,20 @@ export function extractSummaryData(overview: LpAgentOverviewData, context: Summa
     expected_value_native: overview.expected_value_native,
   };
 
-  const extractedData = context.extractPeriodData(periodData);
+  const extractedData = context.extractPeriodData(
+    periodData as unknown as Record<string, { '7D': number; '1M': number }>,
+  );
 
   return {
-    totalPnl: extractedData.total_pnl,
-    totalPnlNative: extractedData.total_pnl_native,
-    winRateNative: extractedData.win_rate_native,
-    totalFeeNative: extractedData.total_fee_native,
-    closedLp: extractedData.closed_lp,
-    avgInflowNative: extractedData.avg_inflow_native,
-    expectedValueNative: extractedData.expected_value_native,
-    avgMonthlyPnlNative: extractedData.avg_monthly_pnl_native,
-    avgMonthlyInflowNative: extractedData.avg_monthly_inflow_native,
+    totalPnl: extractedData.total_pnl || 0,
+    totalPnlNative: extractedData.total_pnl_native || 0,
+    winRateNative: extractedData.win_rate_native || 0,
+    totalFeeNative: extractedData.total_fee_native || 0,
+    closedLp: extractedData.closed_lp || 0,
+    avgInflowNative: extractedData.avg_inflow_native || 0,
+    expectedValueNative: extractedData.expected_value_native || 0,
+    avgMonthlyPnlNative: overview.avg_monthly_pnl_native || 0,
+    avgMonthlyInflowNative: overview.avg_monthly_inflow_native || 0,
+    netWorth,
   };
 }

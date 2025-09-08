@@ -1,6 +1,6 @@
 /**
  * Net Worth Value Object
- * 
+ *
  * Represents a validated net worth amount with business rules
  */
 export class NetWorth {
@@ -27,10 +27,6 @@ export class NetWorth {
 
   public getFormatted(): string {
     return `${this.value.toFixed(2)} SOL`;
-  }
-
-  public isHigh(): boolean {
-    return this.value > 100;
   }
 
   public getMaxRecommendedPositionSize(): number {

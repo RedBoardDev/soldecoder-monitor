@@ -1,11 +1,6 @@
 import type { SummaryPreferences } from '@soldecoder-monitor/data';
 import type { SummaryType } from '../types/summary.types';
 
-/**
- * Value Object representing the context for a summary execution
- * Immutable and encapsulates summary execution metadata
- * Not tied to any specific guild - represents the summary type and execution context
- */
 export class SummaryContextVO {
   constructor(
     public readonly type: SummaryType,
@@ -46,16 +41,10 @@ export class SummaryContextVO {
     }
   }
 
-  /**
-   * Get the period key for LpAgent data based on summary type
-   */
   public get periodKey(): '7D' | '1M' {
     return this.type === 'weekly' ? '7D' : '1M';
   }
 
-  /**
-   * Extract period-specific data from LpAgent overview
-   */
   public extractPeriodData<T extends Record<string, { '7D': number; '1M': number }>>(data: T): Record<keyof T, number> {
     const result = {} as Record<keyof T, number>;
     const periodKey = this.periodKey;

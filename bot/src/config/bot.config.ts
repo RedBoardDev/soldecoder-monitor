@@ -6,6 +6,7 @@ import { PositionSizeFeature } from '@soldecoder-monitor/features/src/positions-
 import { RegisterProcessFeature } from '@soldecoder-monitor/features/src/register-process/register-process.feature';
 import { SettingsChannelsFeature } from '@soldecoder-monitor/features/src/settings-channels/settings-channels.feature';
 import { SettingsServerFeature } from '@soldecoder-monitor/features/src/settings-server/settings-server.feature';
+import { SummariesFeature } from '@soldecoder-monitor/features/src/summaries/summaries.feature';
 import type { Feature } from '@soldecoder-monitor/features-sdk';
 import { GatewayIntentBits, Partials } from 'discord.js';
 
@@ -41,6 +42,7 @@ export const botConfig = {
     { name: 'SettingsServerFeature', class: SettingsServerFeature },
     { name: 'ClosedMessagesFeature', class: ClosedMessagesFeature },
     { name: 'RegisterProcessFeature', class: RegisterProcessFeature },
+    { name: 'SummariesFeature', class: SummariesFeature },
   ] as Array<{ name: string; class: new () => Feature }>,
 
   /**

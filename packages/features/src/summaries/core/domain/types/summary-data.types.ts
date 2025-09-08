@@ -1,21 +1,20 @@
-/**
- * Summary data extracted from LpAgent overview for a specific period
- */
-export interface SummaryData {
-  totalPnl: number;
-  totalPnlNative: number;
-  winRateNative: number;
-  totalFeeNative: number;
-  closedLp: number;
-  avgInflowNative: number;
-  expectedValueNative: number;
-  avgMonthlyPnlNative: number;
-  avgMonthlyInflowNative: number;
-}
+import { z } from 'zod';
 
-/**
- * Raw LpAgent overview data structure for period extraction
- */
+export const SummaryDataSchema = z.object({
+  totalPnl: z.number(),
+  totalPnlNative: z.number(),
+  winRateNative: z.number(),
+  totalFeeNative: z.number(),
+  closedLp: z.number(),
+  avgInflowNative: z.number(),
+  expectedValueNative: z.number(),
+  avgMonthlyPnlNative: z.number(),
+  avgMonthlyInflowNative: z.number(),
+  netWorth: z.number(),
+});
+
+export type SummaryData = z.infer<typeof SummaryDataSchema>;
+
 export interface LpAgentPeriodData {
   total_pnl: { '7D': number; '1M': number };
   total_pnl_native: { '7D': number; '1M': number };
