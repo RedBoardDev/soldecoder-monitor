@@ -9,6 +9,7 @@ const logger = createFeatureLogger('guild-processor-helper');
 
 /**
  * Process position updates for a single guild
+ * Wrapped with comprehensive error handling to prevent crashes
  */
 export async function processGuildPositions(
   client: Client,
@@ -17,27 +18,34 @@ export async function processGuildPositions(
   channelConfigRepository: DynamoChannelConfigRepository,
   globalMessageService: GlobalMessageUpdateService,
 ): Promise<void> {
-  const guildSettings = await guildSettingsRepository.getByGuildId(guildId);
-  if (!guildSettings?.positionDisplayEnabled || !guildSettings?.globalChannelId) {
-    return;
+  try {
+    const guildSettings = await guildSettingsRepository.getByGuildId(guildId);
+    if (!guildSettings?.positionDisplayEnabled || !guildSettings?.globalChannelId) {
+      return;
+    }
+
+    const channels = await channelConfigRepository.getByGuildId(guildId);
+    if (channels.length === 0) {
+      return;
+    }
+
+    const positionStatuses = await fetchPositionStatuses(
+      client,
+      channels.map((c) => c.channelId),
+    );
+
+    const channelCreatedAtMap = createChannelCreatedAtMap(channels);
+    const positionsByWallet = groupPositionsByWallet(positionStatuses, channelCreatedAtMap);
+
+    await globalMessageService.updateGlobalMessage(client, guildId, guildSettings.globalChannelId, positionsByWallet);
+
+    // logger.debug('Guild positions processed successfully', { guildId, positionCount: positionStatuses.length });
+  } catch (error) {
+    logger.error('Error in processGuildPositions - this should never cause a bot crash', error as Error, {
+      guildId,
+      errorType: error instanceof Error ? error.constructor.name : 'unknown',
+    });
   }
-
-  const channels = await channelConfigRepository.getByGuildId(guildId);
-  if (channels.length === 0) {
-    return;
-  }
-
-  const positionStatuses = await fetchPositionStatuses(
-    client,
-    channels.map((c) => c.channelId),
-  );
-
-  const channelCreatedAtMap = createChannelCreatedAtMap(channels);
-  const positionsByWallet = groupPositionsByWallet(positionStatuses, channelCreatedAtMap);
-
-  await globalMessageService.updateGlobalMessage(client, guildId, guildSettings.globalChannelId, positionsByWallet);
-
-  logger.debug('Guild positions processed successfully', { guildId, positionCount: positionStatuses.length });
 }
 
 /**

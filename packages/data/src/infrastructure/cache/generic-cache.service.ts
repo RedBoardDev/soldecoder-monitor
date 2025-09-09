@@ -68,10 +68,10 @@ export class GenericCacheService implements IGenericCacheService {
     });
 
     logger.debug('Cache set', {
-      key,
-      ttl: effectiveTtl,
-      cacheSize: this.cache.size,
-    });
+       key,
+       ttl: effectiveTtl,
+       cacheSize: this.cache.size,
+     });
   }
 
   delete(key: string): void {

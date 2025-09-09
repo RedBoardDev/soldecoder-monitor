@@ -31,7 +31,7 @@ export class LpAgentAdapter implements ILpAgentService {
       defaultTimeout: time.seconds(30),
       userAgent: 'SolDecoder-Bot/1.0 (LpAgent)',
       cacheKeyPrefix: 'lpagent',
-      defaultCacheTtlMs: time.minutes(2),
+      defaultCacheTtlMs: time.minutes(5),
       rateLimiter: {
         maxRequests: 3,
         windowMs: time.minutes(1),

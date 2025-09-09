@@ -184,15 +184,15 @@ export class BotService {
     process.on('SIGINT', () => shutdownHandler('SIGINT'));
     process.on('SIGTERM', () => shutdownHandler('SIGTERM'));
 
-    // Handle uncaught errors
+    // Handle uncaught errors - LOG ONLY, DO NOT EXIT
     process.on('uncaughtException', (error) => {
-      logger.error('Uncaught exception:', error);
-      process.exit(1);
+      logger.error('🚨 Uncaught exception - this should be handled properly:', error);
+      // DO NOT EXIT - just log the error and continue
     });
 
     process.on('unhandledRejection', (reason) => {
-      logger.error('Unhandled promise rejection:', reason);
-      process.exit(1);
+      logger.error('🚨 Unhandled promise rejection - this should be handled properly:', reason);
+      // DO NOT EXIT - just log the error and continue
     });
   }
 }

@@ -8,20 +8,20 @@ export function createFeatureLogger(featureName: string, baseLogger: ILogger): I
   const prefix = `[${featureName}]`;
 
   return {
-    debug: (message: string, ...args: unknown[]) => {
-      baseLogger.debug(`[${prefix}] ${message}`, ...args);
+    debug: (message: string, context?: Record<string, unknown>) => {
+      baseLogger.debug(`${prefix} ${message}`, context);
     },
 
-    info: (message: string, ...args: unknown[]) => {
-      baseLogger.info(`[${prefix}] ${message}`, ...args);
+    info: (message: string, context?: Record<string, unknown>) => {
+      baseLogger.info(`${prefix} ${message}`, context);
     },
 
-    warn: (message: string, ...args: unknown[]) => {
-      baseLogger.warn(`[${prefix}] ${message}`, ...args);
+    warn: (message: string, context?: Record<string, unknown>) => {
+      baseLogger.warn(`${prefix} ${message}`, context);
     },
 
     error: (message: string, error?: Error | unknown, context?: Record<string, unknown>) => {
-      baseLogger.error(`[${prefix}] ${message}`, error, context);
+      baseLogger.error(`${prefix} ${message}`, error, context);
     },
   };
 }
