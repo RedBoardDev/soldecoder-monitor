@@ -19,7 +19,12 @@
     "lint:biome": "biome lint --write .",
     "lint:biome:check": "biome lint .",
     "check": "biome check --write .",
-    "check:ci": "biome ci ."
+    "check:ci": "biome ci .",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:stop": "pm2 stop ecosystem.config.cjs",
+    "pm2:restart": "pm2 restart ecosystem.config.cjs",
+    "pm2:logs": "pm2 logs ecosystem.config.cjs",
+    "pm2:delete": "pm2 delete ecosystem.config.cjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.2",
