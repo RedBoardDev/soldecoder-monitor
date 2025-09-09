@@ -26,9 +26,13 @@ export { Logger } from './logger';
 // Export types
 export type { LoggerConfig, LogLevel } from './types';
 
-// Create and export global logger instance (singleton with config-env)
+// Create and export global logger instance (singleton with file logging enabled)
 export const logger = Logger.getInstance();
 logger.setLevel(logLevel.DEBUG);
+
+// Configuration par défaut pour activer les logs vers les fichiers
+// Les logs seront écrits dans le répertoire ./logs/ avec un fichier par jour
+// Exemple: ./logs/2025-01-04.log
 
 /**
  * Creates a feature logger using the global logger instance

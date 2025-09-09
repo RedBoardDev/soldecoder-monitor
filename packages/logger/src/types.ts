@@ -12,9 +12,9 @@ export enum logLevel {
 export type LogLevel = `${logLevel}`;
 
 export interface ILogger {
-  debug(message: string, ...args: unknown[]): void;
-  info(message: string, ...args: unknown[]): void;
-  warn(message: string, ...args: unknown[]): void;
+  debug(message: string, context?: Record<string, unknown>): void;
+  info(message: string, context?: Record<string, unknown>): void;
+  warn(message: string, context?: Record<string, unknown>): void;
   error(message: string, error?: Error | unknown, context?: Record<string, unknown>): void;
 }
 
@@ -22,6 +22,10 @@ export interface LoggerConfig {
   level: LogLevel;
   enableTimestamp?: boolean;
   enableColors?: boolean;
+  enableFileLogging?: boolean;
+  logDirectory?: string;
+  maxFileSize?: number;
+  maxFiles?: number;
 }
 
 export const LOG_LEVELS: Record<LogLevel, number> = {
