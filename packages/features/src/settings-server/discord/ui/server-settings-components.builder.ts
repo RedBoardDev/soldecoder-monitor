@@ -4,27 +4,12 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 export function buildServerSettingsComponents(guildSettings: GuildSettingsEntity): ActionRowBuilder<ButtonBuilder>[] {
   const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
-  // Main Configuration Row
-  const mainConfigRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId('settings-server:toggle:positionDisplay')
-      .setLabel(guildSettings.positionDisplayEnabled ? 'Disable Position Display' : 'Enable Position Display')
-      .setStyle(ButtonStyle.Secondary)
-      .setEmoji('📊'),
-    new ButtonBuilder()
-      .setCustomId('settings-server:toggle:forwardTpSl')
-      .setLabel(guildSettings.forwardTpSl ? 'Disable Forward TP/SL' : 'Enable Forward TP/SL')
-      .setStyle(ButtonStyle.Secondary)
-      .setEmoji('🔄'),
+  const firstRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId('settings-server:channel:select')
       .setLabel('Change Global Channel')
       .setStyle(ButtonStyle.Secondary)
       .setEmoji('📝'),
-  );
-
-  // Position Configuration Row
-  const positionConfigRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId('settings-server:position-defaults:modal')
       .setLabel('Edit Position Defaults')
@@ -32,6 +17,32 @@ export function buildServerSettingsComponents(guildSettings: GuildSettingsEntity
       .setEmoji('💰'),
   );
 
-  components.push(mainConfigRow, positionConfigRow);
+  const secondRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId('settings-server:toggle:positionDisplay')
+      .setLabel(guildSettings.positionDisplayEnabled ? 'Disable Position Display' : 'Enable Position Display')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('📊'),
+    new ButtonBuilder()
+      .setCustomId('settings-server:toggle:forward')
+      .setLabel(guildSettings.forward ? 'Disable Forward' : 'Enable Forward')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('🔄'),
+  );
+
+  const thirdRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId('settings-server:toggle:weeklySummary')
+      .setLabel(guildSettings.summaryPreferences.weeklySummary ? 'Disable Weekly Summary' : 'Enable Weekly Summary')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('📅'),
+    new ButtonBuilder()
+      .setCustomId('settings-server:toggle:monthlySummary')
+      .setLabel(guildSettings.summaryPreferences.monthlySummary ? 'Disable Monthly Summary' : 'Enable Monthly Summary')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('📊'),
+  );
+
+  components.push(firstRow, secondRow, thirdRow);
   return components;
 }

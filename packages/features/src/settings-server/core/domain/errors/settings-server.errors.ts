@@ -1,8 +1,5 @@
 import { DomainError } from '../../../../shared/domain/errors/domain-error.errors';
 
-/**
- * Error when guild settings are not found
- */
 export class GuildSettingsNotFoundError extends DomainError {
   readonly code = 'GUILD_SETTINGS_NOT_FOUND';
   readonly category = 'CONFIGURATION' as const;
@@ -12,9 +9,6 @@ export class GuildSettingsNotFoundError extends DomainError {
   }
 }
 
-/**
- * Error when invalid server settings are provided
- */
 export class InvalidServerSettingsError extends DomainError {
   readonly code = 'INVALID_SERVER_SETTINGS';
   readonly category = 'VALIDATION' as const;
@@ -24,9 +18,6 @@ export class InvalidServerSettingsError extends DomainError {
   }
 }
 
-/**
- * Error when user lacks permissions for server settings
- */
 export class InsufficientPermissionsError extends DomainError {
   readonly code = 'INSUFFICIENT_PERMISSIONS';
   readonly category = 'VALIDATION' as const;
@@ -36,9 +27,6 @@ export class InsufficientPermissionsError extends DomainError {
   }
 }
 
-/**
- * Error when channel access validation fails
- */
 export class ChannelAccessError extends DomainError {
   readonly code = 'CHANNEL_ACCESS_ERROR';
   readonly category = 'VALIDATION' as const;

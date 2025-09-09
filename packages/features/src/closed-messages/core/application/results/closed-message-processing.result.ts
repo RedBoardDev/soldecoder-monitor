@@ -1,3 +1,4 @@
+import type { TriggerData } from '../../domain/types/trigger.types';
 import type { ClosedPosition } from '../../domain/value-objects/closed-position.vo';
 
 export class ClosedMessageProcessingResult {
@@ -6,8 +7,10 @@ export class ClosedMessageProcessingResult {
     public readonly channelId: string,
     public readonly success: boolean,
     public readonly shouldSendToGlobal: boolean,
+    public readonly meetsThreshold: boolean,
     public readonly closedPosition?: ClosedPosition,
     public readonly reason?: string,
+    public readonly triggerData?: TriggerData | null,
   ) {}
 
   static success(
@@ -15,12 +18,23 @@ export class ClosedMessageProcessingResult {
     channelId: string,
     closedPosition: ClosedPosition,
     shouldSendToGlobal: boolean = false,
+    meetsThreshold: boolean = true,
+    triggerData: TriggerData | null = null,
   ): ClosedMessageProcessingResult {
-    return new ClosedMessageProcessingResult(messageId, channelId, true, shouldSendToGlobal, closedPosition);
+    return new ClosedMessageProcessingResult(
+      messageId,
+      channelId,
+      true,
+      shouldSendToGlobal,
+      meetsThreshold,
+      closedPosition,
+      undefined,
+      triggerData,
+    );
   }
 
   static failure(messageId: string, channelId: string, reason: string): ClosedMessageProcessingResult {
-    return new ClosedMessageProcessingResult(messageId, channelId, false, false, undefined, reason);
+    return new ClosedMessageProcessingResult(messageId, channelId, false, false, false, undefined, reason, null);
   }
 
   get isSuccess(): boolean {

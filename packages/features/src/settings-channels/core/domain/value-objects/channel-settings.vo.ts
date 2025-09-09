@@ -1,9 +1,6 @@
 import type { ChannelConfigEntity } from '@soldecoder-monitor/data';
+import { ThresholdVO } from './threshold.vo';
 
-/**
- * Value Object for Channel Settings
- * Encapsulates the presentation logic for channel configurations
- */
 export class ChannelSettings {
   private constructor(
     public readonly channelId: string,
@@ -16,26 +13,23 @@ export class ChannelSettings {
     const configSummary: string[] = [];
     const detailedInfo: Record<string, string> = {};
 
-    // Build feature summary
-    if (config.notifyOnClose) configSummary.push('🔔 Alerts');
-    if (config.image) configSummary.push('📷 Images');
-    if (config.pin) configSummary.push('📌 Auto-pin');
+    if (config.image) configSummary.push('📷');
+    if (config.pin) configSummary.push('📌');
     if (config.tagType && config.tagType !== 'user' && config.tagType !== 'role') {
-      // Handle the case where tagType is not null but also not 'NONE'
     } else if (config.tagType) {
-      configSummary.push('🏷️ Mentions');
+      configSummary.push('🏷️');
     }
-    if (config.threshold && config.threshold > 0) {
-      configSummary.push(`📊 ${config.threshold}% threshold`);
+    if (config.threshold !== null) {
+      const thresholdVO = new ThresholdVO(config.threshold);
+      configSummary.push(thresholdVO.getEmoji());
     }
 
-    // Build detailed info
-    detailedInfo['Close Alerts'] = config.notifyOnClose ? '✅ Enabled' : '❌ Disabled';
-    detailedInfo['Alert Threshold'] = config.threshold && config.threshold > 0 ? `±${config.threshold}%` : '❌ Not set';
-    detailedInfo['Position Images'] = config.image ? '✅ Enabled' : '❌ Disabled';
-    detailedInfo['Auto-Pin'] = config.pin ? '✅ Enabled' : '❌ Disabled';
+    const thresholdVO = new ThresholdVO(config.threshold);
+    detailedInfo['Alert Threshold'] = thresholdVO.isNumeric ? thresholdVO.getDisplayText() : thresholdVO.getEmoji();
 
-    // Handle mention configuration
+    detailedInfo['Position Images'] = config.image ? '✅' : '❌';
+    detailedInfo['Auto-Pin'] = config.pin ? '✅' : '❌';
+
     let mentionInfo = '❌ None';
     if (config.tagType && config.tagId) {
       mentionInfo = config.tagType === 'role' ? `<@&${config.tagId}>` : `<@${config.tagId}>`;
@@ -47,6 +41,13 @@ export class ChannelSettings {
 
   get featuresDescription(): string {
     return this.configSummary.length > 0 ? this.configSummary.join(' • ') : 'Basic monitoring';
+  }
+
+  get emojiSummary(): string {
+    if (this.configSummary.length === 0) {
+      return '📊 Basic monitoring';
+    }
+    return this.configSummary.join(' ');
   }
 
   get hasAnyFeatures(): boolean {

@@ -4,10 +4,6 @@ import { GuildSettingsNotFoundError } from '../../domain/errors/settings-server.
 import type { GetServerSettingsCommand } from '../commands/get-server-settings.command';
 import { ServerSettingsResult } from '../results/server-settings.result';
 
-/**
- * Use Case: Get Server Settings Overview
- * Returns guild settings with additional context like channel names
- */
 export class GetServerSettingsUseCase {
   constructor(private readonly guildSettingsRepository: GuildSettingsRepository) {}
 
@@ -18,7 +14,6 @@ export class GetServerSettingsUseCase {
       throw new GuildSettingsNotFoundError(command.guildId);
     }
 
-    // Get global channel name if configured
     let globalChannelName: string | undefined;
     if (guildSettings.globalChannelId) {
       const channel = guild.channels.cache.get(guildSettings.globalChannelId);

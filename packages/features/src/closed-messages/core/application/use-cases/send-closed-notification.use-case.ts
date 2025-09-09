@@ -3,9 +3,10 @@ import { createFeatureLogger } from '@soldecoder-monitor/logger';
 import type { Message, TextChannel } from 'discord.js';
 import { prepareMention } from '../../../discord/helpers/mention.helper';
 import { safePin } from '../../../discord/helpers/safe-pin.helper';
+import type { TriggerData } from '../../domain/types/trigger.types';
 import type { ClosedPosition } from '../../domain/value-objects/closed-position.vo';
 import { prepareClosedPositionContent } from '../helpers/content-preparation.helper';
-import { sendToGlobalChannelIfEnabled } from '../helpers/global-channel.helper';
+import { forwardToGlobalChannelIfEnabled } from '../helpers/global-forward.helper';
 
 const logger = createFeatureLogger('send-closed-notification-use-case');
 
@@ -17,15 +18,18 @@ export class SendClosedNotificationUseCase {
     closedPosition: ClosedPosition,
     shouldSendToGlobal: boolean,
     channelConfig: ChannelConfigEntity,
+    meetsThreshold: boolean,
+    triggerData: TriggerData | null = null,
   ): Promise<void> {
     try {
-      const mentionData = prepareMention(channelConfig);
+      const mentionData = prepareMention(channelConfig, meetsThreshold);
 
       const preparedContent = await prepareClosedPositionContent(
         originalMessage,
         closedPosition,
         mentionData.mention,
         channelConfig,
+        triggerData,
       );
 
       const cleanMessage = await this.deleteAndResendOriginalMessage(originalMessage);
@@ -37,24 +41,24 @@ export class SendClosedNotificationUseCase {
         mentionData.allowedMentions,
       );
 
-      if (channelConfig.pin) {
-        try {
-          await safePin(sentMessage);
-        } catch (pinError) {
-          logger.warn('Failed to pin message', {
-            error: pinError instanceof Error ? pinError.message : pinError,
-            messageId: sentMessage.id,
-          });
-        }
+      if (!channelConfig.pin || !meetsThreshold) return;
+
+      try {
+        await safePin(sentMessage);
+      } catch (pinError) {
+        logger.error('Failed to pin message', {
+          error: pinError instanceof Error ? pinError.message : pinError,
+          messageId: sentMessage.id,
+        });
       }
 
-      if (!shouldSendToGlobal || !preparedContent.triggerData) return;
+      if (!shouldSendToGlobal) return;
 
-      await sendToGlobalChannelIfEnabled(
+      await forwardToGlobalChannelIfEnabled(
         this.guildSettingsRepository,
-        originalMessage,
-        preparedContent.contentBody,
+        sentMessage,
         channelConfig.guildId,
+        meetsThreshold,
       );
     } catch (error) {
       logger.error('Failed to send closed position notification', error as Error, {
@@ -66,9 +70,6 @@ export class SendClosedNotificationUseCase {
     }
   }
 
-  /**
-   * Sends message to Discord channel with fallback logic
-   */
   private async sendToChannel(
     originalMessage: Message,
     content: string,
@@ -97,10 +98,6 @@ export class SendClosedNotificationUseCase {
     }
   }
 
-  /**
-   * Deletes the original message and resends it without attachments
-   * This is the only way I found to remove attachments from another bot's message
-   */
   private async deleteAndResendOriginalMessage(originalMessage: Message): Promise<Message> {
     const channel = originalMessage.channel as TextChannel;
 

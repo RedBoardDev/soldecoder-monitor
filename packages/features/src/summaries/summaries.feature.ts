@@ -1,6 +1,11 @@
+import { LpAgentAdapter } from '@shared/infrastructure/lpagent.adapter';
+import { PortfolioService } from '@shared/infrastructure/portfolio.service';
 import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
-import { Cron, Feature, type FeatureContext, FeatureDecorator } from '@soldecoder-monitor/features-sdk';
+import { Cron, Feature, type FeatureContext, FeatureDecorator, SlashCommand } from '@soldecoder-monitor/features-sdk';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import { GetAllGuildConfigsUseCase } from './core/application/use-cases/get-all-guild-configs.use-case';
+import { ProcessSummaryUseCase } from './core/application/use-cases/process-summary.use-case';
+import { SendSummaryNotificationUseCase } from './core/application/use-cases/send-summary-notification.use-case';
 import { SummaryContextVO } from './core/domain/value-objects/summary-context.vo';
 import { SummarySchedulerHandler } from './discord/handlers/summary-scheduler.handler';
 
@@ -12,7 +17,6 @@ import { SummarySchedulerHandler } from './discord/handlers/summary-scheduler.ha
 })
 export class SummariesFeature extends Feature {
   private summaryHandler!: SummarySchedulerHandler;
-  private getAllGuildConfigsUseCase!: GetAllGuildConfigsUseCase;
 
   get metadata() {
     return {
@@ -27,10 +31,18 @@ export class SummariesFeature extends Feature {
     this.setContext(context);
 
     const guildSettingsRepository = DynamoGuildSettingsRepository.create();
+    const lpAgentAdapter = LpAgentAdapter.getInstance();
+    const portfolioService = PortfolioService.getInstance();
 
-    // Initialize summaries dependencies
-    this.getAllGuildConfigsUseCase = new GetAllGuildConfigsUseCase(guildSettingsRepository);
-    this.summaryHandler = new SummarySchedulerHandler(this.getAllGuildConfigsUseCase);
+    const getAllGuildConfigsUseCase = new GetAllGuildConfigsUseCase(guildSettingsRepository);
+    const processSummaryUseCase = new ProcessSummaryUseCase(
+      getAllGuildConfigsUseCase,
+      lpAgentAdapter,
+      portfolioService,
+    );
+    const sendNotificationUseCase = new SendSummaryNotificationUseCase(context);
+
+    this.summaryHandler = new SummarySchedulerHandler(processSummaryUseCase, sendNotificationUseCase);
   }
 
   @Cron({
@@ -39,7 +51,7 @@ export class SummariesFeature extends Feature {
     timezone: 'UTC',
   })
   async executeWeeklySummary(): Promise<void> {
-    const context = SummaryContextVO.system('weekly');
+    const context = SummaryContextVO.create('weekly');
     await this.executeScheduledSummary(context);
   }
 
@@ -49,22 +61,51 @@ export class SummariesFeature extends Feature {
     timezone: 'UTC',
   })
   async executeMonthlySummary(): Promise<void> {
-    const context = SummaryContextVO.system('monthly');
+    const context = SummaryContextVO.create('monthly');
     await this.executeScheduledSummary(context);
   }
 
-  /**
-   * Execute scheduled summary with proper context
-   */
-  private async executeScheduledSummary(context: SummaryContextVO): Promise<void> {
-    try {
-      this.context?.logger.info(`Starting ${context.getTypeLabel().toLowerCase()} summary scheduler execution`);
+  @SlashCommand({
+    name: 'weekly',
+    description: 'Test weekly summary processing',
+  })
+  async handleWeeklyCommand(interaction: ChatInputCommandInteraction): Promise<void> {
+    await interaction.deferReply();
 
+    try {
+      const context = SummaryContextVO.create('weekly');
       await this.summaryHandler.execute(context);
 
-      this.context?.logger.info(`${context.getTypeLabel()} summary scheduler execution completed`);
+      await interaction.editReply('✅ Weekly summary test completed');
     } catch (error) {
-      this.context?.logger.error(`${context.getTypeLabel()} summary scheduler failed`, error as Error);
+      await interaction.editReply('❌ Weekly summary test failed');
+      throw error;
+    }
+  }
+
+  @SlashCommand({
+    name: 'monthly',
+    description: 'Test monthly summary processing',
+  })
+  async handleMonthlyCommand(interaction: ChatInputCommandInteraction): Promise<void> {
+    await interaction.deferReply();
+
+    try {
+      const context = SummaryContextVO.create('monthly');
+      await this.summaryHandler.execute(context);
+
+      await interaction.editReply('✅ Monthly summary test completed');
+    } catch (error) {
+      await interaction.editReply('❌ Monthly summary test failed');
+      throw error;
+    }
+  }
+
+  private async executeScheduledSummary(context: SummaryContextVO): Promise<void> {
+    try {
+      await this.summaryHandler.execute(context);
+    } catch (error) {
+      this.context?.logger.error(`${context.typeLabel} summary scheduler failed`, error as Error);
     }
   }
 }

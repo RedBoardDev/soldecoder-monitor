@@ -1,4 +1,3 @@
-// Errors
 export {
   ChannelAlreadyConfiguredError,
   ChannelConfigNotFoundError,
@@ -6,7 +5,6 @@ export {
   NoChannelsConfiguredError,
 } from './errors/settings-channels.errors';
 
-// Types
 export {
   type AddChannelRequest,
   addChannelRequestSchema,
@@ -20,5 +18,5 @@ export {
   removeChannelRequestSchema,
 } from './types/settings-channels.types';
 
-// Value Objects
 export { ChannelSettings } from './value-objects/channel-settings.vo';
+export { ThresholdVO } from './value-objects/threshold.vo';

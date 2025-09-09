@@ -1,4 +1,4 @@
-import { time } from '@shared';
+import { time } from '@shared/domain';
 import type { IHttpClient } from '../application/interfaces/http-client.interface';
 import type { INftDataService, NftCacheInfo } from '../application/interfaces/nft-data.service.interface';
 import type { NftCollection } from '../domain/nft.types';
@@ -45,6 +45,7 @@ export class CoinGeckoAdapter implements INftDataService {
       const nftData = await this.httpClient.get(url, NftCollectionSchema, {
         cache: {
           enabled: true,
+          ttlMs: time.minutes(5),
           key: `nft-data:${collectionId}`,
         },
       });

@@ -15,7 +15,6 @@ export function buildChannelListEmbed(result: ChannelSettingsResult): EmbedBuild
 
   if (channels.length > 0) {
     channels.forEach((channel) => {
-      // Find the channel name from available channels or fallback
       const channelName = availableChannels.find((ch) => ch.id === channel.channelId)?.name || 'Unknown';
       const summary = ChannelSettings.fromChannelConfig(channel, channelName);
 

@@ -1,29 +1,304 @@
 import path from 'node:path';
-import { createCanvas, GlobalFonts, loadImage } from '@napi-rs/canvas';
+import { type CanvasRenderingContext2D, createCanvas, GlobalFonts, loadImage } from '@napi-rs/canvas';
 import type { ClosedPosition } from 'closed-messages/core';
-import type { TriggerData } from '../../core/domain/types/trigger.types';
-import { formatValue, selectBackgroundPNLCard } from '../helpers/select-background-image';
+import { selectBackgroundPNLCard } from '../helpers/select-background-image';
 
 GlobalFonts.registerFromPath(path.resolve(__dirname, '../../assets/fonts/VarelaRound-Regular.ttf'), 'Varela Round');
 
-/**
- * Value formatting for display
- */
-export interface ValueFormat {
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
+interface ValueFormat {
   sign: string;
   color: string;
 }
 
-export function formatDisplayValue(value: number): ValueFormat {
+interface TextStyle {
+  font: string;
+  fillStyle: string;
+  glowColor?: string;
+  glowBlur?: number;
+}
+
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface LayoutConfig {
+  width: number;
+  height: number;
+  margin: number;
+  lineGap: number;
+}
+
+interface TextElement {
+  text: string;
+  style: TextStyle;
+  position?: Position;
+}
+
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+
+const DEFAULT_LAYOUT: LayoutConfig = {
+  width: 1536,
+  height: 1024,
+  margin: 50,
+  lineGap: 100,
+};
+
+const STYLES = {
+  pair: {
+    token: {
+      font: 'bold 72px "Varela Round"',
+      fillStyle: '#f8f8f8',
+      glowColor: '#ffd700',
+      glowBlur: 10,
+    },
+    separator: {
+      font: 'bold 72px "Varela Round"',
+      fillStyle: '#ffd700',
+      glowColor: '#f8f8f8',
+      glowBlur: 20,
+    },
+  },
+  profit: {
+    main: {
+      font: 'bold 72px "Varela Round"',
+      glowBlur: 30,
+    },
+    secondary: {
+      font: 'bold 72px "Varela Round"',
+      fillStyle: '#f8f8f8',
+      glowColor: '#ffd700',
+      glowBlur: 10,
+    },
+  },
+  time: {
+    number: {
+      font: 'bold 48px "Varela Round"',
+      fillStyle: '#f8f8f8',
+      glowColor: '#ffff00',
+      glowBlur: 10,
+    },
+    unit: {
+      font: 'bold 48px "Varela Round"',
+      fillStyle: '#ffd700',
+      glowColor: '#ffd700',
+      glowBlur: 20,
+    },
+  },
+  metrics: {
+    label: {
+      font: 'bold 48px "Varela Round"',
+      fillStyle: '#ffd700',
+      glowColor: '#ffd700',
+      glowBlur: 10,
+    },
+    value: {
+      font: 'bold 48px "Varela Round"',
+      fillStyle: '#f8f8f8',
+      glowColor: '#ffd700',
+      glowBlur: 10,
+    },
+    pnlValue: {
+      font: 'bold 48px "Varela Round"',
+      glowBlur: 20,
+    },
+  },
+};
+
+// ============================================================================
+// CANVAS UTILITIES
+// ============================================================================
+
+class CanvasRenderer {
+  private ctx: CanvasRenderingContext2D;
+
+  constructor(ctx: CanvasRenderingContext2D) {
+    this.ctx = ctx;
+    this.ctx.textBaseline = 'middle';
+  }
+
+  setGlow(color: string, blur: number): void {
+    this.ctx.shadowColor = color;
+    this.ctx.shadowBlur = blur;
+  }
+
+  clearGlow(): void {
+    this.ctx.shadowColor = 'transparent';
+    this.ctx.shadowBlur = 0;
+  }
+
+  applyStyle(style: TextStyle): void {
+    this.ctx.font = style.font;
+    this.ctx.fillStyle = style.fillStyle;
+    if (style.glowColor && style.glowBlur) {
+      this.setGlow(style.glowColor, style.glowBlur);
+    }
+  }
+
+  measureText(text: string, style: TextStyle): number {
+    const prevFont = this.ctx.font;
+    this.ctx.font = style.font;
+    const width = this.ctx.measureText(text).width;
+    this.ctx.font = prevFont;
+    return width;
+  }
+
+  drawText(text: string, x: number, y: number, style: TextStyle): void {
+    this.applyStyle(style);
+    this.ctx.textAlign = 'left';
+    this.ctx.fillText(text, x, y);
+  }
+
+  drawTextGroup(elements: TextElement[], startX: number, y: number): void {
+    let currentX = startX;
+    for (const element of elements) {
+      this.drawText(element.text, currentX, y, element.style);
+      currentX += this.measureText(element.text, element.style);
+    }
+  }
+
+  drawTextRightAligned(elements: TextElement[], endX: number, y: number): void {
+    const totalWidth = elements.reduce((sum, el) => sum + this.measureText(el.text, el.style), 0);
+    this.drawTextGroup(elements, endX - totalWidth, y);
+  }
+}
+
+// ============================================================================
+// FORMATTERS
+// ============================================================================
+
+function formatDisplayValue(value: number): ValueFormat {
   if (value > 0) return { sign: '+', color: '#66ff66' };
-  if (value < 0) return { sign: '-', color: '#ff6666' };
+  if (value < 0) return { sign: '-', color: '#ff7878' };
   return { sign: '', color: '#ffd700' };
 }
 
-/**
- * Generates position image (placeholder implementation)
- */
-export async function buildPositionImage(closedPosition: ClosedPosition, triggerData?: TriggerData): Promise<Buffer> {
+function formatDuration(hours: number): { num1: string; unit1: string; num2: string; unit2: string } {
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  return {
+    num1: `${h}`,
+    unit1: 'h',
+    num2: `${m.toString().padStart(2, '0')}`,
+    unit2: 'mn',
+  };
+}
+
+// ============================================================================
+// COMPONENT BUILDERS
+// ============================================================================
+
+class PositionCardBuilder {
+  private renderer: CanvasRenderer;
+  private layout: LayoutConfig;
+
+  constructor(renderer: CanvasRenderer, layout: LayoutConfig) {
+    this.renderer = renderer;
+    this.layout = layout;
+  }
+
+  private getRightX(): number {
+    return this.layout.width - this.layout.margin;
+  }
+
+  private getCenterY(): number {
+    // Position centrale pour les éléments principaux
+    return this.layout.height / 2 - this.layout.lineGap;
+  }
+
+  private getBottomY(): number {
+    return this.layout.height - this.layout.margin - this.layout.lineGap;
+  }
+
+  drawTokenPair(token0: string, token1: string): void {
+    const y = this.getCenterY();
+    const elements: TextElement[] = [
+      { text: token0, style: STYLES.pair.token },
+      { text: '/', style: STYLES.pair.separator },
+      { text: token1, style: { ...STYLES.pair.token, glowBlur: 20 } },
+    ];
+    this.renderer.drawTextRightAligned(elements, this.getRightX(), y);
+  }
+
+  drawProfit(pnlUSD: number, pnlSOL: number): void {
+    const y = this.getCenterY() + this.layout.lineGap;
+    const usdFmt = formatDisplayValue(pnlUSD);
+    const solFmt = formatDisplayValue(pnlSOL);
+
+    const profitUsdText = `${usdFmt.sign}${Math.abs(pnlUSD).toFixed(2)}`;
+    const profitSolText = pnlSOL !== 0 ? ` (${solFmt.sign}${Math.abs(pnlSOL).toFixed(2)} SOL)` : '';
+
+    const elements: TextElement[] = [
+      {
+        text: profitUsdText,
+        style: { ...STYLES.profit.main, fillStyle: usdFmt.color, glowColor: usdFmt.color },
+      },
+    ];
+
+    if (profitSolText) {
+      elements.push({ text: profitSolText, style: STYLES.profit.secondary });
+    }
+
+    this.renderer.drawTextRightAligned(elements, this.getRightX(), y);
+  }
+
+  drawElapsedTime(hours: number): void {
+    const y = this.getCenterY() + this.layout.lineGap * 2;
+    const time = formatDuration(hours);
+
+    const elements: TextElement[] = [
+      { text: time.num1, style: STYLES.time.number },
+      { text: time.unit1, style: STYLES.time.unit },
+      { text: time.num2, style: STYLES.time.number },
+      { text: time.unit2, style: STYLES.time.unit },
+    ];
+
+    this.renderer.drawTextRightAligned(elements, this.getRightX(), y);
+  }
+
+  drawPNL(pnlPercentage: number): void {
+    const y = this.getBottomY() + this.layout.lineGap * 0.2;
+    const pctFmt = formatDisplayValue(pnlPercentage);
+    const pnlValueText = `${pctFmt.sign}${Math.abs(pnlPercentage).toFixed(2)}%`;
+
+    const elements: TextElement[] = [
+      { text: 'PNL: ', style: STYLES.metrics.label },
+      {
+        text: pnlValueText,
+        style: { ...STYLES.metrics.pnlValue, fillStyle: pctFmt.color, glowColor: pctFmt.color },
+      },
+    ];
+
+    this.renderer.drawTextRightAligned(elements, this.getRightX(), y);
+  }
+
+  drawTVL(tvlSOL: number, tvlUSD: number): void {
+    const y = this.getBottomY() + this.layout.lineGap;
+    const tvlText = `${tvlSOL.toFixed(2)} SOL ($${tvlUSD.toFixed(0)})`;
+
+    const elements: TextElement[] = [
+      { text: 'TVL: ', style: STYLES.metrics.label },
+      { text: tvlText, style: STYLES.metrics.value },
+    ];
+
+    this.renderer.drawTextRightAligned(elements, this.getRightX(), y);
+  }
+}
+
+// ============================================================================
+// MAIN FUNCTION
+// ============================================================================
+
+export async function buildPositionImage(
+  closedPosition: ClosedPosition,
+  layoutConfig: LayoutConfig = DEFAULT_LAYOUT,
+): Promise<Buffer> {
   const {
     tokenName0,
     tokenName1,
@@ -33,149 +308,24 @@ export async function buildPositionImage(closedPosition: ClosedPosition, trigger
     durationHours,
   } = closedPosition;
 
-  // PnL numbers
-  const pnlUSD = netResult.usd;
-  const pnlSOL = netResult.sol;
-
-  // TVL numbers
-  const tvlUSD = positionTVL.usd;
-  const tvlSOL = positionTVL.sol;
-
-  // Duration (convert back to hours for display)
-  const elapsedHours = durationHours;
-
-  // formatValue shared
-  const usdFmt: ValueFormat = formatValue(pnlUSD);
-  const solFmt: ValueFormat = formatValue(pnlSOL);
-  const pctFmt: ValueFormat = formatValue(pnlPercentage);
-
-  // elapsed time formatting
-  const h = Math.floor(elapsedHours);
-  const m = Math.round((elapsedHours - h) * 60);
-  const elapsedNum1 = `${h}`;
-  const elapsedUnit1 = 'h';
-  const elapsedNum2 = `${m.toString().padStart(2, '0')}`;
-  const elapsedUnit2 = 'mn';
-
-  // texts
-  const profitUsdText = `${usdFmt.sign}$${Math.abs(pnlUSD).toFixed(2)}`;
-  const profitSolText = pnlSOL !== 0 ? ` (${solFmt.sign}${Math.abs(pnlSOL).toFixed(2)} SOL)` : '';
-
-  // canvas
-  const width = 1536;
-  const height = 1024;
-  const margin = 50;
-  const canvas = createCanvas(width, height);
+  // Create canvas
+  const canvas = createCanvas(layoutConfig.width, layoutConfig.height);
   const ctx = canvas.getContext('2d');
 
-  // background
-  const bg = await loadImage(selectBackgroundPNLCard(pnlPercentage, triggerData?.type));
-  ctx.drawImage(bg, 0, 0, width, height);
+  // Draw background
+  const bg = await loadImage(selectBackgroundPNLCard(pnlPercentage));
+  ctx.drawImage(bg, 0, 0, layoutConfig.width, layoutConfig.height);
 
-  const x = width - margin;
-  const lineGap = 100;
-  const topY = margin + lineGap;
+  // Initialize renderer and builder
+  const renderer = new CanvasRenderer(ctx);
+  const builder = new PositionCardBuilder(renderer, layoutConfig);
 
-  ctx.textBaseline = 'middle';
-  function setGlow(color: string, blur: number) {
-    ctx.shadowColor = color;
-    ctx.shadowBlur = blur;
-  }
-
-  // 1) Pair with colored slash
-  ctx.font = 'bold 72px "Varela Round"';
-  const wLeft = ctx.measureText(tokenName0).width;
-  const wSlash = ctx.measureText('/').width;
-  const wRight = ctx.measureText(tokenName1).width;
-  const fullW = wLeft + wSlash + wRight;
-  const startX = x - fullW;
-
-  ctx.textAlign = 'left';
-  ctx.fillStyle = '#f8f8f8';
-  setGlow('#ffd700', 10);
-  ctx.fillText(tokenName0, startX, topY);
-
-  ctx.fillStyle = '#ffd700';
-  setGlow('#f8f8f8', 20);
-  ctx.fillText('/', startX + wLeft, topY);
-
-  ctx.fillStyle = '#f8f8f8';
-  setGlow('#ffd700', 20);
-  ctx.fillText(tokenName1, startX + wLeft + wSlash, topY);
-
-  // 2) Profit line
-  ctx.font = 'bold 72px "Varela Round"';
-  ctx.textAlign = 'left';
-
-  const wUsd = ctx.measureText(profitUsdText).width;
-  setGlow(usdFmt.color, 30);
-  ctx.fillStyle = usdFmt.color;
-  ctx.fillText(profitUsdText, x - (wUsd + ctx.measureText(profitSolText).width), topY + lineGap);
-
-  ctx.fillStyle = '#f8f8f8';
-  setGlow('#ffd700', 10);
-  ctx.fillText(profitSolText, x - ctx.measureText(profitSolText).width, topY + lineGap);
-
-  // 3) Elapsed time
-  ctx.font = 'bold 48px "Varela Round"';
-  const w1 = ctx.measureText(elapsedNum1).width;
-  const u1 = ctx.measureText(elapsedUnit1).width;
-  const w2 = ctx.measureText(elapsedNum2).width;
-  const u2 = ctx.measureText(elapsedUnit2).width;
-  const fullWTime = w1 + u1 + w2 + u2;
-  const startXTime = x - fullWTime;
-
-  ctx.textAlign = 'left';
-  ctx.fillStyle = '#f8f8f8';
-  setGlow('#ffff00', 10);
-  ctx.fillText(elapsedNum1, startXTime, topY + lineGap * 2);
-
-  setGlow('#ffd700', 20);
-  ctx.fillStyle = '#ffd700';
-  ctx.fillText(elapsedUnit1, startXTime + w1, topY + lineGap * 2);
-
-  ctx.fillStyle = '#f8f8f8';
-  setGlow('#ffd700', 10);
-  ctx.fillText(elapsedNum2, startXTime + w1 + u1, topY + lineGap * 2);
-
-  ctx.fillStyle = '#ffd700';
-  setGlow('#ffd700', 20);
-  ctx.fillText(elapsedUnit2, startXTime + w1 + u1 + w2, topY + lineGap * 2);
-
-  // 4) Bottom metrics
-  const bottomY = height - margin - lineGap;
-  ctx.font = 'bold 48px "Varela Round"';
-
-  // PNL label + value
-  const pnlLabel = 'PNL: ';
-  const pnlValueText = `${pctFmt.sign}${Math.abs(pnlPercentage).toFixed(2)}%`;
-  const pnlFull = pnlLabel + pnlValueText;
-  const wPnlFull = ctx.measureText(pnlFull).width;
-  const wPnlLbl = ctx.measureText(pnlLabel).width;
-
-  ctx.textAlign = 'left';
-  ctx.fillStyle = '#ffd700';
-  setGlow('#ffd700', 10);
-  ctx.fillText(pnlLabel, x - wPnlFull, bottomY + lineGap * 0.2);
-
-  ctx.fillStyle = pctFmt.color;
-  setGlow(pctFmt.color, 20);
-  ctx.fillText(pnlValueText, x - wPnlFull + wPnlLbl, bottomY + lineGap * 0.2);
-
-  // TVL
-  const tvlText = `${tvlSOL.toFixed(2)} SOL ($${tvlUSD.toFixed(0)})`;
-  const wTvl = ctx.measureText(tvlText).width;
-  const wLbl = ctx.measureText('TVL: ').width;
-  const startXtv = x - (wLbl + wTvl);
-
-  ctx.textAlign = 'left';
-  setGlow('#ffd700', 20);
-  ctx.fillStyle = '#ffd700';
-  ctx.fillText('TVL: ', startXtv, bottomY + lineGap);
-
-  ctx.fillStyle = '#f8f8f8';
-  setGlow('#ffd700', 10);
-  ctx.fillText(tvlText, startXtv + wLbl, bottomY + lineGap);
+  // Draw all components
+  builder.drawTokenPair(tokenName0, tokenName1);
+  builder.drawProfit(netResult.usd, netResult.sol);
+  builder.drawElapsedTime(durationHours);
+  builder.drawPNL(pnlPercentage);
+  builder.drawTVL(positionTVL.sol, positionTVL.usd);
 
   return canvas.encode('png');
 }

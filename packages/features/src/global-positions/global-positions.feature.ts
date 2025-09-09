@@ -1,5 +1,6 @@
 import { time } from '@shared';
 import { buildDonateEmbed } from '@shared/discord/ui/donate.embed';
+import { GuildConfigGuard } from '@shared/domain';
 import { DynamoChannelConfigRepository, DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import {
   ButtonHandler,
@@ -10,6 +11,7 @@ import {
   Interval,
   RateLimit,
   SlashCommand,
+  UseGuards,
 } from '@soldecoder-monitor/features-sdk';
 import type { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
 import { GetGlobalPositionsUseCase } from './core/application/use-cases/get-global-positions.use-case';
@@ -54,6 +56,7 @@ export class GlobalPositionsFeature extends Feature {
     this.globalPositionsHandler = new GlobalPositionsCommandHandler(this.getGlobalPositionsUseCase);
   }
 
+  @UseGuards(new GuildConfigGuard())
   @SlashCommand({
     name: 'global-positions',
     description: 'Display all positions from the configured wallet',

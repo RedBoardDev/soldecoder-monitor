@@ -1,17 +1,11 @@
 import { z } from 'zod';
 
-/**
- * PnL data in LpAgent response
- */
 export const LpAgentPnlSchema = z
   .object({
     valueNative: z.number(),
   })
   .strip();
 
-/**
- * Token information in a position
- */
 export const LpAgentTokenInfoSchema = z.object({
   token_symbol: z.string(),
   token_name: z.string(),
@@ -20,17 +14,11 @@ export const LpAgentTokenInfoSchema = z.object({
   logo: z.string().url().nullable().optional(),
 });
 
-/**
- * Pool information: fee and tick spacing
- */
 export const LpAgentPoolInfoSchema = z.object({
   fee: z.number(),
   tickSpacing: z.number(),
 });
 
-/**
- * Current position amounts, raw and adjusted
- */
 export const LpAgentCurrentPositionSchema = z.object({
   amount0: z.string(),
   amount1: z.string(),
@@ -38,9 +26,6 @@ export const LpAgentCurrentPositionSchema = z.object({
   amount1Adjusted: z.number(),
 });
 
-/**
- * Single LP position from LpAgent API
- */
 export const LpAgentPositionSchema = z
   .object({
     status: z.string(),
@@ -55,18 +40,12 @@ export const LpAgentPositionSchema = z
   })
   .strip();
 
-/**
- * LpAgent API response for opening positions
- */
 export const LpAgentResponseSchema = z.object({
   status: z.string(),
   count: z.number(),
   data: z.array(LpAgentPositionSchema),
 });
 
-/**
- * Simplified wallet position for internal use
- */
 export const WalletPositionSchema = z.object({
   status: z.string(),
   token0: z.string(),
@@ -79,9 +58,6 @@ export const WalletPositionSchema = z.object({
   valueNative: z.number(),
 });
 
-/**
- * Complete wallet information
- */
 export const WalletInfoSchema = z.object({
   solBalance: z.number(),
   positions: z.array(WalletPositionSchema),
@@ -89,9 +65,6 @@ export const WalletInfoSchema = z.object({
   lastUpdated: z.number(),
 });
 
-/**
- * Overview data from LpAgent API - aggregated statistics
- */
 export const LpAgentOverviewDataSchema = z
   .object({
     owner: z.string(),
@@ -217,9 +190,6 @@ export const LpAgentOverviewDataSchema = z
   })
   .strip();
 
-/**
- * LpAgent overview API response
- */
 export const LpAgentOverviewResponseSchema = z
   .object({
     status: z.string(),
@@ -227,9 +197,6 @@ export const LpAgentOverviewResponseSchema = z
   })
   .strip();
 
-/**
- * Pagination information for historical positions
- */
 export const LpAgentPaginationSchema = z.object({
   currentPage: z.number(),
   totalPages: z.number(),
@@ -237,9 +204,6 @@ export const LpAgentPaginationSchema = z.object({
   pageSize: z.number(),
 });
 
-/**
- * Extended position schema for historical positions
- */
 export const LpAgentHistoricalPositionSchema = z
   .object({
     status: z.string(),
@@ -303,26 +267,17 @@ export const LpAgentHistoricalPositionSchema = z
   })
   .strip();
 
-/**
- * Historical positions data container with pagination
- */
 export const LpAgentHistoricalDataSchema = z.object({
   data: z.array(LpAgentHistoricalPositionSchema),
   pagination: LpAgentPaginationSchema,
 });
 
-/**
- * Complete historical positions API response
- */
 export const LpAgentHistoricalResponseSchema = z.object({
   status: z.string(),
   count: z.number(),
   data: LpAgentHistoricalDataSchema,
 });
 
-/**
- * Detailed PnL information for a specific position
- */
 export const LpAgentDetailedPnlSchema = z.object({
   value: z.number(),
   percent: z.number(),
@@ -330,9 +285,6 @@ export const LpAgentDetailedPnlSchema = z.object({
   percentNative: z.number(),
 });
 
-/**
- * Detailed LP position data from LpAgent API
- */
 export const LpAgentDetailedPositionSchema = z
   .object({
     status: z.string(),
@@ -361,15 +313,11 @@ export const LpAgentDetailedPositionSchema = z
   })
   .strip();
 
-/**
- * LpAgent detailed position API response
- */
 export const LpAgentPositionResponseSchema = z.object({
   status: z.string(),
   data: LpAgentDetailedPositionSchema,
 });
 
-// Export domain types
 export type LpAgentPnl = z.infer<typeof LpAgentPnlSchema>;
 export type LpAgentTokenInfo = z.infer<typeof LpAgentTokenInfoSchema>;
 export type LpAgentPoolInfo = z.infer<typeof LpAgentPoolInfoSchema>;
@@ -388,15 +336,11 @@ export type LpAgentDetailedPnl = z.infer<typeof LpAgentDetailedPnlSchema>;
 export type LpAgentDetailedPosition = z.infer<typeof LpAgentDetailedPositionSchema>;
 export type LpAgentPositionResponse = z.infer<typeof LpAgentPositionResponseSchema>;
 
-/**
- * Domain Value Objects for LpAgent business logic
- */
 export class PoolAddress {
   constructor(private readonly value: string) {
     if (!value || value.trim().length === 0) {
       throw new Error('Pool address cannot be empty');
     }
-    // Basic Solana address validation could be added here
   }
 
   public getValue(): string {

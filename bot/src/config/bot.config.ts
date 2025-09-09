@@ -3,8 +3,10 @@ import { DonateFeature } from '@soldecoder-monitor/features/src/donate/donate.fe
 import { GlobalPositionsFeature } from '@soldecoder-monitor/features/src/global-positions/global-positions.feature';
 import { NftPriceFeature } from '@soldecoder-monitor/features/src/nft-price/nft-price.feature';
 import { PositionSizeFeature } from '@soldecoder-monitor/features/src/positions-size/position-size.feature';
+import { RegisterProcessFeature } from '@soldecoder-monitor/features/src/register-process/register-process.feature';
 import { SettingsChannelsFeature } from '@soldecoder-monitor/features/src/settings-channels/settings-channels.feature';
 import { SettingsServerFeature } from '@soldecoder-monitor/features/src/settings-server/settings-server.feature';
+import { SummariesFeature } from '@soldecoder-monitor/features/src/summaries/summaries.feature';
 import type { Feature } from '@soldecoder-monitor/features-sdk';
 import { GatewayIntentBits, Partials } from 'discord.js';
 
@@ -39,6 +41,8 @@ export const botConfig = {
     { name: 'SettingsChannelsFeature', class: SettingsChannelsFeature },
     { name: 'SettingsServerFeature', class: SettingsServerFeature },
     { name: 'ClosedMessagesFeature', class: ClosedMessagesFeature },
+    { name: 'RegisterProcessFeature', class: RegisterProcessFeature },
+    { name: 'SummariesFeature', class: SummariesFeature },
   ] as Array<{ name: string; class: new () => Feature }>,
 
   /**

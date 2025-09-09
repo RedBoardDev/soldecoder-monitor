@@ -1,21 +1,22 @@
+import type { ThresholdType } from '@soldecoder-monitor/data';
 import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 
-export function buildThresholdModal(channelId: string, currentThreshold: number | null): ModalBuilder {
+export function buildThresholdModal(channelId: string, currentThreshold: ThresholdType): ModalBuilder {
   const modal = new ModalBuilder()
     .setCustomId(`settings-channels:threshold:submit:${channelId}`)
-    .setTitle('Set Alert Threshold Percentage');
+    .setTitle('Set Alert Threshold Configuration');
 
   const thresholdInput = new TextInputBuilder()
     .setCustomId('threshold_value')
-    .setLabel('Threshold (±%)')
+    .setLabel('Threshold Percentage')
     .setStyle(TextInputStyle.Short)
     .setPlaceholder('Enter threshold percentage (e.g., 0.1 for 0.1%)')
     .setMinLength(1)
     .setMaxLength(6)
     .setRequired(true);
 
-  // Set current value if exists
-  if (currentThreshold !== null && currentThreshold !== undefined) {
+  // Set current value if exists and is numeric
+  if (currentThreshold !== null && currentThreshold !== undefined && typeof currentThreshold === 'number') {
     thresholdInput.setValue(currentThreshold.toString());
   }
 
@@ -27,7 +28,7 @@ export function buildThresholdModal(channelId: string, currentThreshold: number 
 
 export interface ThresholdValidationResult {
   isValid: boolean;
-  value?: number;
+  value?: ThresholdType;
   error?: string;
 }
 

@@ -1,9 +1,5 @@
 import { InvalidServerSettingsError } from '../errors/settings-server.errors';
 
-/**
- * Position Size Defaults Value Object
- * Encapsulates validation and behavior for position size default configuration
- */
 export class PositionSizeDefaults {
   private constructor(
     public readonly walletAddress: string | null,
@@ -11,14 +7,12 @@ export class PositionSizeDefaults {
   ) {}
 
   static create(walletAddress: string | null, stopLossPercent: number | null): PositionSizeDefaults {
-    // Validate stop loss percentage if provided
     if (stopLossPercent !== null) {
       if (!Number.isFinite(stopLossPercent) || stopLossPercent < 0 || stopLossPercent > 100) {
         throw new InvalidServerSettingsError('Stop loss percentage must be between 0 and 100');
       }
     }
 
-    // Validate wallet address format if provided
     if (walletAddress !== null && walletAddress.length === 0) {
       throw new InvalidServerSettingsError('Wallet address cannot be empty');
     }

@@ -1,4 +1,5 @@
 import { time } from '@shared';
+import { GuildConfigGuard } from '@shared/domain';
 import { PortfolioService } from '@shared/infrastructure/portfolio.service';
 import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import {
@@ -8,6 +9,7 @@ import {
   FeatureDecorator,
   RateLimit,
   SlashCommand,
+  UseGuards,
 } from '@soldecoder-monitor/features-sdk';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import { CalculatePositionSizesUseCase } from './core/application/use-cases/calculate-position-sizes.use-case';
@@ -35,17 +37,15 @@ export class PositionSizeFeature extends Feature {
   async onLoad(context: FeatureContext): Promise<void> {
     this.setContext(context);
 
-    // 🏭 Setup repositories and services
     const guildSettingsRepository = DynamoGuildSettingsRepository.create();
     const portfolioService = PortfolioService.getInstance();
 
-    // 🎯 Setup use cases (application layer)
     this.calculatePositionSizesUseCase = new CalculatePositionSizesUseCase(guildSettingsRepository, portfolioService);
 
-    // 🎮 Setup Discord handlers (with dependency injection)
     this.positionSizeHandler = new PositionSizeCommandHandler(this.calculatePositionSizesUseCase);
   }
 
+  @UseGuards(new GuildConfigGuard())
   @SlashCommand({
     name: 'position-size',
     description: 'Get recommended size per position based on wallet net worth',

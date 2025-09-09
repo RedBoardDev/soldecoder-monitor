@@ -2,22 +2,14 @@
 import { type GuildSettingsData, GuildSettingsEntity } from '../../../../domain/entities/guild-settings.entity';
 import { TableKey } from '../../../../domain/value-objects/table-key.vo';
 
-/**
- * Guild Settings DynamoDB Mapper
- * Handles all mapping between domain entities and DynamoDB records
- * Centralizes mapping logic to eliminate duplication
- */
 export class GuildSettingsMapper {
-  /**
-   * Map DynamoDB item to domain entity
-   */
   static toDomain(item: Record<string, unknown>, guildId: string): GuildSettingsEntity {
     const data: GuildSettingsData = {
       guildId,
       positionDisplayEnabled: (item.positionDisplayEnabled as boolean) ?? true,
       globalChannelId: (item.globalChannelId as string) || null,
       timezone: (item.timezone as string) || 'UTC',
-      forwardTpSl: (item.forwardTpSl as boolean) ?? true,
+      forward: (item.forward as boolean) ?? true,
       autoDeleteWarnings: (item.autoDeleteWarnings as boolean) ?? false,
       summaryPreferences: (item.summaryPreferences as any) || {
         dailySummary: false,
@@ -34,17 +26,11 @@ export class GuildSettingsMapper {
     return GuildSettingsEntity.create(data);
   }
 
-  /**
-   * Map DynamoDB item to domain entity (when guild ID is in the PK)
-   */
   static toDomainFromKeys(item: Record<string, unknown>): GuildSettingsEntity {
     const guildId = (item.PK as string).replace('GUILD#', '');
     return GuildSettingsMapper.toDomain(item, guildId);
   }
 
-  /**
-   * Map domain entity to DynamoDB item format
-   */
   static toDatabase(entity: GuildSettingsEntity): Record<string, unknown> {
     const tableKey = TableKey.guildSettings(entity.guildId);
 
@@ -54,7 +40,7 @@ export class GuildSettingsMapper {
       positionDisplayEnabled: entity.positionDisplayEnabled,
       globalChannelId: entity.globalChannelId,
       timezone: entity.timezone,
-      forwardTpSl: entity.forwardTpSl,
+      forward: entity.forward,
       autoDeleteWarnings: entity.autoDeleteWarnings,
       summaryPreferences: entity.summaryPreferences,
       positionSizeDefaults: entity.positionSizeDefaults,
@@ -62,9 +48,6 @@ export class GuildSettingsMapper {
     };
   }
 
-  /**
-   * Create DynamoDB filter expression for all guild settings
-   */
   static createAllGuildSettingsFilter(): {
     FilterExpression: string;
     ExpressionAttributeNames: Record<string, string>;

@@ -3,10 +3,6 @@ import { GuildSettingsNotFoundError } from '../../domain/errors/settings-server.
 import type { UpdateServerSettingsCommand } from '../commands/update-server-settings.command';
 import { UpdateServerSettingsResult } from '../results/update-server-settings.result';
 
-/**
- * Use Case: Update Server Settings
- * Updates specific guild settings and returns the updated entity
- */
 export class UpdateServerSettingsUseCase {
   constructor(private readonly guildSettingsRepository: GuildSettingsRepository) {}
 
@@ -17,7 +13,6 @@ export class UpdateServerSettingsUseCase {
       throw new GuildSettingsNotFoundError(command.guildId);
     }
 
-    // Track which fields are being updated
     const updatedFields: string[] = [];
 
     // Merge updates with existing settings
@@ -38,6 +33,30 @@ export class UpdateServerSettingsUseCase {
       updatedFields.push('Position Size Defaults');
     }
 
+    // Merge summary preferences
+    const mergedSummaryPreferences = command.updates.summaryPreferences
+      ? {
+          weeklySummary:
+            command.updates.summaryPreferences.weeklySummary !== undefined
+              ? command.updates.summaryPreferences.weeklySummary
+              : existingSettings.summaryPreferences.weeklySummary,
+          monthlySummary:
+            command.updates.summaryPreferences.monthlySummary !== undefined
+              ? command.updates.summaryPreferences.monthlySummary
+              : existingSettings.summaryPreferences.monthlySummary,
+          dailySummary: existingSettings.summaryPreferences.dailySummary,
+        }
+      : existingSettings.summaryPreferences;
+
+    if (command.updates.summaryPreferences) {
+      if (command.updates.summaryPreferences.weeklySummary !== undefined) {
+        updatedFields.push('Weekly Summary');
+      }
+      if (command.updates.summaryPreferences.monthlySummary !== undefined) {
+        updatedFields.push('Monthly Summary');
+      }
+    }
+
     // Create updated entity
     const updatedSettings = GuildSettingsEntity.create({
       guildId: existingSettings.guildId,
@@ -51,9 +70,8 @@ export class UpdateServerSettingsUseCase {
         command.updates.globalChannelId !== undefined
           ? command.updates.globalChannelId
           : existingSettings.globalChannelId,
-      forwardTpSl:
-        command.updates.forwardTpSl !== undefined ? command.updates.forwardTpSl : existingSettings.forwardTpSl,
-      summaryPreferences: existingSettings.summaryPreferences,
+      forward: command.updates.forward !== undefined ? command.updates.forward : existingSettings.forward,
+      summaryPreferences: mergedSummaryPreferences,
       positionSizeDefaults: mergedPositionSizeDefaults,
       createdAt: existingSettings.createdAt,
     });
@@ -65,8 +83,8 @@ export class UpdateServerSettingsUseCase {
     if (command.updates.globalChannelId !== undefined) {
       updatedFields.push('Global Channel');
     }
-    if (command.updates.forwardTpSl !== undefined) {
-      updatedFields.push('Forward TP/SL');
+    if (command.updates.forward !== undefined) {
+      updatedFields.push('Forward');
     }
 
     await this.guildSettingsRepository.save(updatedSettings);

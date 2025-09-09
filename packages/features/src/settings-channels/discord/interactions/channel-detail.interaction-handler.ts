@@ -149,9 +149,7 @@ export class ChannelDetailInteractionHandler extends BaseInteractionHandler {
     guild: Guild,
     channelId: string,
   ): Promise<void> {
-    if (setting === 'notifyOnClose' && !currentConfig.notifyOnClose) {
-      await this.permissionValidator.validateNotificationFeature(guild, channelId);
-    } else if (setting === 'image' && !currentConfig.image) {
+    if (setting === 'image' && !currentConfig.image) {
       await this.permissionValidator.validateImageFeature(guild, channelId);
     } else if (setting === 'pin' && !currentConfig.pin) {
       await this.permissionValidator.validatePinFeature(guild, channelId);
@@ -160,8 +158,6 @@ export class ChannelDetailInteractionHandler extends BaseInteractionHandler {
 
   private buildToggleUpdates(setting: string, currentConfig: ChannelConfigEntity): ChannelConfigUpdates {
     switch (setting) {
-      case 'notifyOnClose':
-        return { notifyOnClose: !currentConfig.notifyOnClose };
       case 'image':
         return { image: !currentConfig.image };
       case 'pin':

@@ -1,6 +1,3 @@
-/**
- * Rich Value Object representing a closed position with complete performance and metadata
- */
 export class ClosedPosition {
   constructor(
     public readonly tokenName0: string,
@@ -24,8 +21,23 @@ export class ClosedPosition {
     }
   }
 
-  meetsThreshold(threshold: number): boolean {
-    return Math.abs(this.pnlPercentageSol) >= threshold;
+  meetsThreshold(threshold: number | string | null, triggerType: 'take_profit' | 'stop_loss' | null = null): boolean {
+    if (threshold === null) return true;
+
+    if (typeof threshold === 'number') {
+      return Math.abs(this.pnlPercentageSol) >= threshold;
+    }
+
+    switch (threshold) {
+      case 'TP':
+        return triggerType === 'take_profit';
+      case 'SL':
+        return triggerType === 'stop_loss';
+      case 'TP/SL':
+        return triggerType === 'take_profit' || triggerType === 'stop_loss';
+      default:
+        return false;
+    }
   }
 
   get pairName(): string {

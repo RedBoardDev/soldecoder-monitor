@@ -1,4 +1,5 @@
 import { time } from '@shared';
+import { GuildConfigGuard } from '@shared/domain';
 import { DynamoGuildSettingsRepository } from '@soldecoder-monitor/data';
 import { PermissionValidatorService } from '@soldecoder-monitor/discord';
 import {
@@ -11,6 +12,7 @@ import {
   RateLimit,
   SelectHandler,
   SlashCommand,
+  UseGuards,
 } from '@soldecoder-monitor/features-sdk';
 import type {
   ButtonInteraction,
@@ -53,18 +55,14 @@ export class SettingsServerFeature extends Feature {
   async onLoad(context: FeatureContext): Promise<void> {
     this.setContext(context);
 
-    // Setup repositories and services
     const guildSettingsRepository = DynamoGuildSettingsRepository.create();
     const permissionValidator = new PermissionValidatorService();
 
-    // Setup use cases
     this.getServerSettingsUseCase = new GetServerSettingsUseCase(guildSettingsRepository);
     this.updateServerSettingsUseCase = new UpdateServerSettingsUseCase(guildSettingsRepository);
 
-    // Setup main command handler
     this.settingsServerHandler = new SettingsServerCommandHandler(this.getServerSettingsUseCase);
 
-    // Setup specialized interaction handlers
     const toggleHandler = new ToggleInteractionHandler(this.getServerSettingsUseCase, this.updateServerSettingsUseCase);
 
     const channelHandler = new ChannelInteractionHandler(
@@ -78,7 +76,6 @@ export class SettingsServerFeature extends Feature {
       this.updateServerSettingsUseCase,
     );
 
-    // Setup interaction router
     this.interactionRouter = new SettingsServerInteractionRouter(
       toggleHandler,
       channelHandler,
@@ -86,6 +83,7 @@ export class SettingsServerFeature extends Feature {
     );
   }
 
+  @UseGuards(new GuildConfigGuard())
   @SlashCommand({
     name: 'settings-server',
     description: 'Manage server configuration settings interactively',
@@ -108,7 +106,6 @@ export class SettingsServerFeature extends Feature {
     return this.settingsServerHandler.execute(interaction);
   }
 
-  // Button Handlers (prefix 'settings-server:' added automatically)
   @ButtonHandler(/^toggle:/)
   @ButtonHandler('channel:select')
   @ButtonHandler('position-defaults:modal')
@@ -116,16 +113,13 @@ export class SettingsServerFeature extends Feature {
     return this.interactionRouter.routeInteraction(interaction);
   }
 
-  // Select Menu Handlers
   @SelectHandler('channel:set')
   async handleSelects(interaction: ChannelSelectMenuInteraction): Promise<void> {
     return this.interactionRouter.routeInteraction(interaction);
   }
 
-  // Modal Handlers - Direct handler method
   @ModalHandler('position-defaults:submit')
   async handlePositionDefaultsModal(interaction: ModalSubmitInteraction): Promise<void> {
-    // Create and call the position defaults handler directly
     const positionDefaultsHandler = new PositionDefaultsInteractionHandler(
       this.getServerSettingsUseCase,
       this.updateServerSettingsUseCase,

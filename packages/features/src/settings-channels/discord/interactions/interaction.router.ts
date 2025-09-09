@@ -92,6 +92,8 @@ export class SettingsChannelsInteractionRouter {
       await this.channelDetailHandler.handleChannelConfig(interaction);
     } else if (customId.startsWith('settings-channels:toggle:')) {
       await this.channelDetailHandler.handleToggle(interaction);
+    } else if (customId.startsWith('settings-channels:threshold:quick:')) {
+      await this.thresholdHandler.handleQuickThresholdSet(interaction);
     } else if (customId.startsWith('settings-channels:threshold:')) {
       await this.channelDetailHandler.handleThresholdModal(interaction);
     } else if (customId.startsWith('settings-channels:tag:')) {

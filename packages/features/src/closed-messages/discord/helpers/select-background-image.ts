@@ -1,63 +1,31 @@
 import path from 'node:path';
 
-const ASSET_PATH = path.resolve(__dirname, '../../assets/');
+const ASSET_PATH = path.resolve(__dirname, '../../assets/pnl_card');
 
-enum Background {
-  Default = 'background_default.png',
-  Happy = 'background_happy.png',
-  Sad = 'background_sad.png',
-  Trump = 'background_trump.png',
-  summary = 'background_summary.png',
+const PROFIT_IMAGES = [
+  'profit-0.jpeg',
+  'profit-1.jpeg',
+  'profit-2.jpeg',
+  'profit-3.jpeg',
+  'profit-4.jpeg',
+  'profit-6.jpeg',
+  'profit-7.jpeg',
+  'profit-10.jpeg',
+  'profit-11.jpeg',
+];
+
+const LOSS_IMAGES = ['loss-0.jpeg', 'loss-1.jpeg', 'loss-2.jpeg', 'loss-3.jpeg', 'loss-4.jpeg'];
+
+function getRandomImage(images: string[]): string {
+  const randomIndex = Math.floor(Math.random() * images.length);
+  return images[randomIndex];
 }
 
-function getBackgroundPath(fileName: string): string {
-  return path.join(ASSET_PATH, fileName);
-}
+export function selectBackgroundPNLCard(pct: number): string {
+  const isProfit = pct > 0;
+  const folder = isProfit ? 'profit' : 'loss';
+  const images = isProfit ? PROFIT_IMAGES : LOSS_IMAGES;
 
-function shouldUseTrumpBackground(): boolean {
-  const TRUMP_CHANCE = 0.1;
-  return Math.random() < TRUMP_CHANCE;
-}
-
-export function selectBackgroundPNLCard(pct: number, triggerType?: 'take_profit' | 'stop_loss'): string {
-  // Force specific backgrounds for triggered events
-  if (triggerType === 'take_profit') {
-    return getBackgroundPath(Background.Happy);
-  }
-
-  if (triggerType === 'stop_loss') {
-    return getBackgroundPath(Background.Sad);
-  }
-
-  if (pct === 0) {
-    return getBackgroundPath(Background.Default);
-  }
-
-  const isGain = pct > 0;
-  if (isGain && shouldUseTrumpBackground()) {
-    return getBackgroundPath(Background.Trump);
-  }
-
-  if (pct < 0) {
-    return getBackgroundPath(Background.Sad);
-  }
-
-  return getBackgroundPath(Background.Default);
-}
-
-export function selectBackgroundSummary(): string {
-  return getBackgroundPath(Background.summary);
-}
-
-export interface ValueFormat {
-  /** "+" | "-" | "" */
-  sign: string;
-  /** hex color code */
-  color: string;
-}
-
-export function formatValue(value: number): ValueFormat {
-  if (value > 0) return { sign: '+', color: '#66ff66' };
-  if (value < 0) return { sign: '-', color: '#ff6666' };
-  return { sign: '', color: '#ffd700' };
+  const selectedImage = getRandomImage(images);
+  return path.join(ASSET_PATH, folder, selectedImage);
 }
